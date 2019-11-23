@@ -5,7 +5,7 @@ set -e
 #  使用 gofmt 和 goimports 工具对go代码进行格式化
 #  import 部分会分位3部分，当前项目的会作为第3部分
 #
-#   author: github.com/hidu
+#   author: github.com/fsgo/go_fmt
 #   since: 2019年11月23日
 #   useage:
 #      go_fmt.sh        # 格式化当前工作目录下，有修改的所有文件(git管理的项目)
@@ -73,12 +73,12 @@ function goformat() {
     
     lineChanges=`diff "$fileName" "$tmpFileFmt"|wc -l`
     if [ "$lineChanges" -eq "0" ];then
-        printf "\033[32m%-70s diff_lines= %d\033[0m\n" "$fileName"  "$lineChanges"
+        printf "change_lines= %-3d\033[0m\t\033[32m%s\n" "$lineChanges" "$fileName"
     else
         cat "$tmpFileFmt" > "$fileName"
-        printf "\033[34m%-70s\033[0m \033[5;34mdiff_lines= %d\033[0m\n" "$fileName"  "$lineChanges"
+        printf "change_lines= %-3d\033[0m\t\033[34m%s\033[0m \033[5;34m\n"  "$lineChanges" "$fileName"
     fi
-    
+    printf "\033[0m"
 }
 
 # 格式化当前git项目里,修改过的文件
