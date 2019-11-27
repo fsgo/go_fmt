@@ -6,7 +6,7 @@ set -e
 #  import 部分会分位3部分，当前项目的会作为第3部分
 #
 #   author: github.com/fsgo/go_fmt
-#   since: 2019年11月23日
+#   since: 2019年11月24日
 #   useage:
 #      go_fmt.sh        # 格式化当前工作目录下，有修改的所有文件(git管理的项目)
 #      go_fmt.sh  all   # 格式化当前工作目录下，所有的go代码文件
@@ -27,19 +27,26 @@ if [ -z `which goimports` ];then
     exit 1
 fi
 
+if [ "$SOURCE_FILE" == "./..." ];then
+    SOURCE_FILE="all"
+fi
+
+
 function formatImport() {
     realPath=`readlink -f "$1"`
     inFile="$2"
     
     # 获取当前文件所在package,域名后面取3层目录
-    PKG=`echo "$realPath"|grep -oP '(?<=src\/)(\w+(\.\w+)+\/\w+\/\w+\/\w+)'`
+    PKG=`echo "$realPath"|grep -oP '(?<=src\/)([^\/]+(\.[^\/]+)+(\/[^\/]+){3})'`
     # PKG 取值，如  github.com/fsgo/abc/def/
     
     if [ -z "$PKG" ];then
         # 再次尝试域名后面取2层目录
-        PKG=`echo "$realPath"|grep -oP '(?<=src\/)(\w+(\.\w+)+\/\w+\/\w+\/\w+)'`
+        PKG=`echo "$realPath"|grep -oP '(?<=src\/)([^\/]+(\.[^\/]+)+(\/[^\/]+){2})'`
         if [ -z "$PKG" ];then
-            echo "PKG is empty" >&2
+            echo -e "    get current package failed;\n \
+    pls check your project in go workspace\n \
+    see https://golang.org/doc/code.html#Workspaces" >&2
             return
         fi
     fi
@@ -49,6 +56,12 @@ function formatImport() {
 
 function goformat() {
     fileName="$1"
+    
+    realPath=`readlink -f "$fileName"`
+    if [[ "$realPath" == */vendor/* ]];then
+        # echo "vendor ignore : $fileName" >&2
+        return
+    fi
     
     # step 1： fix imports
     tmpFileImports="/tmp/go_fmt_sh/`basename "$fileName"`.goimports"

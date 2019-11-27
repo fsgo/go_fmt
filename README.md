@@ -37,3 +37,18 @@ import 部分会分位3部分，当前项目的会作为第3部分
 ```
   go_imports.sh a.go  # 格式化指定文件
 ```
+
+
+## 3.mac 用户
+由于mac 的readlink、grep等和GNU的不一样，所以在mac下运行可能会异常。  
+需要安装GNU的命令：
+```
+    brew install coreutils
+    brew install grep
+```
+
+之后设置环境变量：
+```
+    export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+    export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+```
