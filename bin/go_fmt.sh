@@ -97,7 +97,14 @@ function goformat() {
 # 格式化当前git项目里,修改过的文件
 function formatGitWorkingDir(){
     echo "-----------------go format--------------------"
-    for fName in `git status -s|grep -E "\.go$"|awk '{if($1!="D"){print $2}}'`
+    
+    # 需要支持如下几种情况：修改(M)、重命名(R)、新增(A)
+    # M  auth/md5_sign.go
+    # R  utils/counter_test.go -> component/counter/counter_test.go
+    # A  unittest/internal/monitor/bvar.apis_monitor.data
+    # 如上，故最新的文件名为最后一列
+    
+    for fName in `git status -s|grep -E "\.go$"|awk '{if($1!="D"){print $NF}}'`
     do
         goformat "$fName"
     done
