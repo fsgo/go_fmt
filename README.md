@@ -1,54 +1,29 @@
-# go_fmt
-golang format tools
+# Go 代码格式化
 
+## 1.功能说明
+* 格式化import部分：分3段式，依次为 标准库、第三方库、项目自身库
+* 格式化注释，对//的注释进行格式调整：若为 "//注释"，调整为 "// 注释"（添加空格）
+* 默认只对git项目库里有修改的进行格式化
 
-## 1.前置依赖
-### goimports
+## 2.安装
 ```
-go get -u golang.org/x/tools/cmd/goimports
+go get -u github.com/fsgo/go_fmt
 ```
+当前版本：v0.1 20191216
 
-## 2.命令说明
-### 2.1 bin/go_fmt.sh
-使用 gofmt 和 goimports 工具对go代码进行格式化。  
-import 部分会分为3部分，当前项目的会作为第3部分，顺序分别为 标准库、第三方库、项目自身库。  
-import 示例：  
-```go
-import(
-    "os"
-    "log"
-     
-    "github.com/hidu/xxx/yyy"
+## 3.使用
 
-    "youdomain.com/namespace/project/a"
-)
+### 3.1 格式化git项目里有修改的.go文件
+```
+$ go_fmt -w
 ```
 
-#### useage:
+### 3.2 对当前目录所有.go文件格式化
 ```
-   go_fmt.sh        # 格式化当前工作目录下，有修改的所有文件(git管理的项目)
-   go_fmt.sh  all   # 格式化当前工作目录下，所有的go代码文件
-   go_fmt.sh  a.go  # 格式化指定文件
+$ go_fmt -w ./...
 ```
 
-### 2.2 bin/go_imports.sh
-import 部分会分位3部分，当前项目的会作为第3部分  
-####  useage:
+### 3.3 对对指定.go文件格式化
 ```
-  go_imports.sh a.go  # 格式化指定文件
-```
-
-
-## 3.mac 用户
-由于mac 的readlink、grep等和GNU的不一样，所以在mac下运行可能会异常。  
-需要安装GNU的命令：
-```
-    brew install coreutils
-    brew install grep
-```
-
-之后设置环境变量：
-```
-    export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-    export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+$ go_fmt -w abc.go
 ```
