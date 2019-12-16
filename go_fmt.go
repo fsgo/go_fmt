@@ -7,6 +7,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"go/scanner"
@@ -23,6 +24,8 @@ var version = "v0.1 20191216"
 var (
 	LocalPrefix string
 	write       bool
+
+	multipleFiles bool
 )
 
 func init() {
@@ -51,6 +54,11 @@ func main() {
 	if len(paths) == 0 {
 		paths = []string{"git_change"}
 	}
+
+	if len(paths) == 1 {
+		multipleFiles = false
+	}
+
 	for _, filePath := range paths {
 		formatOneFile(filePath)
 	}
@@ -71,6 +79,8 @@ func formatOneFile(fileName string) {
 	}
 
 	if fileName == "./..." {
+		multipleFiles = true
+
 		filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
 			if err == nil && isGoFile(info) {
 				goFiles = append(goFiles, path)
@@ -81,6 +91,8 @@ func formatOneFile(fileName string) {
 			return nil
 		})
 	} else if fileName == "git_change" {
+		multipleFiles = true
+
 		files, err := gofmt.GitChangeFiles()
 		if err != nil {
 			report(err)
@@ -99,6 +111,8 @@ func formatOneFile(fileName string) {
 	}
 }
 
+var consoleColorTag = 0x1B
+
 func formatFileByName(fileName string) error {
 	src, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -112,7 +126,13 @@ func formatFileByName(fileName string) error {
 	if err != nil {
 		return err
 	}
+
 	if write {
+		if bytes.Equal(src, out) {
+			fmt.Fprintf(os.Stderr, "%c[1;40;34m skiped   : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
+		} else {
+			fmt.Fprintf(os.Stdout, "%c[1;40;32m rewrited : %s%c[32m\n", consoleColorTag, fileName, consoleColorTag)
+		}
 		return ioutil.WriteFile(fileName, out, 0)
 	} else {
 		fmt.Println(string(out))

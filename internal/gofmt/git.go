@@ -9,6 +9,7 @@ package gofmt
 import (
 	"bytes"
 	"os/exec"
+	"strings"
 )
 
 // GitChangeFiles 获取当前git项目有变更的文件
@@ -37,6 +38,11 @@ func GitChangeFiles() ([]string, error) {
 		arr := bytes.Split(line, []byte(" "))
 
 		fileName := string(arr[len(arr)-1])
+
+		// 是上一级目录的文件
+		if strings.HasPrefix(fileName, "..") {
+			continue
+		}
 
 		files = append(files, fileName)
 	}
