@@ -19,7 +19,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/gofmt"
 )
 
-var version = "v0.1 20191216"
+var version = "v0.1 20191217"
 
 var (
 	LocalPrefix string
@@ -129,7 +129,7 @@ func formatFileByName(fileName string) error {
 
 	if write {
 		if bytes.Equal(src, out) {
-			fmt.Fprintf(os.Stderr, "%c[1;40;34m skiped   : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
+			fmt.Fprintf(os.Stderr, "%c[1;40;34m unchange : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
 		} else {
 			fmt.Fprintf(os.Stdout, "%c[1;40;32m rewrited : %s%c[32m\n", consoleColorTag, fileName, consoleColorTag)
 		}
