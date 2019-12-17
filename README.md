@@ -28,3 +28,12 @@ $ go_fmt -w ./...
 ```
 $ go_fmt -w abc.go
 ```
+
+## 4.配置到git hooks(commit前自动格式化代码)
+```
+mkdir -p ~/.git_config/hooks/
+git config --global core.hooksPath ~/.git_config/hooks/
+
+wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -o ~/.git_config/hooks/pre-commit
+chmod 777 ~/.git_config/hooks/pre-commit
+```
