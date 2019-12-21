@@ -10,30 +10,40 @@
 ```
 go get -u github.com/fsgo/go_fmt
 ```
-当前版本：v0.1 20191217
+当前版本：v0.1 20191221
 
 ## 3.使用
 
 ### 3.1 格式化git项目里有修改的.go文件
 ```
-$ go_fmt -w
+$ go_fmt
 ```
 
 ### 3.2 对当前目录所有.go文件格式化
 ```
-$ go_fmt -w ./...
+$ go_fmt ./...
 ```
 
 ### 3.3 对指定.go文件格式化
 ```
-$ go_fmt -w abc.go
+$ go_fmt abc.go
 ```
 
 ## 4.配置到git hooks(commit前自动格式化代码)
+
+### 4.1 配置到全局Hooks
+> 该方式会导致项目自身的hooks失效。  
+> 若项目有自己的hooks，请不要配置全局而要配置到单个项目。
 ```
 mkdir -p ~/.git_config/hooks/
 git config --global core.hooksPath ~/.git_config/hooks/
 
-wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -o ~/.git_config/hooks/pre-commit
+wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O ~/.git_config/hooks/pre-commit
 chmod 777 ~/.git_config/hooks/pre-commit
+```
+
+### 4.2 配置项目Hooks
+```
+wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O $(git rev-parse --git-dir)/hooks/pre-commit
+chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
 ```

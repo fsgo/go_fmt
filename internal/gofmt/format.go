@@ -16,8 +16,13 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-// FormatFile 输出格式化的go代码
-func Format(fileName string, src []byte, localPrefix string) ([]byte, error) {
+// Format 输出格式化的go代码
+func Format(fileName string, src []byte, options *Options) ([]byte, error) {
+	localPrefix, err := DetectLocal(options.LocalPrefix, fileName)
+	if err != nil {
+		return nil, err
+	}
+
 	fileSet := token.NewFileSet()
 	parserMode := parser.Mode(0) | parser.ParseComments
 	file, err := parser.ParseFile(fileSet, fileName, src, parserMode)
@@ -43,8 +48,8 @@ func Format(fileName string, src []byte, localPrefix string) ([]byte, error) {
 	opt := &imports.Options{
 		Fragment:  true,
 		Comments:  true,
-		TabIndent: true,
-		TabWidth:  8,
+		TabIndent: options.TabIndent,
+		TabWidth:  options.TabWidth,
 	}
 	return imports.Process(fileName, buf.Bytes(), opt)
 }

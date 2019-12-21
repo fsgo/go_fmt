@@ -49,9 +49,8 @@ func fixMultilineComment(cm *ast.Comment) (ok bool) {
 		if txt == "" {
 			cm.Text = "/* */"
 			return false
-		} else {
-			cm.Text = strings.Join([]string{"/* ", txt, " */"}, "")
 		}
+		cm.Text = strings.Join([]string{"/* ", txt, " */"}, "")
 		return true
 	}
 

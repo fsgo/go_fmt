@@ -7,9 +7,14 @@
 package gofmt
 
 // Options 选项
-// todo use it
 type Options struct {
-	TabIndent   bool
-	TabWidth    int
+	TabIndent bool
+
+	TabWidth int
+
 	LocalPrefix string
+
+	Write bool
+
+	Files []string
 }
