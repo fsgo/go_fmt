@@ -14,11 +14,13 @@ import (
 	"go/token"
 
 	"golang.org/x/tools/imports"
+
+	"github.com/fsgo/go_fmt/internal/localmodule"
 )
 
 // Format 输出格式化的go代码
 func Format(fileName string, src []byte, options *Options) ([]byte, error) {
-	localPrefix, err := DetectLocal(options.LocalPrefix, fileName)
+	localPrefix, err := localmodule.Get(options.LocalPrefix, fileName)
 	if err != nil {
 		return nil, err
 	}
