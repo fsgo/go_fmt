@@ -8,6 +8,8 @@ package gofmt
 
 // Options 选项
 type Options struct {
+	Trace bool
+
 	TabIndent bool
 
 	TabWidth int

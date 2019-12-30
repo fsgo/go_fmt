@@ -8,6 +8,7 @@ package gofmt
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -30,6 +31,10 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 	file, err := parser.ParseFile(fileSet, fileName, src, parserMode)
 	if err != nil {
 		return nil, err
+	}
+
+	if options.Trace {
+		fmt.Println("fileName--->", fileName)
 	}
 
 	// ast.Print(fileSet, file)
@@ -65,6 +70,9 @@ func resetImportDecls(fileSet *token.FileSet, f *ast.File) {
 	// 将分组的import 合并为一组，方便后续处理
 	// 已知若import 区域出现单独行的注释将不正确
 	var firstLine int
+	if len(f.Imports) < 2 {
+		return
+	}
 	for _, ip := range f.Imports {
 		p := ip.Pos()
 		if firstLine == 0 {
