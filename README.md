@@ -8,7 +8,7 @@
 
 ## 2.安装
 ```
-go get -u github.com/fsgo/go_fmt
+go get -u github.com/fsgo/go_fmt@master
 ```
 当前版本：v0.1 20191230
 
@@ -31,7 +31,22 @@ $ go_fmt abc.go
 
 ## 4.配置到git hooks(commit前自动格式化代码)
 
-### 4.1 配置到全局Hooks
+### 4.1 配置项目Hooks
+编辑项目的 `.git/hooks/pre-commit`文件，将`go_fmt`命令加入。
+
+方式1：
+```
+echo -e '\ngo_fmt\n' >> $(git rev-parse --git-dir)/hooks/pre-commit
+chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
+```
+
+方式2：
+```
+wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O $(git rev-parse --git-dir)/hooks/pre-commit
+chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
+```
+
+### 4.2 配置到全局Hooks
 > 该方式会导致项目自身的hooks失效。  
 > 若项目有自己的hooks，请不要配置全局而要配置到单个项目。
 ```
@@ -40,10 +55,4 @@ git config --global core.hooksPath ~/.git_config/hooks/
 
 wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O ~/.git_config/hooks/pre-commit
 chmod 777 ~/.git_config/hooks/pre-commit
-```
-
-### 4.2 配置项目Hooks
-```
-wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O $(git rev-parse --git-dir)/hooks/pre-commit
-chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
 ```
