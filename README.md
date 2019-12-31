@@ -7,9 +7,19 @@
 * 默认只对git项目库里有修改的进行格式化
 
 ## 2.安装
+使用 go >= 1.13 版本：
 ```
+export GO111MODULE=on
+go env GOPROXY=https://goproxy.cn,direct
+
 go get -u github.com/fsgo/go_fmt@master
 ```
+
+go < 1.13 版本:
+```
+go get -u github.com/fsgo/go_fmt
+```
+
 当前版本：v0.1 20191230
 
 ## 3.使用
