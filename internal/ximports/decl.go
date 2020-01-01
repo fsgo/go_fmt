@@ -8,8 +8,12 @@ package ximports
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 type importDecl struct {
@@ -93,11 +97,16 @@ func (group *importDeclGroup) Bytes() []byte {
 	return buf.Bytes()
 }
 
-func formatImportDecls(decls []*importDecl, groupFns GroupFns, LocalPrefix string) []byte {
+func formatImportDecls(decls []*importDecl, groupFns GroupFns, options *common.Options) []byte {
 	var buf, buf2 bytes.Buffer
-	buf.WriteString("import (\n")
-	groups := sortImportDecls(decls, groupFns, LocalPrefix)
 
+	buf.WriteString("import (\n")
+	groups := sortImportDecls(decls, groupFns, options)
+
+	if options.Trace {
+		a, _ := json.MarshalIndent(groups, " ", " ")
+		fmt.Println("formatImportDecls:=", string(a))
+	}
 	for _, group := range groups {
 		if group.Group >= 0 {
 			buf.Write(group.Bytes())

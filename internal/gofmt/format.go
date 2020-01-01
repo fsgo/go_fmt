@@ -16,6 +16,8 @@ import (
 	"github.com/fsgo/go_fmt/internal/ximports"
 )
 
+type Options = common.Options
+
 // Format 输出格式化的go代码
 func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 	localPrefix, err := localmodule.Get(options.LocalPrefix, fileName)
@@ -23,9 +25,13 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 		return nil, err
 	}
 
+	if options.Trace {
+		fmt.Println("fileName--->", fileName)
+	}
+
 	options.LocalPrefix = localPrefix
 
-	outImports, errImports := ximports.FormatImports(fileName, src, localPrefix, nil)
+	outImports, errImports := ximports.FormatImports(fileName, src, options, nil)
 	if errImports != nil {
 		return nil, errImports
 	}
@@ -35,10 +41,6 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 	fileSet, file, err := common.ParseFile(fileName, src)
 	if err != nil {
 		return nil, err
-	}
-
-	if options.Trace {
-		fmt.Println("fileName--->", fileName)
 	}
 
 	// ast.Print(fileSet, file)

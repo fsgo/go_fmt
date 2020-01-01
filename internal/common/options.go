@@ -1,10 +1,10 @@
 /*
- * Copyright(C) 2019 github.com/hidu  All Rights Reserved.
+ * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
  * Author: hidu (duv123+git@baidu.com)
- * Date: 2019/12/16
+ * Date: 2020/1/1
  */
 
-package gofmt
+package common
 
 // Options 选项
 type Options struct {

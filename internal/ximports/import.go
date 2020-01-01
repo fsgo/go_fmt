@@ -30,7 +30,7 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的import
-func FormatImports(fileName string, src []byte, LocalPrefix string, groupFns GroupFns) (out []byte, err error) {
+func FormatImports(fileName string, src []byte, options *common.Options, groupFns GroupFns) (out []byte, err error) {
 	_, file, err := common.ParseFile(fileName, src)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func FormatImports(fileName string, src []byte, LocalPrefix string, groupFns Gro
 		decl := importDecls[i]
 		buf.Write(src[start : decl.Pos()-1])
 		if i == 0 {
-			impStr := formatImportDecls(myImportDecls, groupFns, LocalPrefix)
+			impStr := formatImportDecls(myImportDecls, groupFns, options)
 			buf.Write(impStr)
 		}
 		start = int(decl.End())

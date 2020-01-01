@@ -7,11 +7,11 @@
 package ximports
 
 import (
+	"fmt"
+
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/fsgo/go_fmt/internal/common"
-
-	"fmt"
 )
 
 // Clean 未使用的import

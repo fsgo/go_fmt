@@ -9,6 +9,8 @@ package ximports
 import (
 	"sort"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 type GroupFn func(importPath string, LocalPrefix string) int
@@ -52,7 +54,7 @@ var importToGroup = GroupFns{
 	},
 }
 
-func sortImportDecls(decls []*importDecl, groupFns GroupFns, LocalPrefix string) []*importDeclGroup {
+func sortImportDecls(decls []*importDecl, groupFns GroupFns, options *common.Options) []*importDeclGroup {
 	if groupFns == nil {
 		groupFns = importToGroup
 	}
@@ -60,10 +62,12 @@ func sortImportDecls(decls []*importDecl, groupFns GroupFns, LocalPrefix string)
 	groups := make(map[int]*importDeclGroup, 0)
 
 	for _, decl := range decls {
-		num := groupFns.Group(decl.RealPath(), LocalPrefix)
+		num := groupFns.Group(decl.RealPath(), options.LocalPrefix)
 		group, has := groups[num]
 		if !has {
-			group = &importDeclGroup{}
+			group = &importDeclGroup{
+				Group: num,
+			}
 			groups[num] = group
 
 			result = append(result, group)
