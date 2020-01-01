@@ -7,4 +7,4 @@
 package gofmt
 
 // Version 版本信息
-var Version = "v0.1 20191230"
+var Version = "v0.1 20200101"

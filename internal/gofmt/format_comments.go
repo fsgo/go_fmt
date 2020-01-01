@@ -20,7 +20,10 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 		for _, cm := range cms.List {
 			if strings.HasPrefix(cm.Text, "//") {
 				// 单行注释
-				cm.Text = "// " + strings.TrimSpace(cm.Text[2:])
+				// 若//后没有空格则补充
+				if !strings.HasPrefix(cm.Text, "// ") {
+					cm.Text = "// " + cm.Text[2:]
+				}
 			} else if strings.HasPrefix(cm.Text, "/*") {
 				// 多行注释
 				// 会删除没有注释内容的多行注释

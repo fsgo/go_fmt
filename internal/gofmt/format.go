@@ -7,16 +7,13 @@
 package gofmt
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
-	"go/parser"
-	"go/printer"
 	"go/token"
 
-	"golang.org/x/tools/imports"
-
+	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
+	"github.com/fsgo/go_fmt/internal/ximports"
 )
 
 // Format 输出格式化的go代码
@@ -26,9 +23,16 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 		return nil, err
 	}
 
-	fileSet := token.NewFileSet()
-	parserMode := parser.Mode(0) | parser.ParseComments
-	file, err := parser.ParseFile(fileSet, fileName, src, parserMode)
+	options.LocalPrefix = localPrefix
+
+	outImports, errImports := ximports.FormatImports(fileName, src, localPrefix, nil)
+	if errImports != nil {
+		return nil, errImports
+	}
+
+	src = outImports
+
+	fileSet, file, err := common.ParseFile(fileName, src)
 	if err != nil {
 		return nil, err
 	}
@@ -39,45 +43,20 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 
 	// ast.Print(fileSet, file)
 
-	fix(fileSet, file)
+	fix(fileSet, file, src)
 
-	var buf bytes.Buffer
-	printerMode := printer.UseSpaces
-	printerMode |= printer.TabIndent
-	printConfig := &printer.Config{Mode: printerMode, Tabwidth: 8}
+	return common.PrintCode(fileSet, file)
 
-	if err := printConfig.Fprint(&buf, fileSet, file); err != nil {
-		return nil, err
-	}
-
-	imports.LocalPrefix = localPrefix
-
-	opt := &imports.Options{
-		Fragment:  true,
-		Comments:  true,
-		TabIndent: options.TabIndent,
-		TabWidth:  options.TabWidth,
-	}
-	return imports.Process(fileName, buf.Bytes(), opt)
+	// opt := &imports.Options{
+	// Fragment:  true,
+	// Comments:  true,
+	// TabIndent: options.TabIndent,
+	// TabWidth:  options.TabWidth,
+	// }
+	//
+	// return imports.Process(fileName, buf.Bytes(), opt)
 }
 
-func fix(fileSet *token.FileSet, file *ast.File) {
-	resetImportDecls(fileSet, file)
+func fix(fileSet *token.FileSet, file *ast.File, src []byte) {
 	FormatComments(fileSet, file)
-}
-
-func resetImportDecls(fileSet *token.FileSet, f *ast.File) {
-	// 将分组的import 合并为一组，方便后续处理
-	// 已知若import 区域出现单独行的注释将不正确
-	var firstLine int
-	if len(f.Imports) < 2 {
-		return
-	}
-	for _, ip := range f.Imports {
-		p := ip.Pos()
-		if firstLine == 0 {
-			firstLine = fileSet.Position(p).Line + 1
-		}
-		fileSet.File(p).MergeLine(firstLine)
-	}
 }

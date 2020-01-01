@@ -6,8 +6,14 @@
 * 格式化多行注释：去除首未空行；除了首未2行外，每行格式为 `{空格}*{空格}注释内容`
 * 默认只对git项目库里有修改的进行格式化
 
+对于import部分特别说明：
+> 1.支持注释，注释间的空行会去除  
+> 2.对于非末行的注释的位置会和其下面紧挨的importPath绑定在一起。  
+> 3.末行的注释则会放入import的头部。  
+> 4.对于注释的importPath,会按照其实际路径参与分组和排序。  
+
 ## 2.安装/更新
-使用 go >= 1.13 版本：
+使用 go >= 1.13 版本(不需要Fan强)：
 ```
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
@@ -15,12 +21,12 @@ go env GOPROXY=https://goproxy.cn,direct
 go get -u github.com/fsgo/go_fmt@master
 ```
 
-go < 1.13 版本:
+go < 1.13 版本(可能需要Fan强):
 ```
 go get -u github.com/fsgo/go_fmt
 ```
 
-当前版本：v0.1 20191230
+当前版本：v0.1 20200101
 
 ## 3.使用
 

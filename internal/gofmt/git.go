@@ -8,6 +8,7 @@ package gofmt
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -21,7 +22,7 @@ import (
 func GitChangeFiles() ([]string, error) {
 	data, err := exec.Command("git", "status", "-s").CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("exec ( git status -s ) with error: %s", err.Error())
 	}
 	data = bytes.TrimSpace(data)
 	lines := bytes.Split(data, []byte("\n"))
