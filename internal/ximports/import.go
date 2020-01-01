@@ -15,12 +15,12 @@ import (
 	 */
 	/* 多行注释3 */
 	"bytes"
-	// "fmt"
 	"go/ast"
 	"go/format"
 	"go/token"
-	"strconv" // strconv 后面
+	"regexp"
 
+	"strconv" // strconv 后面
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -184,16 +184,44 @@ func importPath(s ast.Spec) string {
 	return ""
 }
 
+var importNameReg = regexp.MustCompile(`^[a-zA-Z_]?[a-zA-Z0-9_]*$`)
+
+var importPathReg = regexp.MustCompile(`^[a-zA-Z_0-9\/\.]+$`)
+
 func isImportPathLine(bf []byte) bool {
-	if len(bf) == 0 {
+	line := bytes.TrimSpace(bf)
+	if len(line) == 0 {
 		return false
 	}
-	if !isImportPathHeader(bf[0]) {
+
+	if bytes.ContainsAny(line, "\n\r") {
 		return false
 	}
-	if bytes.Count(bf, []byte(`"`)) != 2 {
+
+	if !isImportPathHeader(line[0]) {
 		return false
 	}
+	if bytes.Count(line, []byte(`"`)) != 2 {
+		return false
+	}
+	if !bytes.HasSuffix(line, []byte(`"`)) {
+		return false
+	}
+
+	arr := bytes.SplitN(line, []byte(`"`), 3)
+	name := bytes.TrimSpace(arr[0])
+
+	if len(name) > 0 && !importNameReg.Match(name) {
+		return false
+	}
+
+	// 不包括双引号
+	importPath := arr[1]
+
+	if !importPathReg.Match(importPath) {
+		return false
+	}
+
 	return true
 }
 

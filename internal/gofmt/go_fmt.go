@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 // NewGoFmt 创建一个新的带默认格式化规则的格式化实例
@@ -43,7 +45,7 @@ func (gf *GoFmt) BindFlags() {
 		fmt.Fprintf(os.Stderr, "usage: %s [flags] [path ...]\n", cmd)
 		commandLine.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nsite :    github.com/fsgo/go_fmt\n")
-		fmt.Fprintf(os.Stderr, "version:  %s\n", Version)
+		fmt.Fprintf(os.Stderr, "version:  %s\n", common.Version)
 		os.Exit(2)
 	}
 
