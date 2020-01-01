@@ -51,18 +51,28 @@ func (decl *importDecl) realPathFromCmt() string {
 			continue
 		}
 		if isImportPathLine([]byte(cmt)) {
-			return strings.TrimLeft(cmt, `_" `)
+			return strings.TrimLeft(cmt, `_ `)
 		}
 	}
 	return ""
 }
 
+// RealPath 获取实际的import path
+// 比如下列 获取到的都是:a.com/aa"
+// a "a.com/aa"
+// _"a.com/aa"
+// "a.com/aa"
 func (decl *importDecl) RealPath() string {
-	name := strings.TrimLeft(decl.Path, `/*_" `)
-	if name != "" {
+	name := strings.TrimLeft(decl.Path, `/*_ `)
+	if name == "" {
+		name = decl.realPathFromCmt()
+	}
+
+	if !strings.Contains(name, `"`) {
 		return name
 	}
-	return decl.realPathFromCmt()
+	arr := strings.SplitN(name, `"`, 2)
+	return arr[1]
 }
 
 type importDeclGroup struct {
