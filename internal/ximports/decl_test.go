@@ -28,7 +28,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 				},
 				Path: `"github.com/fsgo/go_fmt"`,
 			},
-			want: `github.com/fsgo/go_fmt"`,
+			want: `github.com/fsgo/go_fmt`,
 		},
 		{
 			name: "case 2",
@@ -38,7 +38,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 				},
 				Path: `go_fmt "github.com/fsgo/go_fmt"`,
 			},
-			want: `github.com/fsgo/go_fmt"`,
+			want: `github.com/fsgo/go_fmt`,
 		},
 		{
 			name: "case 3",
@@ -48,7 +48,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 				},
 				Path: `_ "github.com/fsgo/go_fmt"`,
 			},
-			want: `github.com/fsgo/go_fmt"`,
+			want: `github.com/fsgo/go_fmt`,
 		},
 		{
 			name: "case 4",
@@ -58,7 +58,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 				},
 				Path: `_"github.com/fsgo/go_fmt"`,
 			},
-			want: `github.com/fsgo/go_fmt"`,
+			want: `github.com/fsgo/go_fmt`,
 		},
 		{
 			name: "case 5",
@@ -68,7 +68,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 				},
 				Path: `gofmt"github.com/fsgo/go_fmt"`,
 			},
-			want: `github.com/fsgo/go_fmt"`,
+			want: `github.com/fsgo/go_fmt`,
 		},
 		{
 			name: "case 6",
@@ -77,7 +77,7 @@ func Test_importDecl_RealPath(t *testing.T) {
 					`// "github.com/fsgo/cache"`,
 				},
 			},
-			want: `github.com/fsgo/cache"`,
+			want: `github.com/fsgo/cache`,
 		},
 		{
 			name: "case 7",
@@ -88,7 +88,23 @@ func Test_importDecl_RealPath(t *testing.T) {
 					`//"github.com/fsgo/cache"`,
 				},
 			},
-			want: `github.com/fsgo/cache"`,
+			want: `github.com/fsgo/cache`,
+		},
+		{
+			name: "case 8",
+			fields: fields{
+				Comments: []string{
+					`//"github.com/fsgo/cache" //注释`,
+				},
+			},
+			want: `github.com/fsgo/cache`,
+		},
+		{
+			name: "case 9",
+			fields: fields{
+				Path: `"fmt" //注释`,
+			},
+			want: `fmt`,
 		},
 	}
 	for _, tt := range tests {

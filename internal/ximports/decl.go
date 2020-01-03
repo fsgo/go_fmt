@@ -71,7 +71,7 @@ func (decl *importDecl) RealPath() string {
 	if !strings.Contains(name, `"`) {
 		return name
 	}
-	arr := strings.SplitN(name, `"`, 2)
+	arr := strings.SplitN(name, `"`, 3)
 	return arr[1]
 }
 
@@ -107,11 +107,11 @@ func (group *importDeclGroup) Bytes() []byte {
 	return buf.Bytes()
 }
 
-func formatImportDecls(decls []*importDecl, groupFns GroupFns, options *common.Options) []byte {
+func formatImportDecls(decls []*importDecl, options *common.Options) []byte {
 	var buf, buf2 bytes.Buffer
 
 	buf.WriteString("import (\n")
-	groups := sortImportDecls(decls, groupFns, options)
+	groups := sortImportDecls(decls, options)
 
 	if options.Trace {
 		a, _ := json.MarshalIndent(groups, " ", " ")

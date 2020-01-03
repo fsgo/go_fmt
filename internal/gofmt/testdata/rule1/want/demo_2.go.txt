@@ -1,0 +1,46 @@
+/*
+ * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
+ * Author: hidu (duv123+git@baidu.com)
+ * Date: 2020/1/3
+ */
+
+package input
+
+import (
+	// 注释strconvstrconv
+	"fmt" // fmt 后面的注释
+	"strconv"
+	// strings上面的注释
+	"strings"
+
+	/*
+	 * 多行注释1
+	 */
+	// imports 上面的注释后面的注释
+	"golang.org/x/tools/imports"
+
+	"github.com/fsgo/go_fmt/internal/ximports"
+)
+
+// 这里有注释1
+
+/*
+ * 多行注释2
+ */
+
+/* *多行注释3 */
+
+//     a2 你好
+func a2() {
+	fmt.Println()
+	strconv.Itoa(0)
+
+	strings.Join([]string{}, "")
+}
+
+// b2 b2 的注释
+func b2() {
+	_ = imports.Debug
+	ximports.Clean("", nil)
+}
+

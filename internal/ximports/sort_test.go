@@ -15,9 +15,8 @@ import (
 
 func Test_sortImportDecls(t *testing.T) {
 	type args struct {
-		decls    []*importDecl
-		groupFns GroupFns
-		options  *common.Options
+		decls   []*importDecl
+		options *common.Options
 	}
 	tests := []struct {
 		name string
@@ -51,7 +50,6 @@ func Test_sortImportDecls(t *testing.T) {
 						Path: ``,
 					},
 				},
-				groupFns: nil,
 				options: &common.Options{
 					LocalPrefix: "github.com/a",
 				},
@@ -99,7 +97,7 @@ func Test_sortImportDecls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := sortImportDecls(tt.args.decls, tt.args.groupFns, tt.args.options); !reflect.DeepEqual(got, tt.want) {
+			if got := sortImportDecls(tt.args.decls, tt.args.options); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("sortImportDecls() = %v, want %v", got, tt.want)
 			}
 		})

@@ -7,21 +7,42 @@
 package gofmt
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-// filesCurrentDirAll 获取当前目录所有的.go 文件
-func filesCurrentDirAll() ([]string, error) {
+// currentDirAllGoFiles 获取当前目录所有的.go 文件
+func currentDirAllGoFiles() ([]string, error) {
 	var goFiles []string
 	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
-		if err == nil && isGoFile(info) {
+		if err == nil && isGoFile(info) && !isIgnorePath(path) {
 			goFiles = append(goFiles, path)
 		}
 		return err
 	})
 	return goFiles, err
+}
+
+var ignoreDirNames = []string{
+	"testdata",
+	"vendor",
+}
+
+// isIgnorePath 判断一个路径是否应该忽略掉
+func isIgnorePath(path string) bool {
+	for _, name := range ignoreDirNames {
+		ignoreDir := fmt.Sprintf("%s%c", name, filepath.Separator)
+		if strings.HasPrefix(path, ignoreDir) {
+			return true
+		}
+		ignoreDir = fmt.Sprintf("%c%s", filepath.Separator, ignoreDir)
+		if strings.Contains(path, ignoreDir) {
+			return true
+		}
+	}
+	return false
 }
 
 // filesGitDirChange 获取当前git项目目录所有有修改问.go文件
@@ -32,7 +53,7 @@ func filesGitDirChange() ([]string, error) {
 	}
 	var goFiles []string
 	for _, fileName := range gitFiles {
-		if isGoFileName(fileName) {
+		if isGoFileName(fileName) && !isIgnorePath(fileName) {
 			goFiles = append(goFiles, fileName)
 		}
 	}

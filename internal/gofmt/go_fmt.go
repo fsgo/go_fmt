@@ -20,10 +20,11 @@ import (
 func NewGoFmt() *GoFmt {
 	return &GoFmt{
 		Options: &Options{
-			TabIndent:   true,
-			TabWidth:    8,
-			LocalPrefix: "auto",
-			Write:       true,
+			TabIndent:    true,
+			TabWidth:     8,
+			LocalPrefix:  "auto",
+			Write:        true,
+			MergeImports: true,
 		},
 	}
 }
@@ -37,7 +38,7 @@ type GoFmt struct {
 func (gf *GoFmt) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	commandLine.BoolVar(&gf.Options.Write, "w", true, "write result to (source) file instead of stdout")
-	commandLine.StringVar(&gf.Options.LocalPrefix, "local", "auto", "put imports beginning with this string after 3rd-party packages; comma-separated list")
+	commandLine.StringVar(&gf.Options.LocalPrefix, "local", "auto", "put imports beginning with this string after 3rd-party packages")
 	commandLine.BoolVar(&gf.Options.Trace, "trace", false, "show trace infos")
 
 	commandLine.Usage = func() {
@@ -73,7 +74,6 @@ func (gf *GoFmt) execute() error {
 	if err != nil {
 		return err
 	}
-
 	var errTotal int
 
 	for _, fileName := range files {
@@ -103,7 +103,7 @@ func (gf *GoFmt) execute() error {
 func (gf *GoFmt) printFmtResult(fileName string, change bool, err error) {
 	var consoleColorTag = 0x1B
 	if change {
-		fmt.Fprintf(os.Stdout, "%c[31m rewrited : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
+		fmt.Fprintf(os.Stderr, "%c[31m rewrited : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
 	} else {
 		fmt.Fprintf(os.Stderr, "%c[32m unchange : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
 	}
@@ -125,7 +125,7 @@ func (gf *GoFmt) ParserOptionsFiles() ([]string, error) {
 		var tmpList []string
 		switch name {
 		case "./...":
-			tmpList, err = filesCurrentDirAll()
+			tmpList, err = currentDirAllGoFiles()
 		case "git_change":
 			tmpList, err = filesGitDirChange()
 		default:
@@ -151,13 +151,10 @@ func (gf *GoFmt) ParserOptionsFiles() ([]string, error) {
 
 // Format 格式化文件，获取格式化后的内容
 func (gf *GoFmt) Format(fileName string, src []byte) (out []byte, change bool, err error) {
-	if src == nil {
-		src, err = ioutil.ReadFile(fileName)
-		if err != nil {
-			return nil, false, err
-		}
+	src, err = ioutil.ReadFile(fileName)
+	if err != nil {
+		return nil, false, err
 	}
-
 	out, err = Format(fileName, src, gf.Options)
 
 	if err != nil {

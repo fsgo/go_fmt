@@ -6,6 +6,9 @@
 
 package common
 
+// ImportGroupFn import 排序逻辑
+type ImportGroupFn func(importPath string, opt *Options) int
+
 // Options 选项
 type Options struct {
 	Trace bool
@@ -18,5 +21,11 @@ type Options struct {
 
 	Write bool
 
+	// 待处理的文件列表
 	Files []string
+
+	ImportGroupFn ImportGroupFn
+
+	// 是否将多段import 合并为一个
+	MergeImports bool
 }

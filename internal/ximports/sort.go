@@ -13,61 +13,31 @@ import (
 	"github.com/fsgo/go_fmt/internal/common"
 )
 
-// GroupFn 对import path排序的方法
-// 返回 >=0 的值为有效值，-1 未无效值
-type GroupFn func(importPath string, LocalPrefix string) int
-
-// GroupFns 对import path排序的所有方法
-// 排序分组在后面的应该放到前面
-type GroupFns []GroupFn
-
-// Group 执行排序逻辑
-func (fns GroupFns) Group(importPath string, LocalPrefix string) int {
-	importPath = strings.TrimLeft(importPath, `"`)
-	for _, fn := range fns {
-		if num := fn(importPath, LocalPrefix); num >= 0 {
-			return num
-		}
+func defaultImportGroup(importPath string, opt *common.Options) int {
+	LocalPrefix := opt.LocalPrefix
+	// 本地项目库
+	if strings.HasPrefix(importPath, LocalPrefix) || strings.TrimSuffix(LocalPrefix, "/") == importPath {
+		return 2
 	}
-	// 未识别的分组
+	// 第三方项目库
+	if strings.Contains(importPath, ".") {
+		return 1
+	}
+	//
 	return 0
 }
 
-var importToGroup = GroupFns{
-	// 本地项目库
-	func(importPath string, LocalPrefix string) int {
-		if strings.HasPrefix(importPath, LocalPrefix) || strings.TrimSuffix(LocalPrefix, "/") == importPath {
-			return 2
-		}
-		return -1
-	},
-
-	// 第三方项目库
-	func(importPath string, LocalPrefix string) int {
-		if strings.Contains(importPath, ".") {
-			return 1
-		}
-		return -1
-	},
-
-	// go标准库
-	func(importPath string, LocalPrefix string) int {
-		if importPath != "" {
-			return 0
-		}
-		return -1
-	},
-}
-
-func sortImportDecls(decls []*importDecl, groupFns GroupFns, options *common.Options) []*importDeclGroup {
-	if groupFns == nil {
-		groupFns = importToGroup
+func sortImportDecls(decls []*importDecl, options *common.Options) []*importDeclGroup {
+	groupFn := options.ImportGroupFn
+	if groupFn == nil {
+		groupFn = defaultImportGroup
 	}
+
 	result := make([]*importDeclGroup, 0)
 	groups := make(map[int]*importDeclGroup, 0)
 
 	for _, decl := range decls {
-		num := groupFns.Group(decl.RealPath(), options.LocalPrefix)
+		num := groupFn(decl.RealPath(), options)
 		group, has := groups[num]
 		if !has {
 			group = &importDeclGroup{

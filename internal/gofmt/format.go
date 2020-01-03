@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"io/ioutil"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
@@ -17,10 +18,19 @@ import (
 	"github.com/fsgo/go_fmt/internal/ximports"
 )
 
+// Options 别名
 type Options = common.Options
 
 // Format 输出格式化的go代码
 func Format(fileName string, src []byte, options *Options) ([]byte, error) {
+	if src == nil {
+		var err error
+		src, err = ioutil.ReadFile(fileName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	localPrefix, err := localmodule.Get(options.LocalPrefix, fileName)
 	if err != nil {
 		return nil, err
@@ -32,7 +42,7 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 
 	options.LocalPrefix = localPrefix
 
-	outImports, errImports := ximports.FormatImports(fileName, src, options, nil)
+	outImports, errImports := ximports.FormatImports(fileName, src, options)
 	if errImports != nil {
 		return nil, errImports
 	}
@@ -49,15 +59,6 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 	fix(fileSet, file, src)
 
 	return common.PrintCode(fileSet, file)
-
-	// opt := &imports.Options{
-	// Fragment:  true,
-	// Comments:  true,
-	// TabIndent: options.TabIndent,
-	// TabWidth:  options.TabWidth,
-	// }
-	//
-	// return imports.Process(fileName, buf.Bytes(), opt)
 }
 
 func fix(fileSet *token.FileSet, file *ast.File, src []byte) {

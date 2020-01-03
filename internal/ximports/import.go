@@ -19,8 +19,8 @@ import (
 	"go/format"
 	"go/token"
 	"regexp"
-
 	"strconv" // strconv 后面
+
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -30,7 +30,7 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的import
-func FormatImports(fileName string, src []byte, options *common.Options, groupFns GroupFns) (out []byte, err error) {
+func FormatImports(fileName string, src []byte, options *common.Options) (out []byte, err error) {
 	_, file, err := common.ParseFile(fileName, src)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func FormatImports(fileName string, src []byte, options *common.Options, groupFn
 		decl := importDecls[i]
 		buf.Write(src[start : decl.Pos()-1])
 		if i == 0 {
-			impStr := formatImportDecls(myImportDecls, groupFns, options)
+			impStr := formatImportDecls(myImportDecls, options)
 			buf.Write(impStr)
 		}
 		start = int(decl.End())
@@ -78,12 +78,6 @@ func FormatImports(fileName string, src []byte, options *common.Options, groupFn
 	buf.Write(src[start:])
 
 	return format.Source(buf.Bytes())
-
-	// if out,err:=Clean(fileName,buf.Bytes());err!=nil{
-	// return nil,err
-	// }else{
-	// return format.Source(out)
-	// }
 }
 
 // parserImportSrc 直接对import 部分的源代码进行解析
@@ -157,7 +151,6 @@ func parserImportSrc(src []byte) (lines []*importDecl, err error) {
 		lines = append(lines, decl)
 	}
 
-	// fmt.Println("body:",string(body))
 	return lines, nil
 }
 
@@ -201,10 +194,7 @@ func isImportPathLine(bf []byte) bool {
 	if !isImportPathHeader(line[0]) {
 		return false
 	}
-	if bytes.Count(line, []byte(`"`)) != 2 {
-		return false
-	}
-	if !bytes.HasSuffix(line, []byte(`"`)) {
+	if bytes.Count(line, []byte(`"`)) < 2 {
 		return false
 	}
 
@@ -220,6 +210,14 @@ func isImportPathLine(bf []byte) bool {
 
 	if !importPathReg.Match(importPath) {
 		return false
+	}
+
+	cmt := bytes.TrimSpace(arr[2])
+	if len(cmt) > 0 {
+		// 若不是注释
+		if !bytes.HasPrefix(cmt, []byte("/")) {
+			return false
+		}
 	}
 
 	return true
