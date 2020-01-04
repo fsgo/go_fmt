@@ -1,0 +1,16 @@
+/*
+ * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
+ * Author: hidu (duv123+git@baidu.com)
+ * Date: 2020/1/3
+ */
+
+package input
+
+func a() {
+	fmt.Println()
+}
+
+func b() {
+	_ = imports.Debug
+	ximports.Clean("", nil)
+}

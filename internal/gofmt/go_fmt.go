@@ -38,8 +38,9 @@ type GoFmt struct {
 func (gf *GoFmt) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	commandLine.BoolVar(&gf.Options.Write, "w", true, "write result to (source) file instead of stdout")
-	commandLine.StringVar(&gf.Options.LocalPrefix, "local", "auto", "put imports beginning with this string after 3rd-party packages")
+	commandLine.StringVar(&gf.Options.LocalPrefix, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&gf.Options.Trace, "trace", false, "show trace infos")
+	commandLine.BoolVar(&gf.Options.MergeImports, "mi", false, "merge imports into one")
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]

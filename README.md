@@ -10,7 +10,8 @@
 > 1.支持注释，注释间的空行会去除  
 > 2.对于非末行的注释的位置会和其下面紧挨的importPath绑定在一起。  
 > 3.末行的注释则会放入import的头部。  
-> 4.对于注释的importPath,会按照其实际路径参与分组和排序。  
+> 4.对于注释的importPath,会按照其实际路径参与分组和排序。   
+> 5.可使用`-mi`参数来控制是否将多段import合并为一段（默认否）。
 
 会忽略当前目录以及子目录下的`testdata`和`vendor`目录。  
 若需要可进入其目录里执行该命令。  
@@ -29,10 +30,23 @@ go < 1.13 版本(可能需要Fan强):
 go get -u github.com/fsgo/go_fmt
 ```
 
-当前版本：v0.1 20200103
+当前版本：v0.1 20200104
 
 ## 3.使用
 
+### 3.0 help
+> go_fmt -help
+
+```
+usage: go_fmt [flags] [path ...]
+  -local string
+    	put imports beginning with this string as 3rd-party packages (default "auto")
+  -mi
+    	merge imports into one
+  -trace
+    	show trace infos
+  -w	write result to (source) file instead of stdout (default true)
+```
 ### 3.1 格式化git项目里有修改的.go文件
 ```
 $ go_fmt

@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -22,10 +23,30 @@ func TestFormat_rule1(t *testing.T) {
 		Write:        false,
 		MergeImports: true,
 	}
-	rule1Dir := "./testdata/rule1/"
+	runTest(t, "rule1", opt)
+}
+
+func TestFormat_rule2(t *testing.T) {
+	opt := &Options{
+		TabIndent:    true,
+		TabWidth:     8,
+		LocalPrefix:  "auto",
+		Write:        false,
+		MergeImports: false,
+	}
+	runTest(t, "rule2", opt)
+}
+
+func runTest(t *testing.T, ruleDirName string, opt *Options) {
+	rule1Dir := "./testdata/" + ruleDirName + "/"
+
+	var checkFileTotal int
+
 	filepath.Walk(rule1Dir+"/input/", func(path string, info os.FileInfo, err error) error {
 		t.Run(path, func(t *testing.T) {
-			if err == nil && isGoFileName(path) {
+			if err == nil && strings.HasSuffix(path, ".go.txt") {
+				checkFileTotal++
+
 				got, err := Format(path, nil, opt)
 				if err != nil {
 					t.Errorf("Format returl error: %s", err)
@@ -47,4 +68,7 @@ func TestFormat_rule1(t *testing.T) {
 		return nil
 	})
 
+	if checkFileTotal < 1 {
+		t.Fatalf("checkFileTotal==0")
+	}
 }

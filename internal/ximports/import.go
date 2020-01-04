@@ -15,6 +15,7 @@ import (
 	 */
 	/* 多行注释3 */
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/token"
@@ -44,8 +45,9 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 
 	var importDecls []*ast.GenDecl
 
-	var myImportDecls []*importDecl
+	myImportDeclsMap := make(map[int][]*importDecl, 0)
 
+	var nextID int
 	for _, decl := range file.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 
@@ -60,7 +62,28 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 		if err != nil {
 			panic(err.Error())
 		}
+
+		if _, has := myImportDeclsMap[nextID]; !has {
+			myImportDeclsMap[nextID] = []*importDecl{}
+		}
+
+		var myImportDecls []*importDecl
+
+		myImportDecls = myImportDeclsMap[nextID]
+
 		myImportDecls = append(myImportDecls, lines...)
+
+		myImportDeclsMap[nextID] = myImportDecls
+
+		// 若将多段import merge到一个里,nextID 不变化
+		// 下一段import 将和之前的merge到一起
+		if !options.MergeImports {
+			nextID++
+		}
+	}
+
+	if options.Trace {
+		fmt.Println("myImportDeclsMap:", myImportDeclsMap)
 	}
 
 	var buf bytes.Buffer
@@ -68,10 +91,12 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	for i := 0; i < len(importDecls); i++ {
 		decl := importDecls[i]
 		buf.Write(src[start : decl.Pos()-1])
-		if i == 0 {
-			impStr := formatImportDecls(myImportDecls, options)
-			buf.Write(impStr)
+
+		importNew := formatImportDecls(myImportDeclsMap[i], options)
+		if len(importNew) > 0 {
+			buf.Write(importNew)
 		}
+
 		start = int(decl.End())
 	}
 

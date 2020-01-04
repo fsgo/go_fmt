@@ -108,6 +108,9 @@ func (group *importDeclGroup) Bytes() []byte {
 }
 
 func formatImportDecls(decls []*importDecl, options *common.Options) []byte {
+	if len(decls) == 0 {
+		return nil
+	}
 	var buf, buf2 bytes.Buffer
 
 	buf.WriteString("import (\n")
