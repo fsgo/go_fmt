@@ -11,20 +11,33 @@ import (
 	"strings"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/pkgs"
 )
 
 func defaultImportGroup(importPath string, opt *common.Options) int {
+	// 若是纯注释，则排在最上面
+	if importPath == "" {
+		return 0
+	}
+
+	// 系统标准库
+	if pkgs.IsStd(importPath) {
+		return 0
+	}
+
 	LocalPrefix := opt.LocalPrefix
 	// 本地项目库
 	if strings.HasPrefix(importPath, LocalPrefix) || strings.TrimSuffix(LocalPrefix, "/") == importPath {
 		return 2
 	}
+
 	// 第三方项目库
-	if strings.Contains(importPath, ".") {
-		return 1
-	}
-	//
-	return 0
+	// if strings.Contains(importPath, ".") {
+	// 	return 1
+	// }
+
+	// 默认为第三方库
+	return 1
 }
 
 func sortImportDecls(decls []*importDecl, options *common.Options) []*importDeclGroup {
