@@ -52,7 +52,8 @@ func fixMultilineComment(cm *ast.Comment) (ok bool) {
 	txt := strings.TrimSpace(cm.Text)
 
 	// cgo
-	if strings.Contains(txt, "#include ") {
+	if strings.Contains(txt, "#include ") ||
+		strings.Contains(txt, "#cgo ") {
 		return true
 	}
 
