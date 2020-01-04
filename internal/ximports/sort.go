@@ -40,7 +40,7 @@ func defaultImportGroup(importPath string, opt *common.Options) int {
 	return 1
 }
 
-func sortImportDecls(decls []*importDecl, options *common.Options) []*importDeclGroup {
+func sortImportDecls(decls []*importDecl, options *common.Options) importDeclGroups {
 	groupFn := options.ImportGroupFn
 	if groupFn == nil {
 		groupFn = defaultImportGroup
@@ -61,6 +61,7 @@ func sortImportDecls(decls []*importDecl, options *common.Options) []*importDecl
 			result = append(result, group)
 		}
 		group.Decls = append(group.Decls, decl)
+		group.sort()
 	}
 
 	sort.Slice(result, func(i, j int) bool {

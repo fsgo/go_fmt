@@ -102,8 +102,11 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	}
 
 	buf.Write(src[start:])
-
-	return format.Source(buf.Bytes())
+	code, err := format.Source(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	return cleanSpecCode(code), nil
 }
 
 // parserImportSrc 直接对import 部分的源代码进行解析

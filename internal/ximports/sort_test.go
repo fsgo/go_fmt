@@ -7,7 +7,6 @@
 package ximports
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -21,7 +20,7 @@ func Test_sortImportDecls(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []*importDeclGroup
+		want importDeclGroups
 	}{
 		{
 			name: "case 1",
@@ -54,7 +53,7 @@ func Test_sortImportDecls(t *testing.T) {
 					LocalPrefix: "github.com/a",
 				},
 			},
-			want: []*importDeclGroup{
+			want: importDeclGroups{
 				{
 					Group: 0,
 					Decls: []*importDecl{
@@ -97,8 +96,12 @@ func Test_sortImportDecls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := sortImportDecls(tt.args.decls, tt.args.options); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("sortImportDecls() = %v, want %v", got, tt.want)
+			got := sortImportDecls(tt.args.decls, tt.args.options).String()
+			want := tt.want.String()
+			if got != want {
+				gotLen := len(got)
+				wantLen := len(want)
+				t.Errorf("sortImportDecls() len=(%d):\n%q\n======want(%d):\n%q", gotLen, got, wantLen, want)
 			}
 		})
 	}
