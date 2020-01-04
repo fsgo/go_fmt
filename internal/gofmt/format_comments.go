@@ -20,9 +20,18 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 		for _, cm := range cms.List {
 			if strings.HasPrefix(cm.Text, "//") {
 				// 单行注释
-				// 若//后没有空格则补充
-				if !strings.HasPrefix(cm.Text, "// ") {
-					cm.Text = "// " + cm.Text[2:]
+
+				// @see https://github.com/golang/go/blob/master/src/runtime/HACKING.md
+				// @see go doc compile
+				if strings.HasPrefix(cm.Text, "//go:") ||
+					strings.HasPrefix(cm.Text, "//line ") ||
+					strings.HasPrefix(cm.Text, "//*line ") {
+					// spec comment,ignore
+				} else {
+					// 若//后没有空格则补充
+					if !strings.HasPrefix(cm.Text, "// ") {
+						cm.Text = "// " + cm.Text[2:]
+					}
 				}
 			} else if strings.HasPrefix(cm.Text, "/*") {
 				// 多行注释
@@ -38,8 +47,14 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 	}
 }
 
+// fixMultilineComment 多行注释处理
 func fixMultilineComment(cm *ast.Comment) (ok bool) {
 	txt := strings.TrimSpace(cm.Text)
+
+	// cgo
+	if strings.Contains(txt, "#include ") {
+		return true
+	}
 
 	// 使用 /* */的多行注释
 	txt = strings.TrimSpace(txt[1 : len(txt)-1]) // 去除两边的 "/"

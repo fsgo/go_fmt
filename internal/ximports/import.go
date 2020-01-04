@@ -51,6 +51,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	for _, decl := range file.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 
+		// import "C" 是Cgo的，不可以处理
 		if !ok || gen.Tok != token.IMPORT || declImports(gen, "C") {
 			continue
 		}
