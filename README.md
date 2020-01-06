@@ -22,7 +22,7 @@
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
 
-go get -u github.com/fsgo/go_fmt@3ed19e2
+go get -u github.com/fsgo/go_fmt@06ec1e1
 ```
 
 go < 1.13 版本(可能需要Fan强):
