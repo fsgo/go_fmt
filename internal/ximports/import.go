@@ -208,7 +208,7 @@ func importPath(s ast.Spec) string {
 
 var importNameReg = regexp.MustCompile(`^[a-zA-Z_]?[a-zA-Z0-9_]*$`)
 
-var importPathReg = regexp.MustCompile(`^[a-zA-Z_0-9\/\.]+$`)
+var importPathReg = regexp.MustCompile(`^[a-zA-Z_0-9\-\/\.]+$`)
 
 func isImportPathLine(bf []byte) bool {
 	line := bytes.TrimSpace(bf)

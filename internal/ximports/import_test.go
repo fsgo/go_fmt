@@ -145,6 +145,20 @@ func Test_isImportPathLine(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "case 16",
+			args: args{
+				bf: []byte(`"github.com/go-playground/locales/en"`),
+			},
+			want: true,
+		},
+		{
+			name: "case 17",
+			args: args{
+				bf: []byte(`validator_engine "gopkg.in/go-playground/validator.v9"`),
+			},
+			want: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
