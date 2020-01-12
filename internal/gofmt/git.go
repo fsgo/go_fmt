@@ -20,9 +20,9 @@ import (
 // A  unittest/internal/monitor/bvar.apis_monitor.data
 // ?? internal/gofmt/files.go
 func GitChangeFiles() ([]string, error) {
-	data, err := exec.Command("git", "status", "-s").CombinedOutput()
+	data, err := exec.Command("git", "status", "-su").CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("exec ( git status -s ) with error: %s", err.Error())
+		return nil, fmt.Errorf("exec ( git status -su ) with error: %s", err.Error())
 	}
 	data = bytes.TrimSpace(data)
 	lines := bytes.Split(data, []byte("\n"))
