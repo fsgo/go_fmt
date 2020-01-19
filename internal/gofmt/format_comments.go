@@ -25,7 +25,8 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 				// @see go doc compile
 				if strings.HasPrefix(cm.Text, "//go:") ||
 					strings.HasPrefix(cm.Text, "//line ") ||
-					strings.HasPrefix(cm.Text, "//*line ") {
+					strings.HasPrefix(cm.Text, "//*line ") ||
+					strings.HasPrefix(cm.Text, "//export ") {
 					// spec comment,ignore
 				} else {
 					// 若//后没有空格则补充

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/tools/imports"
 	"fmt"
 )
-
+//export a
 func a() {
 fmt.Println()
 }
