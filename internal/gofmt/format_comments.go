@@ -50,11 +50,18 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 
 // fixMultilineComment 多行注释处理
 func fixMultilineComment(cm *ast.Comment) (ok bool) {
+	// todo 目前的格式化策略不好，先关闭掉
+	return true
 	txt := strings.TrimSpace(cm.Text)
 
 	// cgo
 	if strings.Contains(txt, "#include ") ||
 		strings.Contains(txt, "#cgo ") {
+		return true
+	}
+
+	// markdown 的注释代码
+	if strings.Contains(txt, "```") {
 		return true
 	}
 

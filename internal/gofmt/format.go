@@ -31,6 +31,10 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 		}
 	}
 
+	if common.DoNotEdit(src) {
+		return src, nil
+	}
+
 	localPrefix, err := localmodule.Get(options.LocalPrefix, fileName)
 	if err != nil {
 		return nil, err
