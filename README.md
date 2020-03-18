@@ -3,10 +3,9 @@
 ## 1.功能说明
 * 格式化import部分：分3段式，依次为 `标准库`、`第三方库`、`项目自身库`
 * 格式化单行注释：若为 `//注释内容`，调整为 `//{空格}注释内容`
-* 格式化多行注释：去除首未空行；除了首未2行外，每行格式为 `{空格}*{空格}注释内容`
 * 默认只对git项目库里有修改的进行格式化
 
-对于import部分特别说明：
+对于import部分：
 > 1.可使用`-mi`参数来控制是否将多段import合并为一段（默认否）。  
 > 2.对于注释的import path,会按照其实际路径参与分组和排序。   
 > 3.对于非末行的注释的位置会和其下面紧挨的import path绑定在一起。  
@@ -22,7 +21,7 @@
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
 
-go get -u github.com/fsgo/go_fmt@v0.1.20200313
+go get -u github.com/fsgo/go_fmt@v0.1.20200318
 ```
 
 go < 1.13 版本(可能需要Fan强):
@@ -30,7 +29,7 @@ go < 1.13 版本(可能需要Fan强):
 go get -u github.com/fsgo/go_fmt
 ```
 
-当前版本：v0.1 20200313
+当前版本：v0.1 20200318
 
 ## 3.使用
 
