@@ -25,8 +25,5 @@ func DoNotEdit(src []byte) bool {
 
 	first = bytes.Replace(first, []byte(" "), []byte(""), -1)
 	first = bytes.ToUpper(first)
-	if bytes.Contains(first, []byte("DONOTEDIT")) {
-		return true
-	}
-	return false
+	return bytes.Contains(first, []byte("DONOTEDIT"))
 }

@@ -47,7 +47,7 @@ func sortImportDecls(decls []*importDecl, options *common.Options) importDeclGro
 	}
 
 	result := make([]*importDeclGroup, 0)
-	groups := make(map[int]*importDeclGroup, 0)
+	groups := make(map[int]*importDeclGroup)
 
 	for _, decl := range decls {
 		num := groupFn(decl.RealPath(), options)

@@ -45,7 +45,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 
 	var importDecls []*ast.GenDecl
 
-	myImportDeclsMap := make(map[int][]*importDecl, 0)
+	myImportDeclsMap := make(map[int][]*importDecl)
 
 	var nextID int
 	for _, decl := range file.Decls {

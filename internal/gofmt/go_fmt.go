@@ -51,7 +51,10 @@ func (gf *GoFmt) BindFlags() {
 		os.Exit(2)
 	}
 
-	commandLine.Parse(os.Args[1:])
+	if err := commandLine.Parse(os.Args[1:]); err != nil {
+		fmt.Fprintf(os.Stderr, "parser commandLine with error: %s\n", err.Error())
+		os.Exit(2)
+	}
 
 	gf.Options.Files = commandLine.Args()
 
@@ -152,9 +155,11 @@ func (gf *GoFmt) ParserOptionsFiles() ([]string, error) {
 
 // Format 格式化文件，获取格式化后的内容
 func (gf *GoFmt) Format(fileName string, src []byte) (out []byte, change bool, err error) {
-	src, err = ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, false, err
+	if len(src) == 0 {
+		src, err = ioutil.ReadFile(fileName)
+		if err != nil {
+			return nil, false, err
+		}
 	}
 	out, err = Format(fileName, src, gf.Options)
 

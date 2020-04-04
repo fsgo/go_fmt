@@ -13,7 +13,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/pkgs/std"
 )
 
-// go:generate go run cmd/update_std_static.go -out std_static.go
+//go:generate go run cmd/update_std_static.go -out std_static.go
 
 // IsStd 判断是否系统标准库
 func IsStd(path string) bool {

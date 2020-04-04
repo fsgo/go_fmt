@@ -42,7 +42,7 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 
 	var checkFileTotal int
 
-	filepath.Walk(rule1Dir+"/input/", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(rule1Dir+"/input/", func(path string, info os.FileInfo, err error) error {
 		t.Run(path, func(t *testing.T) {
 			if err == nil && strings.HasSuffix(path, ".go.txt") {
 				checkFileTotal++
@@ -59,14 +59,20 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 				}
 				want = bytes.TrimSpace(want)
 				if !bytes.Equal(got, want) {
-					t.Errorf("not eq")
-					ioutil.WriteFile(rule1Dir+"/tmp/"+filepath.Base(path)+".got", got, 0644)
-					ioutil.WriteFile(rule1Dir+"/tmp/"+filepath.Base(path)+".want", want, 0644)
+					fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
+					fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
+					err1 := ioutil.WriteFile(fileGot, got, 0644)
+					err2 := ioutil.WriteFile(fileWant, want, 0644)
+					t.Errorf("not eq, fileget=%q (%v), filewant=%q (%v)", fileGot, fileWant, err1, err2)
 				}
 			}
 		})
 		return nil
 	})
+
+	if err != nil {
+		t.Errorf("filepath.Walk with error:%s", err.Error())
+	}
 
 	if checkFileTotal < 1 {
 		t.Fatalf("checkFileTotal==0")
