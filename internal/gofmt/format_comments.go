@@ -26,7 +26,7 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 				if strings.HasPrefix(cm.Text, "//go:") ||
 					strings.HasPrefix(cm.Text, "//line ") ||
 					strings.HasPrefix(cm.Text, "//*line ") ||
-					strings.HasPrefix(cm.Text, "//nolint ") ||
+					strings.HasPrefix(cm.Text, "//nolint") ||
 					strings.HasPrefix(cm.Text, "//export ") {
 					// spec comment,ignore
 				} else {
