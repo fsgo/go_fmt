@@ -12,9 +12,9 @@ import (
 )
 
 func Test_currentDirAllGoFiles(t *testing.T) {
-	files, err := currentDirAllGoFiles()
+	files, err := allGoFiles()
 	if err != nil {
-		t.Fatalf("currentDirAllGoFiles with error:%s", err)
+		t.Fatalf("allGoFiles with error:%s", err)
 	}
 
 	for _, fpath := range files {

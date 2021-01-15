@@ -13,10 +13,10 @@ import (
 	"strings"
 )
 
-// currentDirAllGoFiles 获取当前目录所有的.go 文件
-func currentDirAllGoFiles() ([]string, error) {
+// allGoFiles 获取当前目录所有的.go 文件
+func allGoFiles(dir string) ([]string, error) {
 	var goFiles []string
-	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err == nil && isGoFile(info) && !isIgnorePath(path) {
 			goFiles = append(goFiles, path)
 		}

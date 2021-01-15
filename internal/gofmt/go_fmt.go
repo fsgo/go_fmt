@@ -63,7 +63,7 @@ func (gf *Formatter) execute(opt *Options) error {
 func (gf *Formatter) printFmtResult(fileName string, change bool, err error) {
 
 	if gf.PrintResult != nil {
-		gf.printFmtResult(fileName, change, err)
+		gf.PrintResult(fileName, change, err)
 		return
 	}
 

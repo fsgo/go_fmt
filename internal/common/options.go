@@ -61,18 +61,27 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 			continue
 		}
 		var tmpList []string
+
 		switch name {
 		case "./...":
-			tmpList, err = currentDirAllGoFiles()
+			tmpList, err = allGoFiles("./")
 		case "git_change":
 			tmpList, err = filesGitDirChange()
 		default:
-			// 若属实传入 文件名 可以不用检查是否是.go文件
-			// 在一些特殊场景可能会有用
-			if len(opt.Files) == 1 || isGoFileName(name) {
-				tmpList = []string{name}
+			info, errStat := os.Stat(name)
+			if errStat != nil {
+				return nil, err
+			}
+			if info.IsDir() {
+				tmpList, err = allGoFiles(name)
 			} else {
-				err = fmt.Errorf("%q is not .go file", name)
+				// 若属实传入 文件名 可以不用检查是否是.go文件
+				// 在一些特殊场景可能会有用
+				if len(opt.Files) == 1 || isGoFileName(name) {
+					tmpList = []string{name}
+				} else {
+					err = fmt.Errorf("%q is not .go file", name)
+				}
 			}
 		}
 
