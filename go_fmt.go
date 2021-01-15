@@ -7,11 +7,21 @@
 package main
 
 import (
-	"github.com/fsgo/go_fmt/internal/gofmt"
+	"fmt"
+	"os"
+
+	"github.com/fsgo/go_fmt/gofmtapi"
 )
 
 func main() {
-	gf := gofmt.NewGoFmt()
-	gf.BindFlags()
-	gf.Execute()
+	gf := gofmtapi.NewFormatter()
+	opt := gofmtapi.NewOptions()
+	opt.BindFlags()
+
+	err := gf.Execute(opt)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(2)
+	}
 }

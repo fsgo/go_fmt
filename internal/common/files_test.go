@@ -1,10 +1,10 @@
 /*
- * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
+ * Copyright(C) 2021 github.com/hidu  All Rights Reserved.
  * Author: hidu (duv123+git@baidu.com)
- * Date: 2020/1/3
+ * Date: 2021/1/15
  */
 
-package gofmt
+package common
 
 import (
 	"strings"

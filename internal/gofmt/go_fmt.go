@@ -8,73 +8,29 @@ package gofmt
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/fsgo/go_fmt/internal/common"
 )
 
-// NewGoFmt 创建一个新的带默认格式化规则的格式化实例
-func NewGoFmt() *GoFmt {
-	return &GoFmt{
-		Options: &Options{
-			TabIndent:    true,
-			TabWidth:     8,
-			LocalPrefix:  "auto",
-			Write:        true,
-			MergeImports: true,
-		},
-	}
+// NewFormatter 创建一个新的带默认格式化规则的格式化实例
+func NewFormatter() *Formatter {
+	return &Formatter{}
 }
 
-// GoFmt 代码格式化实例
-type GoFmt struct {
-	Options *Options
-}
-
-// BindFlags 绑定参数信息
-func (gf *GoFmt) BindFlags() {
-	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	commandLine.BoolVar(&gf.Options.Write, "w", true, "write result to (source) file instead of stdout")
-	commandLine.StringVar(&gf.Options.LocalPrefix, "local", "auto", "put imports beginning with this string as 3rd-party packages")
-	commandLine.BoolVar(&gf.Options.Trace, "trace", false, "show trace infos")
-	commandLine.BoolVar(&gf.Options.MergeImports, "mi", false, "merge imports into one")
-
-	commandLine.Usage = func() {
-		cmd := os.Args[0]
-		fmt.Fprintf(os.Stderr, "usage: %s [flags] [path ...]\n", cmd)
-		commandLine.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nsite :    github.com/fsgo/go_fmt\n")
-		fmt.Fprintf(os.Stderr, "version:  %s\n", common.Version)
-		os.Exit(2)
-	}
-
-	if err := commandLine.Parse(os.Args[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "parser commandLine with error: %s\n", err.Error())
-		os.Exit(2)
-	}
-
-	gf.Options.Files = commandLine.Args()
-
-	if len(gf.Options.Files) == 0 {
-		gf.Options.Files = []string{"git_change"}
-	}
+// Formatter 代码格式化实例
+type Formatter struct {
+	// PrintResult 用于格式化过程中，打印结果
+	PrintResult func(fileName string, change bool, err error)
 }
 
 // Execute 执行代码格式化
-func (gf *GoFmt) Execute() {
-	err := gf.execute()
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(2)
-	}
+func (gf *Formatter) Execute(opt *Options) error {
+	return gf.execute(opt)
 }
 
-func (gf *GoFmt) execute() error {
-	files, err := gf.ParserOptionsFiles()
+func (gf *Formatter) execute(opt *Options) error {
+	files, err := opt.AllGoFiles()
 	if err != nil {
 		return err
 	}
@@ -86,10 +42,10 @@ func (gf *GoFmt) execute() error {
 		var change bool
 		var errFmt error
 
-		if gf.Options.Write {
-			change, errFmt = gf.FormatAndWriteFile(fileName)
+		if opt.Write {
+			change, errFmt = gf.FormatAndWriteFile(fileName, opt)
 		} else {
-			out, change, errFmt = gf.Format(fileName, nil)
+			out, change, errFmt = gf.Format(fileName, nil, opt)
 		}
 		if errFmt != nil {
 			errTotal++
@@ -104,7 +60,13 @@ func (gf *GoFmt) execute() error {
 	return nil
 }
 
-func (gf *GoFmt) printFmtResult(fileName string, change bool, err error) {
+func (gf *Formatter) printFmtResult(fileName string, change bool, err error) {
+
+	if gf.PrintResult != nil {
+		gf.printFmtResult(fileName, change, err)
+		return
+	}
+
 	var consoleColorTag = 0x1B
 	if change {
 		fmt.Fprintf(os.Stderr, "%c[31m rewrited : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
@@ -113,55 +75,15 @@ func (gf *GoFmt) printFmtResult(fileName string, change bool, err error) {
 	}
 }
 
-// ParserOptionsFiles 通过解析Options.Files值获取要进行格式化的文件列表
-func (gf *GoFmt) ParserOptionsFiles() ([]string, error) {
-	if len(gf.Options.Files) == 0 {
-		return nil, fmt.Errorf("Options.Files cannot empty")
-	}
-
-	var files []string
-	var err error
-
-	for _, name := range gf.Options.Files {
-		if name == "" {
-			continue
-		}
-		var tmpList []string
-		switch name {
-		case "./...":
-			tmpList, err = currentDirAllGoFiles()
-		case "git_change":
-			tmpList, err = filesGitDirChange()
-		default:
-			// 若属实传入 文件名 可以不用检查是否是.go文件
-			// 在一些特殊场景可能会有用
-			if len(gf.Options.Files) == 1 || isGoFileName(name) {
-				tmpList = []string{name}
-			} else {
-				err = fmt.Errorf("%q is not .go file", name)
-			}
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if len(tmpList) > 0 {
-			files = append(files, tmpList...)
-		}
-	}
-	return files, nil
-}
-
 // Format 格式化文件，获取格式化后的内容
-func (gf *GoFmt) Format(fileName string, src []byte) (out []byte, change bool, err error) {
+func (gf *Formatter) Format(fileName string, src []byte, opt *Options) (out []byte, change bool, err error) {
 	if len(src) == 0 {
 		src, err = ioutil.ReadFile(fileName)
 		if err != nil {
 			return nil, false, err
 		}
 	}
-	out, err = Format(fileName, src, gf.Options)
+	out, err = Format(fileName, src, opt)
 
 	if err != nil {
 		return nil, false, err
@@ -171,8 +93,8 @@ func (gf *GoFmt) Format(fileName string, src []byte) (out []byte, change bool, e
 }
 
 // FormatAndWriteFile 格式化并写入文件
-func (gf *GoFmt) FormatAndWriteFile(fileName string) (bool, error) {
-	out, change, err := gf.Format(fileName, nil)
+func (gf *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, error) {
+	out, change, err := gf.Format(fileName, nil, opt)
 
 	if err != nil {
 		return false, err
@@ -182,7 +104,7 @@ func (gf *GoFmt) FormatAndWriteFile(fileName string) (bool, error) {
 		return change, nil
 	}
 
-	if gf.Options.Write {
+	if opt.Write {
 		err = ioutil.WriteFile(fileName, out, 0)
 	}
 	return change, err
