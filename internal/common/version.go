@@ -7,4 +7,4 @@
 package common
 
 // Version 版本信息
-var Version = "v0.1 20210115"
+var Version = "v0.2.2 20210220"

@@ -40,7 +40,7 @@ func main() {
 	var buf bytes.Buffer
 	buf.WriteString("// AUTO GENERATE, DOT EDIT IT\n\n")
 
-	buf.WriteString("// GO Version: ")
+	buf.WriteString("// GO VersionFile: ")
 	buf.WriteString(runtime.Version())
 	buf.WriteString("\n\n")
 

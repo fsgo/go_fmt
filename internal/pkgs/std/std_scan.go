@@ -30,7 +30,7 @@ func PKGs() ([]string, error) {
 		info, errStat := os.Stat(fl)
 
 		if errStat != nil {
-			return nil, fmt.Errorf("os.Stat(%q),with error:%s", fl, errStat)
+			return nil, fmt.Errorf("os.Stat(%q),with error:%w", fl, errStat)
 		}
 
 		if info.IsDir() {

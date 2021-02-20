@@ -1,6 +1,6 @@
 // AUTO GENERATE, DOT EDIT IT
 
-// GO Version: go1.14
+// GO VersionFile: go1.16
 
 package pkgs
 
@@ -16,6 +16,7 @@ var stdPKGs = []string{
 	"crypto",
 	"database",
 	"debug",
+	"embed",
 	"encoding",
 	"errors",
 	"expvar",
