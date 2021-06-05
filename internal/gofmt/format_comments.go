@@ -1,8 +1,6 @@
-/*
- * Copyright(C) 2019 github.com/hidu  All Rights Reserved.
- * Author: hidu (duv123+git@baidu.com)
- * Date: 2019/12/16
- */
+// Copyright(C) 2019 github.com/hidu  All Rights Reserved.
+// Author: hidu (duv123+git@baidu.com)
+// Date: 2019/12/16
 
 package gofmt
 
@@ -14,7 +12,7 @@ import (
 
 // FormatComments 对代码注释进行格式化
 // 若是空行注释将删除
-func FormatComments(fileSet *token.FileSet, f *ast.File) {
+func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 	for _, cms := range f.Comments {
 		var cmList []*ast.Comment
 		for _, cm := range cms.List {
@@ -37,8 +35,7 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 				}
 			} else if strings.HasPrefix(cm.Text, "/*") {
 				// 多行注释
-				// 会删除没有注释内容的多行注释
-				if !fixMultilineComment(cm) {
+				if !fixMultilineComment(cm, options) {
 					continue
 				}
 			}
@@ -50,8 +47,10 @@ func FormatComments(fileSet *token.FileSet, f *ast.File) {
 }
 
 // fixMultilineComment 多行注释处理
-func fixMultilineComment(cm *ast.Comment) (ok bool) {
-	// todo 目前的格式化策略不好，先关闭掉
+func fixMultilineComment(cm *ast.Comment, options *Options) (ok bool) {
+	if options.SingleLineCopyright {
+		fixCopyright(cm)
+	}
 	return true
 
 	// txt := strings.TrimSpace(cm.Text)
@@ -123,4 +122,32 @@ func fixMultilineComment(cm *ast.Comment) (ok bool) {
 	// cm.Text = builder.String()
 	//
 	// return true
+}
+
+func fixCopyright(cm *ast.Comment) {
+	if cm.Pos() != 1 {
+		return
+	}
+	cm.Text = multilineCommentSingle(cm.Text)
+}
+
+func multilineCommentSingle(txt string) string {
+	txt1 := strings.TrimSpace(txt[1 : len(txt)-1]) // 去除两边的 "/"
+	lines := strings.Split(txt1, "\n")
+
+	cmtLines := make([]string, 0, len(lines))
+	for _, line := range lines {
+		// 去除开头的 "*"
+		line = strings.TrimLeft(strings.TrimSpace(line), "*")
+		line = strings.TrimSpace(line)
+		cmtLines = append(cmtLines, line)
+	}
+	newTxt := strings.TrimSpace(strings.Join(cmtLines, "\n"))
+
+	lines = strings.Split(newTxt, "\n")
+	cmtLines = cmtLines[:0]
+	for _, line := range lines {
+		cmtLines = append(cmtLines, "// "+line)
+	}
+	return strings.Join(cmtLines, "\n")
 }

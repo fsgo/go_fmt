@@ -1,8 +1,6 @@
-/*
- * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
- * Author: hidu (duv123+git@baidu.com)
- * Date: 2020/1/1
- */
+// Copyright(C) 2020 github.com/hidu  All Rights Reserved.
+// Author: hidu (duv123+git@baidu.com)
+// Date: 2020/1/1
 
 package common
 
@@ -23,8 +21,10 @@ type Options struct {
 
 	TabWidth int
 
+	// LocalPrefix 当前模块的前缀
 	LocalPrefix string
 
+	// Write 是否直接将格式化后的内容写入文件
 	Write bool
 
 	// 待处理的文件列表
@@ -34,6 +34,9 @@ type Options struct {
 
 	// 是否将多段 import 合并为一个
 	MergeImports bool
+
+	// SingleLineCopyright 是否将 copyright 的多行注释格式化为单行注释
+	SingleLineCopyright bool
 }
 
 // NewDefaultOptions 生成默认的 options
@@ -103,6 +106,7 @@ func (opt *Options) BindFlags() {
 	commandLine.StringVar(&opt.LocalPrefix, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
 	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")
+	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", false, "multiline copyright to single-line")
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]

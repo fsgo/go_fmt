@@ -1,8 +1,6 @@
-/*
- * Copyright(C) 2021 github.com/hidu  All Rights Reserved.
- * Author: hidu (duv123+git@baidu.com)
- * Date: 2021/1/15
- */
+// Copyright(C) 2021 github.com/hidu  All Rights Reserved.
+// Author: hidu (duv123+git@baidu.com)
+// Date: 2021/1/15
 
 package common
 
@@ -12,7 +10,7 @@ import (
 )
 
 func Test_currentDirAllGoFiles(t *testing.T) {
-	files, err := allGoFiles()
+	files, err := allGoFiles("../")
 	if err != nil {
 		t.Fatalf("allGoFiles with error:%s", err)
 	}

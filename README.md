@@ -4,6 +4,7 @@
 * 格式化import部分：分3段式，依次为 `标准库`、`第三方库`、`项目自身库`
 * 格式化单行注释：若为 `//注释内容`，调整为 `//{空格}注释内容`
 * 默认只对git项目库里有修改的进行格式化
+* 支持将多行的 copyright 注释修改为单行格式(默认不调整)
 
 对于import部分：
 > 1.可使用`-mi`参数来控制是否将多段import合并为一段（默认否）。  
@@ -41,6 +42,8 @@ usage: go_fmt [flags] [path ...]
     	put imports beginning with this string as 3rd-party packages (default "auto")
   -mi
     	merge imports into one
+  -slcr
+    	multiline copyright to single-line
   -trace
     	show trace infos
   -w	write result to (source) file instead of stdout (default true)

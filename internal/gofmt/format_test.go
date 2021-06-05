@@ -1,8 +1,6 @@
-/*
- * Copyright(C) 2020 github.com/hidu  All Rights Reserved.
- * Author: hidu (duv123+git@baidu.com)
- * Date: 2020/1/3
- */
+// Copyright(C) 2020 github.com/hidu  All Rights Reserved.
+// Author: hidu (duv123+git@baidu.com)
+// Date: 2020/1/3
 
 package gofmt
 
@@ -37,6 +35,18 @@ func TestFormat_rule2(t *testing.T) {
 	runTest(t, "rule2", opt)
 }
 
+func TestFormat_rule3(t *testing.T) {
+	opt := &Options{
+		TabIndent:           true,
+		TabWidth:            8,
+		LocalPrefix:         "auto",
+		Write:               false,
+		MergeImports:        false,
+		SingleLineCopyright: true,
+	}
+	runTest(t, "rule3", opt)
+}
+
 func runTest(t *testing.T, ruleDirName string, opt *Options) {
 	rule1Dir := "./testdata/" + ruleDirName + "/"
 
@@ -63,7 +73,7 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 					fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
 					err1 := ioutil.WriteFile(fileGot, got, 0644)
 					err2 := ioutil.WriteFile(fileWant, want, 0644)
-					t.Errorf("not eq, fileget=%q (%v), filewant=%q (%v)", fileGot, fileWant, err1, err2)
+					t.Errorf("not eq, fileget=%q (write=%v), filewant=%q (write=%v)", fileGot, err1, fileWant, err2)
 				}
 			}
 		})

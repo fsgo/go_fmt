@@ -1,8 +1,6 @@
-/*
- * Copyright(C) 2019 github.com/hidu  All Rights Reserved.
- * Author: hidu (duv123+git@baidu.com)
- * Date: 2019/12/16
- */
+// Copyright(C) 2019 github.com/hidu  All Rights Reserved.
+// Author: hidu (duv123+git@baidu.com)
+// Date: 2019/12/16
 
 package gofmt
 
@@ -60,11 +58,11 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 
 	// ast.Print(fileSet, file)
 
-	fix(fileSet, file, src)
+	fix(fileSet, file, src, options)
 
 	return common.PrintCode(fileSet, file)
 }
 
-func fix(fileSet *token.FileSet, file *ast.File, src []byte) {
-	FormatComments(fileSet, file)
+func fix(fileSet *token.FileSet, file *ast.File, src []byte, options *Options) {
+	FormatComments(fileSet, file, options)
 }
