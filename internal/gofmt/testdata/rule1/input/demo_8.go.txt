@@ -1,0 +1,26 @@
+package pool_test
+
+import (
+	"fmt"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega" // abc
+	
+	"testing"
+	"github.com/alicebob/miniredis/v2" // def
+)
+
+func hello() {
+	fmt.Println("hello")
+
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	defer s.Close()
+}
+
+// TestGinkgoSuite abcd
+func TestGinkgoSuite(t *testing.T) {
+	_ = GinkgoParallelNode()
+	_ = BeNil()
+}

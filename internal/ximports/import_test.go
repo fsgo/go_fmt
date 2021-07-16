@@ -157,6 +157,13 @@ func Test_isImportPathLine(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "case 18",
+			args: args{
+				bf: []byte(`. "github.com/onsi/gomega"`),
+			},
+			want: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

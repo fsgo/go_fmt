@@ -53,7 +53,6 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 		if !ok || gen.Tok != token.IMPORT || declImports(gen, "C") {
 			continue
 		}
-
 		importDecls = append(importDecls, gen)
 
 		importSrc := src[decl.Pos()-1 : decl.End()]
@@ -204,7 +203,14 @@ func importPath(s ast.Spec) string {
 	return ""
 }
 
-var importNameReg = regexp.MustCompile(`^[a-zA-Z_]?[a-zA-Z0-9_]*$`)
+// import 的 Name 部分
+// 如 import(
+//    redis "github.com/xxx"
+//    _ "github.com/xxx"
+//    . "github.com/xxx"
+// )
+// 上面的 "redis"、"_"、和 "." 都是
+var importNameReg = regexp.MustCompile(`^([a-zA-Z_]?[a-zA-Z0-9_]*)|(\.)$`)
 
 var importPathReg = regexp.MustCompile(`^[a-zA-Z_0-9\-\/\.]+$`)
 
@@ -221,6 +227,8 @@ func isImportPathLine(bf []byte) bool {
 	if !isImportPathHeader(line[0]) {
 		return false
 	}
+
+	// 暂时未支持"`"
 	if bytes.Count(line, []byte(`"`)) < 2 {
 		return false
 	}
@@ -252,6 +260,7 @@ func isImportPathLine(bf []byte) bool {
 
 func isImportPathHeader(first byte) bool {
 	return first == '"' ||
+		first == '.' ||
 		first == '_' ||
 		(first >= 'A' && first <= 'Z') ||
 		(first >= 'a' && first <= 'z')
