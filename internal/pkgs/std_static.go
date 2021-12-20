@@ -1,6 +1,6 @@
 // AUTO GENERATE, DOT EDIT IT
 
-// GO VersionFile: go1.16
+// GO VersionFile: go1.18beta1
 
 package pkgs
 
@@ -11,6 +11,7 @@ var stdPKGs = []string{
 	"bytes",
 	"cmd",
 	"compress",
+	"constraints",
 	"container",
 	"context",
 	"crypto",

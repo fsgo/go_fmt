@@ -60,7 +60,7 @@ func main() {
 		log.Fatalf("format.Source with error:%s\n", err)
 	}
 
-	if err := ioutil.WriteFile(*out, code, 0644); err != nil {
+	if err = ioutil.WriteFile(*out, code, 0644); err != nil {
 		log.Fatalf("write %s with error:%v\n", *out, err)
 	}
 }
