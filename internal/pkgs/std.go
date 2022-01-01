@@ -26,7 +26,7 @@ func IsStd(path string) bool {
 	// 获取当前系统的标准库
 	currentStds, err := std.PKGs()
 	if err != nil {
-		log.Printf("scan std pkgs failed,err=%s\n", err)
+		log.Printf("scan std pkgs failed, err=%s\n", err)
 		return false
 	}
 
