@@ -20,7 +20,7 @@ import (
 func GitChangeFiles() ([]string, error) {
 	data, err := exec.Command("git", "status", "-su").CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("exec ( git status -su ) with error: %s\n%s", err.Error(), data)
+		return nil, fmt.Errorf("exec ( git status -su ) with error: %w\n%s", err, data)
 	}
 	data = bytes.TrimSpace(data)
 	lines := bytes.Split(data, []byte("\n"))

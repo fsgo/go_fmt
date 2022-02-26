@@ -24,6 +24,9 @@ type Formatter struct {
 
 // Execute 执行代码格式化
 func (gf *Formatter) Execute(opt *Options) error {
+	if e := opt.Check(); e != nil {
+		return e
+	}
 	return gf.execute(opt)
 }
 

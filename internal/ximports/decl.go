@@ -142,6 +142,8 @@ func (group *importDeclGroup) Bytes() []byte {
 // 为了达到预期，故目前这样处理，Format后再使用cleanSpecCode方法将该分隔符删除掉
 const importGroupSpit = "\"github.com/fsgo/gofmtgofmtgofmtgofmt\"\n"
 
+// formatImportDecls 格式化 import 的一个分组
+// 会对这个分组重新排序
 func formatImportDecls(decls []*importDecl, options *common.Options) []byte {
 	if len(decls) == 0 {
 		return nil

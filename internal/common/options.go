@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // ImportGroupFunc import 排序逻辑
@@ -37,6 +38,39 @@ type Options struct {
 
 	// SingleLineCopyright 是否将 copyright 的多行注释格式化为单行注释
 	SingleLineCopyright bool
+
+	// import 分组的排序规则,可选
+	// 总共 可分为 3 组，分别是 标准库(简称 s)，第三方库(简称 t)，模块自身(简称 c)
+	// stc: 默认的排序规则
+	// sct: Go 源码中的排序规则
+	ImportGroupRule string
+}
+
+var defaultImportGroupRule = "stc"
+
+// GetImportGroup 读取 import 分组的排序
+func (opt *Options) GetImportGroup(t byte) int {
+	if len(opt.ImportGroupRule) == 0 {
+		return strings.Index(defaultImportGroupRule, string(t))
+	}
+	return strings.Index(opt.ImportGroupRule, string(t))
+}
+
+// Check 简称 option 是否正确
+func (opt *Options) Check() error {
+	if len(opt.ImportGroupRule) > 0 {
+		if len(opt.ImportGroupRule) != 3 {
+			return fmt.Errorf("invalid ig %q", opt.ImportGroupRule)
+		}
+		for i := 0; i < len(opt.ImportGroupRule); i++ {
+			switch opt.ImportGroupRule[i] {
+			case 's', 't', 'c':
+			default:
+				return fmt.Errorf("invalid ig %q", opt.ImportGroupRule)
+			}
+		}
+	}
+	return nil
 }
 
 // NewDefaultOptions 生成默认的 options
@@ -107,6 +141,10 @@ func (opt *Options) BindFlags() {
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
 	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")
 	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", false, "multiline copyright to single-line")
+	commandLine.StringVar(&opt.ImportGroupRule, "ig", "stc", `import group sort rule,
+stc: Go Standard pkgs, Third Party pkgs, Current Module pkg
+sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
+`)
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]

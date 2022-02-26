@@ -47,6 +47,19 @@ func TestFormat_rule3(t *testing.T) {
 	runTest(t, "rule3", opt)
 }
 
+func TestFormat_rule4(t *testing.T) {
+	opt := &Options{
+		TabIndent:           true,
+		TabWidth:            8,
+		LocalPrefix:         "cmd",
+		Write:               false,
+		MergeImports:        false,
+		SingleLineCopyright: true,
+		ImportGroupRule:     "sct",
+	}
+	runTest(t, "rule4", opt)
+}
+
 func runTest(t *testing.T, ruleDirName string, opt *Options) {
 	rule1Dir := "./testdata/" + ruleDirName + "/"
 

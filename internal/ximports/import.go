@@ -35,21 +35,23 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 		return nil, err
 	}
 
-	// 将分组的import 合并为一组，方便后续处理
-	// 已知若import 区域出现单独行的注释将不正确
+	// 将分组的 import 合并为一组，方便后续处理
+	// 已知若 import 区域出现单独行的注释将不正确
 	if len(file.Imports) < 2 {
 		return src, nil
 	}
 
 	var importDecls []*ast.GenDecl
 
-	myImportDeclsMap := make(map[int][]*importDecl)
+	// 原始的 import 部分，未排序的
+	// 保存的是原始的分组情况
+	originImports := make(map[int][]*importDecl)
 
 	var nextID int
 	for _, decl := range file.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 
-		// import "C" 是Cgo的，不可以处理
+		// import "C" 是 Cgo 的，不可以处理
 		if !ok || gen.Tok != token.IMPORT || declImports(gen, "C") {
 			continue
 		}
@@ -61,19 +63,19 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 			panic(err.Error())
 		}
 
-		if _, has := myImportDeclsMap[nextID]; !has {
-			myImportDeclsMap[nextID] = []*importDecl{}
+		if _, has := originImports[nextID]; !has {
+			originImports[nextID] = []*importDecl{}
 		}
 
 		var myImportDecls []*importDecl
 
-		myImportDecls = myImportDeclsMap[nextID]
+		myImportDecls = originImports[nextID]
 
 		myImportDecls = append(myImportDecls, lines...)
 
-		myImportDeclsMap[nextID] = myImportDecls
+		originImports[nextID] = myImportDecls
 
-		// 若将多段import merge到一个里,nextID 不变化
+		// 若将多段 import merge 到一个里,nextID 不变化
 		// 下一段import 将和之前的merge到一起
 		if !options.MergeImports {
 			nextID++
@@ -81,7 +83,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	}
 
 	if options.Trace {
-		fmt.Println("myImportDeclsMap:", myImportDeclsMap)
+		fmt.Println("originImports:", originImports)
 	}
 
 	var buf bytes.Buffer
@@ -90,7 +92,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 		decl := importDecls[i]
 		buf.Write(src[start : decl.Pos()-1])
 
-		importNew := formatImportDecls(myImportDeclsMap[i], options)
+		importNew := formatImportDecls(originImports[i], options)
 		if len(importNew) > 0 {
 			buf.Write(importNew)
 		}
@@ -106,7 +108,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	return cleanSpecCode(code), nil
 }
 
-// parserImportSrc 直接对import 部分的源代码进行解析
+// parserImportSrc 直接对 import 部分的源代码进行解析
 func parserImportSrc(src []byte) (lines []*importDecl, err error) {
 
 	body := bytes.TrimSpace(src[len("import"):])
@@ -151,7 +153,7 @@ func parserImportSrc(src []byte) (lines []*importDecl, err error) {
 		if bytes.HasPrefix(bf, []byte("//")) {
 			checkDecl()
 			decl.AddComment(bf)
-			// 注释掉的import path 的情况
+			// 注释掉的 import path 的情况
 			if decl.CommentHasImportPath() {
 				lines = append(lines, decl)
 				// fmt.Println("CommentHasImportPath",decl)

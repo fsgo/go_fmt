@@ -28,8 +28,8 @@ func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 					strings.HasPrefix(cm.Text, "//export ") {
 					// spec comment,ignore
 				} else {
-					// 若//后没有空格则补充
-					if !strings.HasPrefix(cm.Text, "// ") {
+					// 若 // 后没有空格则补充
+					if !strings.HasPrefix(cm.Text, "// ") && !strings.HasPrefix(cm.Text, "//	") {
 						cm.Text = "// " + cm.Text[2:]
 					}
 				}

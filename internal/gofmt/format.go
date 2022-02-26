@@ -39,7 +39,7 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 	}
 
 	if options.Trace {
-		fmt.Println("fileName--->", fileName)
+		fmt.Println("fileName--->", fileName, "localPrefix=", localPrefix)
 	}
 
 	options.LocalPrefix = localPrefix

@@ -38,6 +38,11 @@ go get -u github.com/fsgo/go_fmt
 
 ```
 usage: go_fmt [flags] [path ...]
+  -ig string
+    	import group sort rule,
+    	stc: Go Standard pkgs, Third Party pkgs, Current Module pkg
+    	sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
+    	 (default "stc")
   -local string
     	put imports beginning with this string as 3rd-party packages (default "auto")
   -mi

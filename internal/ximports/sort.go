@@ -18,15 +18,16 @@ func defaultImportGroup(importPath string, opt *common.Options) int {
 		return 0
 	}
 
-	// 系统标准库
-	if pkgs.IsStd(importPath) {
-		return 0
-	}
-
 	LocalPrefix := opt.LocalPrefix
 	// 本地项目库
+	// 因为当前项目的 模块名(LocalPrefix) 可能和 系统标准库 的出现同名，所以优先判断
 	if strings.HasPrefix(importPath, LocalPrefix) || strings.TrimSuffix(LocalPrefix, "/") == importPath {
-		return 2
+		return opt.GetImportGroup('c')
+	}
+
+	// 系统标准库
+	if pkgs.IsStd(importPath) {
+		return opt.GetImportGroup('s')
 	}
 
 	// 第三方项目库
@@ -35,7 +36,7 @@ func defaultImportGroup(importPath string, opt *common.Options) int {
 	// }
 
 	// 默认为第三方库
-	return 1
+	return opt.GetImportGroup('t')
 }
 
 func sortImportDecls(decls []*importDecl, options *common.Options) importDeclGroups {

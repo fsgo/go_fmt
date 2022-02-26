@@ -10,6 +10,7 @@ import (
 )
 
 func hello() {
+	//	前面是一个 tab， 不是空格
 	fmt.Println("hello")
 
 	s, err := miniredis.Run()
