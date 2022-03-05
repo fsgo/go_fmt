@@ -12,6 +12,7 @@ import (
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
+	"github.com/fsgo/go_fmt/internal/simplify"
 	// a "github.com/fsgo/go_fmt/internal/ximports"
 	"github.com/fsgo/go_fmt/internal/ximports"
 )
@@ -64,5 +65,8 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 }
 
 func fix(fileSet *token.FileSet, file *ast.File, src []byte, options *Options) {
+	if options.Simplify {
+		simplify.Format(file)
+	}
 	FormatComments(fileSet, file, options)
 }

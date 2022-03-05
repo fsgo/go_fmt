@@ -28,6 +28,9 @@ type Options struct {
 	// Write 是否直接将格式化后的内容写入文件
 	Write bool
 
+	// Simplify  是否简化代码
+	Simplify bool
+
 	// 待处理的文件列表
 	Files []string
 
@@ -81,6 +84,7 @@ func NewDefaultOptions() *Options {
 		LocalPrefix:  "auto",
 		Write:        true,
 		MergeImports: true,
+		Simplify:     true,
 	}
 }
 
@@ -137,6 +141,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 func (opt *Options) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	commandLine.BoolVar(&opt.Write, "w", true, "write result to (source) file instead of stdout")
+	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
 	commandLine.StringVar(&opt.LocalPrefix, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
 	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")

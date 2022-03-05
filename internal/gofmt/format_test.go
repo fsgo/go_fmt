@@ -31,6 +31,7 @@ func TestFormat_rule2(t *testing.T) {
 		LocalPrefix:  "auto",
 		Write:        false,
 		MergeImports: false,
+		Simplify:     true,
 	}
 	runTest(t, "rule2", opt)
 }
