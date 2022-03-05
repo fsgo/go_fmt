@@ -18,19 +18,13 @@
 若需要可进入其目录里执行该命令。  
 
 ## 2.安装/更新
-使用 go >= 1.13 版本(不需要Fan强)：
 ```
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
 
-go get install github.com/fsgo/go_fmt@master
+go install github.com/fsgo/go_fmt@master
 ```
-
-go < 1.13 版本(可能需要Fan强):
-```
-go get -u github.com/fsgo/go_fmt
-```
-
+升级 Go 版本后，请用最新版本 go 重新安装/更新 `go_fmt` 。
 
 ## 3.使用
 

@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -155,8 +156,13 @@ sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
 		cmd := os.Args[0]
 		fmt.Fprintf(os.Stderr, "usage: %s [flags] [path ...]\n", cmd)
 		commandLine.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nsite :    github.com/fsgo/go_fmt\n")
-		fmt.Fprintf(os.Stderr, "version:  %s\n", Version)
+		fmt.Fprintf(os.Stderr, "\n")
+
+		titleFormat := "%15s : %s\n"
+		fmt.Fprintf(os.Stderr, titleFormat, "build with", runtime.Version())
+		fmt.Fprintf(os.Stderr, titleFormat, "site", "https://github.com/fsgo/go_fmt")
+		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install github.com/fsgo/go_fmt@master")
+		fmt.Fprintf(os.Stderr, titleFormat, "version", Version)
 		os.Exit(2)
 	}
 

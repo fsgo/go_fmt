@@ -249,13 +249,13 @@ func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value)
 			v.Field(i).Set(subst(m, p.Field(i), pos))
 		}
 		return v
-
-	case reflect.Pointer:
-		v := reflect.New(p.Type()).Elem()
-		if elem := p.Elem(); elem.IsValid() {
-			v.Set(subst(m, elem, pos).Addr())
-		}
-		return v
+	// reflect.Pointer 是 go1.18 才添加的
+	// case reflect.Pointer:
+	// 	v := reflect.New(p.Type()).Elem()
+	// 	if elem := p.Elem(); elem.IsValid() {
+	// 		v.Set(subst(m, elem, pos).Addr())
+	// 	}
+	// 	return v
 
 	case reflect.Interface:
 		v := reflect.New(p.Type()).Elem()
@@ -263,7 +263,16 @@ func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value)
 			v.Set(subst(m, elem, pos))
 		}
 		return v
+	default:
+		// 用于支持 go1.18 版本的 reflect.Pointer
+		if v := substKind(m, p, pos); v != nil {
+			return *v
+		}
 	}
 
 	return pattern
+}
+
+var substKind = func(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value) *reflect.Value {
+	return nil
 }
