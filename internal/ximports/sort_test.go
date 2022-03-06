@@ -48,7 +48,7 @@ func Test_sortImportDecls(t *testing.T) {
 					},
 				},
 				options: &common.Options{
-					LocalPrefix: "github.com/a",
+					LocalModule: "github.com/a",
 				},
 			},
 			want: importDeclGroups{

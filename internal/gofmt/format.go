@@ -21,7 +21,9 @@ import (
 type Options = common.Options
 
 // Format 输出格式化的go代码
-func Format(fileName string, src []byte, options *Options) ([]byte, error) {
+func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
+	options := opts.Clone()
+
 	if src == nil {
 		var err error
 		src, err = ioutil.ReadFile(fileName)
@@ -34,16 +36,16 @@ func Format(fileName string, src []byte, options *Options) ([]byte, error) {
 		return src, nil
 	}
 
-	localPrefix, err := localmodule.Get(options.LocalPrefix, fileName)
+	module, err := localmodule.Get(options, fileName)
 	if err != nil {
 		return nil, err
 	}
 
 	if options.Trace {
-		fmt.Println("fileName--->", fileName, "localPrefix=", localPrefix)
+		fmt.Println("[go.module]", fileName, "--->", module)
 	}
 
-	options.LocalPrefix = localPrefix
+	options.LocalModule = module
 
 	outImports, errImports := ximports.FormatImports(fileName, src, options)
 	if errImports != nil {

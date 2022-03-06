@@ -36,7 +36,7 @@ func main() {
 	}
 
 	var buf bytes.Buffer
-	buf.WriteString("// AUTO GENERATE, DOT EDIT IT\n\n")
+	buf.WriteString("// Code Generate by cmd/update_std_static.go, DO NOT EDIT.\n\n")
 
 	buf.WriteString("// GO VersionFile: ")
 	buf.WriteString(runtime.Version())

@@ -1,0 +1,3 @@
+module github.com/fsgo/go_fmt
+
+go 1.16

@@ -6,10 +6,13 @@ package localmodule
 
 import (
 	"testing"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 func Test_detectByGoMod(t *testing.T) {
-	got, err := detectByGoMod("")
+	opt := &common.Options{}
+	got, err := detectByGoMod(opt, "")
 	if err != nil {
 		t.Fatalf("detectByGoMod() with error:%s", err)
 	}

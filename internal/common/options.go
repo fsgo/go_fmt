@@ -23,8 +23,19 @@ type Options struct {
 
 	TabWidth int
 
-	// LocalPrefix 当前模块的前缀
-	LocalPrefix string
+	// LocalModule 当前代码所在的 module
+	// 对应其 go.mod 文件中的 module 的值
+	LocalModule string
+
+	// ThirdModules 可选，第三方模块列表
+	//
+	// 是为解决这种情况：
+	// LocalModule = github.com/test
+	// 但是其子目录有其他的子模块，如：
+	// github.com/test/hello/say
+	// github.com/test/world
+	// 这个时候，在 github.com/test 里的代码，应该将 github.com/test/hello/say 归为第三方模块代码的分组
+	ThirdModules Modules
 
 	// Write 是否直接将格式化后的内容写入文件
 	Write bool
@@ -50,10 +61,24 @@ type Options struct {
 	ImportGroupRule string
 }
 
+// ImportGroupType import 分组类型
+type ImportGroupType byte
+
+const (
+	// ImportGroupGoStandard 标准库(简称 s)
+	ImportGroupGoStandard ImportGroupType = 's'
+
+	// ImportGroupThirdParty 第三方库(简称 t)
+	ImportGroupThirdParty ImportGroupType = 't'
+
+	// ImportGroupCurrentModule 模块自身(简称 c)
+	ImportGroupCurrentModule ImportGroupType = 'c'
+)
+
 var defaultImportGroupRule = "stc"
 
 // GetImportGroup 读取 import 分组的排序
-func (opt *Options) GetImportGroup(t byte) int {
+func (opt *Options) GetImportGroup(t ImportGroupType) int {
 	if len(opt.ImportGroupRule) == 0 {
 		return strings.Index(defaultImportGroupRule, string(t))
 	}
@@ -82,7 +107,7 @@ func NewDefaultOptions() *Options {
 	return &Options{
 		TabIndent:    true,
 		TabWidth:     8,
-		LocalPrefix:  "auto",
+		LocalModule:  "auto",
 		Write:        true,
 		MergeImports: true,
 		Simplify:     true,
@@ -143,13 +168,13 @@ func (opt *Options) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	commandLine.BoolVar(&opt.Write, "w", true, "write result to (source) file instead of stdout")
 	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
-	commandLine.StringVar(&opt.LocalPrefix, "local", "auto", "put imports beginning with this string as 3rd-party packages")
+	commandLine.StringVar(&opt.LocalModule, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
 	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")
 	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", false, "multiline copyright to single-line")
-	commandLine.StringVar(&opt.ImportGroupRule, "ig", "stc", `import group sort rule,
-stc: Go Standard pkgs, Third Party pkgs, Current Module pkg
-sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
+	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import group sort rule,
+stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
+sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 `)
 
 	commandLine.Usage = func() {
@@ -176,4 +201,11 @@ sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
 	if len(opt.Files) == 0 {
 		opt.Files = []string{"git_change"}
 	}
+}
+
+// Clone 当执行 format 的时候，每个文件都 clone 一份
+func (opt *Options) Clone() *Options {
+	o1 := &Options{}
+	*o1 = *opt
+	return o1
 }

@@ -1,0 +1,15 @@
+// Copyright(C) 2022 github.com/fsgo  All Rights Reserved.
+// Author: fsgo
+// Date: 2022/3/6
+
+package main
+
+import (
+	"fmt"
+	"github.com/test/rule5/say"
+	"github.com/test/rule5/hello"
+)
+
+func main(){
+	fmt.Println("hello",say.ID(),hello.Name())
+}

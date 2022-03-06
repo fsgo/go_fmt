@@ -17,6 +17,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
+	"path/filepath"
 	"regexp"
 	"strconv" // strconv 后面
 
@@ -29,7 +30,9 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的import
-func FormatImports(fileName string, src []byte, options *common.Options) (out []byte, err error) {
+func FormatImports(fileName string, src []byte, opts *common.Options) (out []byte, err error) {
+	opts = opts.Clone()
+
 	_, file, err := common.ParseFile(fileName, src)
 	if err != nil {
 		return nil, err
@@ -39,6 +42,14 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 	// 已知若 import 区域出现单独行的注释将不正确
 	if len(file.Imports) < 2 {
 		return src, nil
+	}
+
+	if err = findSubModules(fileName, opts); err != nil {
+		return nil, err
+	}
+	
+	if opts.Trace{
+		fmt.Println("ThirdParty Modules:",opts.ThirdModules)
 	}
 
 	var importDecls []*ast.GenDecl
@@ -77,12 +88,12 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 
 		// 若将多段 import merge 到一个里,nextID 不变化
 		// 下一段import 将和之前的merge到一起
-		if !options.MergeImports {
+		if !opts.MergeImports {
 			nextID++
 		}
 	}
 
-	if options.Trace {
+	if opts.Trace {
 		fmt.Println("originImports:", originImports)
 	}
 
@@ -92,7 +103,7 @@ func FormatImports(fileName string, src []byte, options *common.Options) (out []
 		decl := importDecls[i]
 		buf.Write(src[start : decl.Pos()-1])
 
-		importNew := formatImportDecls(originImports[i], options)
+		importNew := formatImportDecls(originImports[i], opts)
 		if len(importNew) > 0 {
 			buf.Write(importNew)
 		}
@@ -266,4 +277,19 @@ func isImportPathHeader(first byte) bool {
 		first == '_' ||
 		(first >= 'A' && first <= 'Z') ||
 		(first >= 'a' && first <= 'z')
+}
+
+func findSubModules(fileName string, opts *common.Options) error {
+	mp, err := common.FindGoModPath(fileName)
+	if err != nil {
+		return err
+	}
+	ms, err := common.ListModules(filepath.Dir(mp))
+	if err != nil {
+		return err
+	}
+	if len(ms) > 0 {
+		opts.ThirdModules = append(opts.ThirdModules, ms...)
+	}
+	return nil
 }

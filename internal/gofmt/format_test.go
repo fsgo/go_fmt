@@ -17,7 +17,7 @@ func TestFormat_rule1(t *testing.T) {
 	opt := &Options{
 		TabIndent:    true,
 		TabWidth:     8,
-		LocalPrefix:  "auto",
+		LocalModule:  "auto",
 		Write:        false,
 		MergeImports: true,
 	}
@@ -28,7 +28,7 @@ func TestFormat_rule2(t *testing.T) {
 	opt := &Options{
 		TabIndent:    true,
 		TabWidth:     8,
-		LocalPrefix:  "auto",
+		LocalModule:  "auto",
 		Write:        false,
 		MergeImports: false,
 		Simplify:     true,
@@ -40,7 +40,7 @@ func TestFormat_rule3(t *testing.T) {
 	opt := &Options{
 		TabIndent:           true,
 		TabWidth:            8,
-		LocalPrefix:         "auto",
+		LocalModule:         "auto",
 		Write:               false,
 		MergeImports:        false,
 		SingleLineCopyright: true,
@@ -52,13 +52,25 @@ func TestFormat_rule4(t *testing.T) {
 	opt := &Options{
 		TabIndent:           true,
 		TabWidth:            8,
-		LocalPrefix:         "cmd",
+		LocalModule:         "cmd",
 		Write:               false,
 		MergeImports:        false,
 		SingleLineCopyright: true,
 		ImportGroupRule:     "sct",
 	}
 	runTest(t, "rule4", opt)
+}
+
+func TestFormat_rule5(t *testing.T) {
+	// 校验包含有子模块的情况
+	opt := &Options{
+		TabIndent:    true,
+		TabWidth:     8,
+		LocalModule:  "auto",
+		Write:        false,
+		MergeImports: false,
+	}
+	runTest(t, "rule5", opt)
 }
 
 func runTest(t *testing.T, ruleDirName string, opt *Options) {

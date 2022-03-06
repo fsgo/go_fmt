@@ -1,4 +1,4 @@
-// AUTO GENERATE, DOT EDIT IT
+// Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
 // GO VersionFile: go1.18rc1
 

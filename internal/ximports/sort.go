@@ -6,7 +6,6 @@ package ximports
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/pkgs"
@@ -18,29 +17,30 @@ func defaultImportGroup(importPath string, opt *common.Options) int {
 		return 0
 	}
 
-	LocalPrefix := opt.LocalPrefix
-	// 本地项目库
-	// 因为当前项目的 模块名(LocalPrefix) 可能和 系统标准库 的出现同名，所以优先判断
-	if strings.HasPrefix(importPath, LocalPrefix) || strings.TrimSuffix(LocalPrefix, "/") == importPath {
-		return opt.GetImportGroup('c')
+	module := opt.LocalModule
+
+	// 当前的路径是否属于配置的 第三方模块列表里的
+	if opt.ThirdModules.PkgIn(importPath) {
+		return opt.GetImportGroup(common.ImportGroupThirdParty)
+	}
+
+	// 判断是否属于当前的项目库
+	// 因为当前项目的 模块名(LocalModule) 可能和 系统标准库 的出现同名，所以优先判断
+	if common.InModule(importPath, module) {
+		return opt.GetImportGroup(common.ImportGroupCurrentModule)
 	}
 
 	// 系统标准库
 	if pkgs.IsStd(importPath) {
-		return opt.GetImportGroup('s')
+		return opt.GetImportGroup(common.ImportGroupGoStandard)
 	}
 
-	// 第三方项目库
-	// if strings.Contains(importPath, ".") {
-	// 	return 1
-	// }
-
 	// 默认为第三方库
-	return opt.GetImportGroup('t')
+	return opt.GetImportGroup(common.ImportGroupThirdParty)
 }
 
-func sortImportDecls(decls []*importDecl, options *common.Options) importDeclGroups {
-	groupFn := options.ImportGroupFn
+func sortImportDecls(decls []*importDecl, opts *common.Options) importDeclGroups {
+	groupFn := opts.ImportGroupFn
 	if groupFn == nil {
 		groupFn = defaultImportGroup
 	}
@@ -49,7 +49,7 @@ func sortImportDecls(decls []*importDecl, options *common.Options) importDeclGro
 	groups := make(map[int]*importDeclGroup)
 
 	for _, decl := range decls {
-		num := groupFn(decl.RealPath(), options)
+		num := groupFn(decl.RealPath(), opts)
 		group, has := groups[num]
 		if !has {
 			group = &importDeclGroup{
