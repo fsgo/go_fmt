@@ -43,6 +43,13 @@ type Options struct {
 	// Simplify  是否简化代码
 	Simplify bool
 
+	// DisplayDiff  是否只检查是否已格式化，
+	// 当值为 true 时，会强制设置 Write=false
+	DisplayDiff bool
+
+	// DisplayFormat 输出 DisplayDiff 的格式，默认为 text，还可以是 json
+	DisplayFormat string
+
 	// 待处理的文件列表
 	Files []string
 
@@ -87,6 +94,9 @@ func (opt *Options) GetImportGroup(t ImportGroupType) int {
 
 // Check 简称 option 是否正确
 func (opt *Options) Check() error {
+	if opt.DisplayDiff {
+		opt.Write = false
+	}
 	if len(opt.ImportGroupRule) > 0 {
 		if len(opt.ImportGroupRule) != 3 {
 			return fmt.Errorf("invalid ig %q", opt.ImportGroupRule)
@@ -167,6 +177,8 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 func (opt *Options) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	commandLine.BoolVar(&opt.Write, "w", true, "write result to (source) file instead of stdout")
+	commandLine.BoolVar(&opt.DisplayDiff, "d", false, "display diffs instead of rewriting files")
+	commandLine.StringVar(&opt.DisplayFormat, "df", "text", "display diffs format, support: text, json")
 	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
 	commandLine.StringVar(&opt.LocalModule, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")

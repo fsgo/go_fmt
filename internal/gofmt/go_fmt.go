@@ -6,9 +6,12 @@ package gofmt
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 // NewFormatter 创建一个新的带默认格式化规则的格式化实例
@@ -20,93 +23,166 @@ func NewFormatter() *Formatter {
 type Formatter struct {
 	// PrintResult 用于格式化过程中，打印结果
 	PrintResult func(fileName string, change bool, err error)
+
+	diffs diffResults
 }
 
 // Execute 执行代码格式化
-func (gf *Formatter) Execute(opt *Options) error {
+func (ft *Formatter) Execute(opt *Options) error {
 	if e := opt.Check(); e != nil {
 		return e
 	}
-	return gf.execute(opt)
+	return ft.execute(opt)
 }
 
-func (gf *Formatter) execute(opt *Options) error {
+func (ft *Formatter) execute(opt *Options) error {
 	files, err := opt.AllGoFiles()
 	if err != nil {
 		return err
 	}
-	var errTotal int
+	ft.diffs = nil
 
+	var failNum int
+	var changeNum int
 	for _, fileName := range files {
-
-		var out []byte
-		var change bool
-		var errFmt error
-
-		if opt.Write {
-			change, errFmt = gf.FormatAndWriteFile(fileName, opt)
-		} else {
-			out, change, errFmt = gf.Format(fileName, nil, opt)
+		change, err2 := ft.doFormat(opt, fileName)
+		if err2 != nil {
+			failNum++
 		}
-		if errFmt != nil {
-			errTotal++
+		if change {
+			changeNum++
 		}
-
-		gf.printFmtResult(fileName, change, errFmt)
-
-		if len(out) > 0 {
-			fmt.Println(string(out))
-		}
+	}
+	if len(ft.diffs) > 0 {
+		ft.diffs.Output(opt.DisplayFormat)
+	}
+	if failNum > 0 {
+		return fmt.Errorf("%d files format failed", failNum)
+	}
+	if opt.DisplayDiff && changeNum > 0 {
+		return fmt.Errorf("%d files sholud be formated", changeNum)
 	}
 	return nil
 }
 
-func (gf *Formatter) printFmtResult(fileName string, change bool, err error) {
+func (ft *Formatter) printFmtResult(fileName string, change bool, event string, err error) {
+	if ft.PrintResult != nil {
+		ft.PrintResult(fileName, change, err)
+		return
+	}
+	txt := fmt.Sprintf(" %8s : %s", event, fileName)
+	if change {
+		txt = common.ConsoleRed(txt)
+	} else {
+		txt = common.ConsoleGreen(txt)
+	}
+	fmt.Fprint(os.Stderr, txt, "\n")
+}
 
-	if gf.PrintResult != nil {
-		gf.PrintResult(fileName, change, err)
+func (ft *Formatter) execCallBack(opt *Options, fileName string, originSrc []byte, prettySrc []byte, err error) {
+	if bytes.Equal(originSrc, prettySrc) || !opt.DisplayDiff {
+		return
+	}
+	result := common.Diff(string(originSrc), string(prettySrc), opt.Trace)
+	if result == nil {
 		return
 	}
 
-	var consoleColorTag = 0x1B
-	if change {
-		fmt.Fprintf(os.Stderr, "%c[31m rewrited : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
-	} else {
-		fmt.Fprintf(os.Stderr, "%c[32m unchange : %s%c[0m\n", consoleColorTag, fileName, consoleColorTag)
+	df := &diffResult{
+		File:   fileName,
+		Diffs:  result.Detail(),
+		result: result,
 	}
+	if err != nil {
+		df.Error = err.Error()
+	}
+	ft.diffs = append(ft.diffs, df)
+}
+
+func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
+	originSrc, prettySrc, err := ft.Format(fileName, nil, opt)
+	ft.execCallBack(opt, fileName, originSrc, prettySrc, err)
+	changed := !bytes.Equal(originSrc, prettySrc)
+	if err != nil {
+		ft.printFmtResult(fileName, true, "error", err)
+		return changed, err
+	}
+
+	if !changed {
+		ft.printFmtResult(fileName, false, "pretty", nil)
+		return changed, nil
+	}
+
+	if opt.Write {
+		err = ioutil.WriteFile(fileName, prettySrc, 0)
+		ft.printFmtResult(fileName, true, "rewrote", err)
+		return changed, err
+	} else if opt.DisplayDiff {
+		ft.printFmtResult(fileName, true, "ugly", err)
+	}
+	if !opt.DisplayDiff {
+		fmt.Println(string(prettySrc))
+	}
+	return changed, nil
 }
 
 // Format 格式化文件，获取格式化后的内容
-func (gf *Formatter) Format(fileName string, src []byte, opt *Options) (out []byte, change bool, err error) {
+func (ft *Formatter) Format(fileName string, src []byte, opt *Options) (originSrc []byte, prettySrc []byte, err error) {
 	if len(src) == 0 {
 		src, err = ioutil.ReadFile(fileName)
 		if err != nil {
-			return nil, false, err
+			return nil, nil, err
 		}
 	}
-	out, err = Format(fileName, src, opt)
+	prettySrc, err = Format(fileName, src, opt)
 
 	if err != nil {
-		return nil, false, err
+		return nil, nil, err
 	}
-	change = !bytes.Equal(src, out)
-	return out, change, nil
+	return src, prettySrc, nil
 }
 
 // FormatAndWriteFile 格式化并写入文件
-func (gf *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, error) {
-	out, change, err := gf.Format(fileName, nil, opt)
+func (ft *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, error) {
+	originSrc, prettySrc, err := ft.Format(fileName, nil, opt)
 
 	if err != nil {
 		return false, err
 	}
 
-	if !change {
-		return change, nil
+	if bytes.Equal(originSrc, prettySrc) {
+		return false, nil
 	}
 
 	if opt.Write {
-		err = ioutil.WriteFile(fileName, out, 0)
+		err = ioutil.WriteFile(fileName, prettySrc, 0)
 	}
-	return change, err
+	return true, err
+}
+
+type diffResult struct {
+	File   string
+	Error  string
+	Diffs  interface{}
+	result common.DiffResult
+}
+
+type diffResults []*diffResult
+
+func (drs diffResults) Output(format string) {
+	if format == "json" {
+		bf, _ := json.MarshalIndent(drs, " ", "    ")
+		fmt.Fprint(os.Stdout, string(bf), "\n")
+		return
+	}
+
+	for i := 0; i < len(drs); i++ {
+		item := drs[i]
+		title := common.ConsoleRed(item.File)
+		msg := item.result.String()
+		if len(item.Error) > 0 {
+			msg += "Error:" + common.ConsoleRed(item.Error)
+		}
+		fmt.Fprint(os.Stdout, title, "\n", msg, "\n")
+	}
 }

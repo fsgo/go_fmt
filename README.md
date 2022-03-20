@@ -33,10 +33,13 @@ go install github.com/fsgo/go_fmt@master
 
 ```
 usage: go_fmt [flags] [path ...]
+  -d	display diffs instead of rewriting files
+  -df string
+    	display diffs format, support: text, json (default "text")
   -ig string
     	import group sort rule,
-    	stc: Go Standard pkgs, Third Party pkgs, Current Module pkg
-    	sct: Go Standard pkgs, Current Module pkg, Third Party pkgs
+    	stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
+    	sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
     	 (default "stc")
   -local string
     	put imports beginning with this string as 3rd-party packages (default "auto")

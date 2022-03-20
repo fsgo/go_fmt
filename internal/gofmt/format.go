@@ -13,7 +13,6 @@ import (
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
-	// a "github.com/fsgo/go_fmt/internal/ximports"
 	"github.com/fsgo/go_fmt/internal/ximports"
 )
 

@@ -29,7 +29,7 @@ import (
 // 多段import 会合并成一段
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
-// 不会自动去除没使用的import
+// 不会自动去除没使用的 import
 func FormatImports(fileName string, src []byte, opts *common.Options) (out []byte, err error) {
 	opts = opts.Clone()
 
@@ -47,9 +47,9 @@ func FormatImports(fileName string, src []byte, opts *common.Options) (out []byt
 	if err = findSubModules(fileName, opts); err != nil {
 		return nil, err
 	}
-	
-	if opts.Trace{
-		fmt.Println("ThirdParty Modules:",opts.ThirdModules)
+
+	if opts.Trace {
+		fmt.Println("ThirdParty Modules:", opts.ThirdModules)
 	}
 
 	var importDecls []*ast.GenDecl

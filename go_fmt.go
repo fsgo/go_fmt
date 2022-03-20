@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/fsgo/go_fmt/gofmtapi"
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 	err := gf.Execute(opt)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		fmt.Fprint(os.Stderr, common.ConsoleRed(err.Error())+"\n")
 		os.Exit(2)
 	}
 }
