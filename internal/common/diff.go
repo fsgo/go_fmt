@@ -66,18 +66,28 @@ func (dd *diffDetail) Output(trace bool) string {
 	}
 	b.WriteString(fmt.Sprintf("line %d:\n", dd.LineNo))
 
-	if len(dd.Delete) > 0 {
+	if len(dd.Delete) > 0 || dd.Type == DoffTypeDelete {
 		b.WriteString(fmt.Sprintf("  -: %s\n", dd.quote(dd.Delete)))
 	}
-	if len(dd.Add) > 0 {
+	if len(dd.Add) > 0 || dd.Type == DiffTypeAdd {
 		b.WriteString(fmt.Sprintf("  +: %s\n", dd.quote(dd.Add)))
 	}
 	return strings.TrimSpace(b.String())
 }
 
 func (dd *diffDetail) quote(txt string) string {
-	if strings.TrimSpace(txt) == "" {
-		return strings.Trim(strconv.QuoteToGraphic(txt), `"`)
+	// 针对全部是不可见字符的情况做展现优化
+	if len(strings.TrimSpace(txt)) == 0 {
+		arr := []byte(txt)
+		for i := 0; i < len(arr); i++ {
+			switch arr[i] {
+			case ' ':
+				arr[i] = '_'
+			case '\t':
+				arr[i] = '-'
+			}
+		}
+		return string(arr) + "\\n"
 	}
 	return txt
 }
@@ -115,10 +125,6 @@ func (r *diffReporter) Report(rs cmp.Result) {
 	vx, vy := r.path.Last().Values()
 	lineNo := r.parserLineNo(r.path.Last().String())
 
-	// if lineNo==162{
-	// 	log.Printf("vx=%v vy=%v\n",vx,vy)
-	// }
-
 	detail := &diffDetail{
 		LineNo: lineNo + 1,
 		Type:   DiffTypeChange,
@@ -135,11 +141,6 @@ func (r *diffReporter) Report(rs cmp.Result) {
 		detail.Add = r.formatTxt(vy)
 	} else {
 		detail.Type = DoffTypeDelete
-	}
-
-	// 由于是将字符串按照 \n 拆分为了 []string，这里是为了避免新增的换行不能展现
-	if detail.Type == DiffTypeAdd && len(detail.Add) == 0 {
-		detail.Add = "\n"
 	}
 
 	r.diffs = append(r.diffs, detail)

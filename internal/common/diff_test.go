@@ -75,6 +75,22 @@ func TestDiff(t *testing.T) {
 			},
 			want: "Trace: [52->?]\nline 53:\n  -: world",
 		},
+		{
+			name: "df3_del_space",
+			args: args{
+				a: strings.Repeat("a\n", 50) + "\nhello\n\n\n",
+				b: strings.Repeat("a\n", 50) + "\nhello",
+			},
+			want: "Trace: [52->?]\nline 53:\n  -: \\n\n\nTrace: [53->?]\nline 54:\n  -: \\n\n\nTrace: [54->?]\nline 55:\n  -: \\n",
+		},
+		{
+			name: "df4_del_space",
+			args: args{
+				a: " \n \n\n",
+				b: "",
+			},
+			want: "Trace: [0->?]\nline 1:\n  -: _\\n\n\nTrace: [1->?]\nline 2:\n  -: _\\n\n\nTrace: [2->?]\nline 3:\n  -: \\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
