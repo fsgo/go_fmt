@@ -5,13 +5,38 @@
 package simplify
 
 import (
+	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
+	"os"
 	"reflect"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
+
+// parseExpr parses s as an expression.
+// It might make sense to expand this to allow statement patterns,
+// but there are problems with preserving formatting and also
+// with what a wildcard for a statement looks like.
+func parseExpr(s, what string) ast.Expr {
+	x, err := parser.ParseExpr(s)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "parsing %s %s at %s\n", what, s, err)
+		os.Exit(2)
+	}
+	return x
+}
+
+// Keep this function for debugging.
+/*
+func dump(msg string, val reflect.Value) {
+	fmt.Printf("%s:\n", msg)
+	ast.Print(fileSet, val.Interface())
+	fmt.Println()
+}
+*/
 
 // rewriteFile applies the rewrite rule 'pattern -> replace' to an entire file.
 func rewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File) *ast.File {
@@ -117,7 +142,6 @@ func isWildcard(s string) bool {
 // match reports whether pattern matches val,
 // recording wildcard submatches in m.
 // If m == nil, match checks whether pattern == val.
-// nolint:gocyclo,cyclop
 func match(m map[string]reflect.Value, pattern, val reflect.Value) bool {
 	// Wildcard matches any expression. If it appears multiple
 	// times in the pattern, it must match the same expression
@@ -206,7 +230,6 @@ func match(m map[string]reflect.Value, pattern, val reflect.Value) bool {
 // of wildcards and pos used as the position of tokens from the pattern.
 // if m == nil, subst returns a copy of pattern and doesn't change the line
 // number information.
-// nolint:gocyclo
 func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value) reflect.Value {
 	if !pattern.IsValid() {
 		return reflect.Value{}
@@ -251,13 +274,13 @@ func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value)
 			v.Field(i).Set(subst(m, p.Field(i), pos))
 		}
 		return v
-	// reflect.Pointer 是 go1.18 才添加的
-	// case reflect.Pointer:
-	// 	v := reflect.New(p.Type()).Elem()
-	// 	if elem := p.Elem(); elem.IsValid() {
-	// 		v.Set(subst(m, elem, pos).Addr())
-	// 	}
-	// 	return v
+
+	case reflect.Pointer:
+		v := reflect.New(p.Type()).Elem()
+		if elem := p.Elem(); elem.IsValid() {
+			v.Set(subst(m, elem, pos).Addr())
+		}
+		return v
 
 	case reflect.Interface:
 		v := reflect.New(p.Type()).Elem()
@@ -265,16 +288,7 @@ func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value)
 			v.Set(subst(m, elem, pos))
 		}
 		return v
-	default:
-		// 用于支持 go1.18 版本的 reflect.Pointer
-		if v := substKind(m, p, pos); v != nil {
-			return *v
-		}
 	}
 
 	return pattern
-}
-
-var substKind = func(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value) *reflect.Value {
-	return nil
 }

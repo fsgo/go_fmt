@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
+	"sync/atomic"
 
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -42,25 +44,45 @@ func (ft *Formatter) execute(opt *Options) error {
 	}
 	ft.diffs = nil
 
-	var failNum int
-	var changeNum int
-	for _, fileName := range files {
-		change, err2 := ft.doFormat(opt, fileName)
-		if err2 != nil {
-			failNum++
-		}
-		if change {
-			changeNum++
-		}
+	ch := make(chan bool, 20) // 控制并发
+
+	var wg sync.WaitGroup
+	var failNum int64
+	var changeNum int64
+	for i := 0; i < len(files); i++ {
+		fileName := files[i]
+		ch <- true
+
+		// 并发，同时对多个文件进行格式化
+		go func() {
+			wg.Add(1)
+			defer func() {
+				<-ch
+				wg.Done()
+			}()
+			change, err2 := ft.doFormat(opt, fileName)
+			if err2 != nil {
+				atomic.AddInt64(&failNum, 1)
+			}
+			if change {
+				atomic.AddInt64(&changeNum, 1)
+			}
+		}()
 	}
+	wg.Wait()
+	close(ch)
+
 	if len(ft.diffs) > 0 {
 		ft.diffs.Output(opt.DisplayFormat)
 	}
-	if failNum > 0 {
-		return fmt.Errorf("%d files format failed", failNum)
+	if n := atomic.LoadInt64(&failNum); n > 0 {
+		return fmt.Errorf("%d files format failed", n)
 	}
-	if opt.DisplayDiff && changeNum > 0 {
-		return fmt.Errorf("%d files sholud be formated", changeNum)
+
+	if opt.DisplayDiff {
+		if n := atomic.LoadInt64(&changeNum); n > 0 {
+			return fmt.Errorf("%d files sholud be formated", n)
+		}
 	}
 	return nil
 }

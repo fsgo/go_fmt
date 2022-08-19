@@ -9,6 +9,8 @@ import (
 )
 
 // Format call simplify
+//
+// rewrite.go 和 simplify.go 来自于 go1.19
 func Format(f *ast.File) {
 	simplify(f)
 }

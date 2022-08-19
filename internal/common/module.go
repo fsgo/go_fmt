@@ -11,11 +11,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"golang.org/x/mod/modfile"
 )
 
-var goModPathCache = map[string]string{}
+var goModPathCache = &sync.Map{}
 
 // FindGoModPath 查找文件对应的 go.mod 文件
 func FindGoModPath(fileName string) (string, error) {
@@ -25,8 +26,8 @@ func FindGoModPath(fileName string) (string, error) {
 	}
 	pd := filepath.Dir(ap)
 
-	if v, has := goModPathCache[pd]; has {
-		return v, nil
+	if v, has := goModPathCache.Load(pd); has {
+		return v.(string), nil
 	}
 
 	// 限定最大往上查找 128 次，避免
@@ -34,7 +35,7 @@ func FindGoModPath(fileName string) (string, error) {
 		modPath := filepath.Join(pd, "go.mod")
 		info, err := os.Stat(modPath)
 		if err == nil && !info.IsDir() {
-			goModPathCache[pd] = modPath
+			goModPathCache.Store(pd, modPath)
 			return modPath, nil
 		}
 		cpd := filepath.Dir(pd)
@@ -79,25 +80,27 @@ func (ms Modules) PkgIn(pkg string) bool {
 	return false
 }
 
-var modulesCache = map[string]Modules{}
+// key：dir，string
+// value: Modules
+var modulesCache = &sync.Map{}
 
 // ListModules 找到指定目录下的所有子 module
 //
 // 可能是这样的：
-//  a.go
-//  go.mod
-//  + world (目录)
-//  	say.go    // 这个和 下面的 hello 就是两个不同的 module
-//  + hello (目录) // 这是一个独立的 module
-//  	hello.go
-//  	go.mod
 //
+//	a.go
+//	go.mod
+//	+ world (目录)
+//		say.go    // 这个和 下面的 hello 就是两个不同的 module
+//	+ hello (目录) // 这是一个独立的 module
+//		hello.go
+//		go.mod
 func ListModules(dir string) (Modules, error) {
-	if v, has := modulesCache[dir]; has {
-		return v, nil
+	if v, has := modulesCache.Load(dir); has {
+		return v.(Modules), nil
 	}
 	root := filepath.Join(dir, "go.mod")
-	var result []string
+	var result Modules
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() || info.Name() != "go.mod" || root == path {
 			return nil
@@ -111,7 +114,7 @@ func ListModules(dir string) (Modules, error) {
 	})
 
 	if err == nil {
-		modulesCache[dir] = result
+		modulesCache.Store(dir, result)
 	}
 	return result, err
 }
