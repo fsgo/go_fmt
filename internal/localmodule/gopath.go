@@ -5,6 +5,7 @@
 package localmodule
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,7 +41,7 @@ func detectByGoPath(opt *common.Options, fileName string) (string, error) {
 
 	infos := strings.SplitN(filepath.Clean(fileName), srcDirName, 2)
 	if len(infos) != 2 || len(infos[1]) == 0 {
-		return "", nil
+		return "", errors.New("project not in GOPATH")
 	}
 	dirs := strings.Split(infos[1], string(filepath.Separator))
 	level := domainLevel[dirs[0]]

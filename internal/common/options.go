@@ -10,6 +10,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/simplify"
 )
 
 // ImportGroupFunc import 排序逻辑
@@ -66,6 +68,12 @@ type Options struct {
 	// stc: 默认的排序规则
 	// sct: Go 源码中的排序规则
 	ImportGroupRule string
+
+	// 重写、简化代码的规则，可选
+	RewriteRules []string
+
+	// 是否使用内置的 rewrite 规则简化代码，可选，默认 false
+	RewriteWithBuildIn bool
 }
 
 // ImportGroupType import 分组类型
@@ -188,6 +196,11 @@ func (opt *Options) BindFlags() {
 stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
 sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 `)
+	var rewriteRule stringSlice
+	commandLine.Var(&rewriteRule, "r", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
+
+	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", false, `rewrite with build in rules:
+`+strings.Join(simplify.BuildInRewriteRules(), "\n"))
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]
@@ -207,7 +220,7 @@ sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 		fmt.Fprintf(os.Stderr, "parser commandLine with error: %s\n", err.Error())
 		os.Exit(2)
 	}
-
+	opt.RewriteRules = rewriteRule
 	opt.Files = commandLine.Args()
 
 	if len(opt.Files) == 0 {

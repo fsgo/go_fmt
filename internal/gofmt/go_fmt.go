@@ -8,10 +8,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sync"
-	"sync/atomic"
 
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -49,23 +47,29 @@ func (ft *Formatter) execute(opt *Options) error {
 	var wg sync.WaitGroup
 	var failNum int64
 	var changeNum int64
+	var mu sync.Mutex
 	for i := 0; i < len(files); i++ {
+		wg.Add(1)
 		fileName := files[i]
 		ch <- true
 
 		// 并发，同时对多个文件进行格式化
 		go func() {
-			wg.Add(1)
 			defer func() {
 				<-ch
 				wg.Done()
 			}()
 			change, err2 := ft.doFormat(opt, fileName)
+
+			mu.Lock()
+			defer mu.Unlock()
+
 			if err2 != nil {
-				atomic.AddInt64(&failNum, 1)
+				failNum++
+				err = err2
 			}
 			if change {
-				atomic.AddInt64(&changeNum, 1)
+				changeNum++
 			}
 		}()
 	}
@@ -75,14 +79,16 @@ func (ft *Formatter) execute(opt *Options) error {
 	if len(ft.diffs) > 0 {
 		ft.diffs.Output(opt.DisplayFormat)
 	}
-	if n := atomic.LoadInt64(&failNum); n > 0 {
-		return fmt.Errorf("%d files format failed", n)
+	mu.Lock()
+	defer mu.Unlock()
+	if err != nil {
+		return err
 	}
-
-	if opt.DisplayDiff {
-		if n := atomic.LoadInt64(&changeNum); n > 0 {
-			return fmt.Errorf("%d files sholud be formated", n)
-		}
+	if failNum > 0 {
+		return fmt.Errorf("%d files format failed", failNum)
+	}
+	if opt.DisplayDiff && changeNum > 0 {
+		return fmt.Errorf("%d files sholud be formated", changeNum)
 	}
 	return nil
 }
@@ -136,7 +142,7 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 	}
 
 	if opt.Write {
-		err = ioutil.WriteFile(fileName, prettySrc, 0)
+		err = os.WriteFile(fileName, prettySrc, 0)
 		ft.printFmtResult(fileName, true, "rewrote", err)
 		return changed, err
 	} else if opt.DisplayDiff {
@@ -151,7 +157,7 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 // Format 格式化文件，获取格式化后的内容
 func (ft *Formatter) Format(fileName string, src []byte, opt *Options) (originSrc []byte, prettySrc []byte, err error) {
 	if len(src) == 0 {
-		src, err = ioutil.ReadFile(fileName)
+		src, err = os.ReadFile(fileName)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -177,7 +183,7 @@ func (ft *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, er
 	}
 
 	if opt.Write {
-		err = ioutil.WriteFile(fileName, prettySrc, 0)
+		err = os.WriteFile(fileName, prettySrc, 0)
 	}
 	return true, err
 }

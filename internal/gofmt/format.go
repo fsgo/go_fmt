@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"io/ioutil"
+	"os"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
@@ -25,7 +25,7 @@ func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 
 	if src == nil {
 		var err error
-		src, err = ioutil.ReadFile(fileName)
+		src, err = os.ReadFile(fileName)
 		if err != nil {
 			return nil, err
 		}
@@ -45,12 +45,10 @@ func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 	}
 
 	options.LocalModule = module
-
 	outImports, errImports := ximports.FormatImports(fileName, src, options)
 	if errImports != nil {
 		return nil, errImports
 	}
-
 	src = outImports
 
 	fileSet, file, err := common.ParseFile(fileName, src)
@@ -60,14 +58,27 @@ func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 
 	// ast.Print(fileSet, file)
 
-	fix(fileSet, file, src, options)
-
+	file, err = fix(fileSet, file, options)
+	if err != nil {
+		return nil, err
+	}
 	return common.PrintCode(fileSet, file)
 }
 
-func fix(fileSet *token.FileSet, file *ast.File, src []byte, options *Options) {
-	if options.Simplify {
+func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error) {
+	if opt.Simplify {
 		simplify.Format(file)
 	}
-	FormatComments(fileSet, file, options)
+	FormatComments(fileSet, file, opt)
+	if len(opt.RewriteRules) > 0 {
+		var err error
+		file, err = simplify.Rewrites(file, opt.RewriteRules)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if opt.RewriteWithBuildIn {
+		return simplify.Rewrites(file, simplify.BuildInRewriteRules())
+	}
+	return file, nil
 }

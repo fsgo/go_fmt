@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv" // strconv 后面
+	"strings"
 
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
@@ -218,9 +219,11 @@ func importPath(s ast.Spec) string {
 
 // import 的 Name 部分
 // 如 import(
-//    redis "github.com/xxx"
-//    _ "github.com/xxx"
-//    . "github.com/xxx"
+//
+//	redis "github.com/xxx"
+//	_ "github.com/xxx"
+//	. "github.com/xxx"
+//
 // )
 // 上面的 "redis"、"_"、和 "." 都是
 var importNameReg = regexp.MustCompile(`^([a-zA-Z_]?[a-zA-Z0-9_]*)|(\.)$`)
@@ -280,6 +283,10 @@ func isImportPathHeader(first byte) bool {
 }
 
 func findSubModules(fileName string, opts *common.Options) error {
+	// 这种情况是由于当前代码并没有 go.mod，所以需要忽略掉
+	if strings.HasPrefix(opts.LocalModule, "_") {
+		return nil
+	}
 	mp, err := common.FindGoModPath(fileName)
 	if err != nil {
 		return err

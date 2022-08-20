@@ -6,7 +6,6 @@ package localmodule
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -39,18 +38,15 @@ func loadConfig() error {
 		return nil
 	}
 
-	confBuf, err := ioutil.ReadFile(confPath)
+	confBuf, err := os.ReadFile(confPath)
 	if err != nil {
 		return err
 	}
 	var conf *config
-	if err := json.Unmarshal(confBuf, &conf); err != nil {
+	// 若配置解析失败则忽略掉
+	if err = json.Unmarshal(confBuf, &conf); err != nil {
 		return nil
 	}
 
-	if err := parserConfig4GoPath(conf); err != nil {
-		return err
-	}
-
-	return nil
+	return parserConfig4GoPath(conf)
 }

@@ -7,7 +7,6 @@ package common
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,7 +48,7 @@ func FindGoModPath(fileName string) (string, error) {
 
 // ModuleByFile 解析 go.mod 文件里的  module 的值
 func ModuleByFile(goModPath string) (string, error) {
-	goModBuf, err := ioutil.ReadFile(goModPath)
+	goModBuf, err := os.ReadFile(goModPath)
 	if err != nil {
 		return "", err
 	}
