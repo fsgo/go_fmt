@@ -5,4 +5,4 @@
 package common
 
 // Version 版本信息
-var Version = "v0.4.3 20220820"
+var Version = "v0.4.4 20220910"

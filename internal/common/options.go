@@ -19,11 +19,16 @@ type ImportGroupFunc func(importPath string, opt *Options) int
 
 // Options 选项
 type Options struct {
-	Trace bool
+	ImportGroupFn ImportGroupFunc
 
-	TabIndent bool
+	// DisplayFormat 输出 DisplayDiff 的格式，默认为 text，还可以是 json
+	DisplayFormat string
 
-	TabWidth int
+	// import 分组的排序规则,可选
+	// 总共 可分为 3 组，分别是 标准库(简称 s)，第三方库(简称 t)，模块自身(简称 c)
+	// stc: 默认的排序规则
+	// sct: Go 源码中的排序规则
+	ImportGroupRule string
 
 	// LocalModule 当前代码所在的 module
 	// 对应其 go.mod 文件中的 module 的值
@@ -39,6 +44,20 @@ type Options struct {
 	// 这个时候，在 github.com/test 里的代码，应该将 github.com/test/hello/say 归为第三方模块代码的分组
 	ThirdModules Modules
 
+	// 待处理的文件列表
+	Files []string
+
+	// 重写、简化代码的规则，可选
+	RewriteRules []string
+
+	TabWidth int
+
+	// FieldAlignment struct 字段对齐优化，可选，默认 0
+	// 可选值:
+	// 1-对发现的进行修正，同时打印日志
+	// 2-只打印出需优化的日志信息
+	FieldAlignment int
+
 	// Write 是否直接将格式化后的内容写入文件
 	Write bool
 
@@ -49,13 +68,7 @@ type Options struct {
 	// 当值为 true 时，会强制设置 Write=false
 	DisplayDiff bool
 
-	// DisplayFormat 输出 DisplayDiff 的格式，默认为 text，还可以是 json
-	DisplayFormat string
-
-	// 待处理的文件列表
-	Files []string
-
-	ImportGroupFn ImportGroupFunc
+	Trace bool
 
 	// 是否将多段 import 合并为一个
 	MergeImports bool
@@ -63,14 +76,7 @@ type Options struct {
 	// SingleLineCopyright 是否将 copyright 的多行注释格式化为单行注释
 	SingleLineCopyright bool
 
-	// import 分组的排序规则,可选
-	// 总共 可分为 3 组，分别是 标准库(简称 s)，第三方库(简称 t)，模块自身(简称 c)
-	// stc: 默认的排序规则
-	// sct: Go 源码中的排序规则
-	ImportGroupRule string
-
-	// 重写、简化代码的规则，可选
-	RewriteRules []string
+	TabIndent bool
 
 	// 是否使用内置的 rewrite 规则简化代码，可选，默认 false
 	RewriteWithBuildIn bool
@@ -152,6 +158,13 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 			tmpList, err = allGoFiles("./")
 		case "git_change":
 			tmpList, err = filesGitDirChange()
+			if err != nil {
+				if opt.Trace {
+					fmt.Println("git_change:", err.Error())
+				}
+				// 若获取 git 变化的文件失败，则获取当前目录下所有文件
+				tmpList, err = allGoFiles("./")
+			}
 		default:
 			info, errStat := os.Stat(name)
 			if errStat != nil {

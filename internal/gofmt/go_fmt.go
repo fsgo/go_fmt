@@ -189,10 +189,10 @@ func (ft *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, er
 }
 
 type diffResult struct {
-	File   string
-	Error  string
 	Diffs  interface{}
 	result common.DiffResult
+	File   string
+	Error  string
 }
 
 type diffResults []*diffResult

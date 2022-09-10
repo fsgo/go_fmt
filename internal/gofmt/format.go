@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/fieldalignment"
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
 	"github.com/fsgo/go_fmt/internal/ximports"
@@ -70,6 +71,7 @@ func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error
 		simplify.Format(file)
 	}
 	FormatComments(fileSet, file, opt)
+
 	if len(opt.RewriteRules) > 0 {
 		var err error
 		file, err = simplify.Rewrites(file, opt.RewriteRules)
@@ -77,8 +79,18 @@ func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error
 			return nil, err
 		}
 	}
+
 	if opt.RewriteWithBuildIn {
-		return simplify.Rewrites(file, simplify.BuildInRewriteRules())
+		var err error
+		file, err = simplify.Rewrites(file, simplify.BuildInRewriteRules())
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	if opt.FieldAlignment == 1 {
+		fieldalignment.Run(fileSet, file, true)
+	}
+
 	return file, nil
 }

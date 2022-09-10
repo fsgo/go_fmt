@@ -48,11 +48,11 @@ const (
 )
 
 type diffDetail struct {
-	LineNo int
 	Trace  string
 	Delete string
 	Add    string
 	Type   DiffType
+	LineNo int
 }
 
 func (dd *diffDetail) String() string {
@@ -102,7 +102,8 @@ func (r *diffReporter) PushStep(ps cmp.PathStep) {
 	r.path = append(r.path, ps)
 }
 
-//  解析文本获取行数
+//	解析文本获取行数
+//
 // [31->?] [26] [36->32] [?->39]
 func (r *diffReporter) parserLineNo(txt string) int {
 	for _, b := range []byte("[]?>") {

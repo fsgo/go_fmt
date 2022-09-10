@@ -17,8 +17,8 @@ import (
 )
 
 type importDecl struct {
-	Comments []string
 	Path     string
+	Comments []string
 }
 
 func (decl *importDecl) AddComment(bf []byte) {
@@ -108,8 +108,8 @@ func (ig importDeclGroups) String() string {
 }
 
 type importDeclGroup struct {
-	Group int
 	Decls []*importDecl
+	Group int
 }
 
 func (group *importDeclGroup) sort() {
@@ -135,10 +135,12 @@ func (group *importDeclGroup) Bytes() []byte {
 // 多个 import group 分组直接的分隔符
 // 使用这个是由于 source.Format() 方法，对于一个注释的第三方 path,如
 // import(
-//    "fmt"
-//      // "github.com/fsgo/a"
-//  )
-//  // 期望是将 注释行的第三方库放入单独的一组，但是 source.Format 会将其中间的空行给去掉
+//
+//	  "fmt"
+//	    // "github.com/fsgo/a"
+//	)
+//	// 期望是将 注释行的第三方库放入单独的一组，但是 source.Format 会将其中间的空行给去掉
+//
 // 为了达到预期，故目前这样处理，Format 后再使用 cleanSpecCode 方法将该分隔符删除掉
 const importGroupSpit = "\"github.com/fsgo/gofmtgofmtgofmtgofmt\"\n"
 
