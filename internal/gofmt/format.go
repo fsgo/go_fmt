@@ -23,7 +23,6 @@ type Options = common.Options
 // Format 输出格式化的go代码
 func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 	options := opts.Clone()
-
 	if src == nil {
 		var err error
 		src, err = os.ReadFile(fileName)
@@ -67,8 +66,9 @@ func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 }
 
 func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error) {
+	// ast.Print(fileSet,file)
 	if opt.Simplify {
-		simplify.Format(file)
+		simplify.Format(fileSet, file)
 	}
 	FormatComments(fileSet, file, opt)
 

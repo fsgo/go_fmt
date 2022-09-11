@@ -10,5 +10,5 @@ import (
 )
 
 func Run(fileSet *token.FileSet, file *ast.File, fix bool) {
-	// todo
+
 }

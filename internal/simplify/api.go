@@ -15,7 +15,8 @@ import (
 // Format call simplify
 //
 // rewrite.go 和 simplify.go 来自于 go1.19
-func Format(f *ast.File) {
+func Format(fileSet *token.FileSet, f *ast.File) {
+	fixStructExprNoKey(fileSet, f)
 	simplify(f)
 }
 

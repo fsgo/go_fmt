@@ -34,7 +34,7 @@ import (
 func FormatImports(fileName string, src []byte, opts *common.Options) (out []byte, err error) {
 	opts = opts.Clone()
 
-	_, file, err := common.ParseFile(fileName, src)
+	_, file, err := common.ParseOneFile(fileName, src)
 	if err != nil {
 		return nil, err
 	}
