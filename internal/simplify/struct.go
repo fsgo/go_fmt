@@ -67,7 +67,8 @@ func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 
 					v1 := &ast.KeyValueExpr{
 						Key: &ast.Ident{
-							Name: names[z].Name,
+							Name:    names[z].Name,
+							NamePos: val.Pos(),
 						},
 						Value: val,
 					}
@@ -139,7 +140,8 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 		}
 		v1 := &ast.KeyValueExpr{
 			Key: &ast.Ident{
-				Name: names[i].Name,
+				Name:    names[i].Name,
+				NamePos: item.Pos(),
 			},
 			Value: item,
 		}
@@ -150,6 +152,6 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 func nodeCode(n ast.Node) string {
 	bf := &bytes.Buffer{}
 	fset := token.NewFileSet()
-	format.Node(bf, fset, n)
+	_ = format.Node(bf, fset, n)
 	return bf.String()
 }
