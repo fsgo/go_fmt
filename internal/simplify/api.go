@@ -54,6 +54,7 @@ var rewriteRules = []string{
 	"interface{} -> any",
 }
 
+// BuildInRewriteRules 获取内置的简化规则
 func BuildInRewriteRules() []string {
 	return rewriteRules
 }

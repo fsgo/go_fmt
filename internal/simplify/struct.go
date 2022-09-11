@@ -55,6 +55,7 @@ func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 		if st == nil {
 			continue
 		}
+		names := structFields(st)
 		for j := 0; j < len(n1.Elts); j++ {
 			if m1, ok1 := n1.Elts[j].(*ast.CompositeLit); ok1 {
 				for z := 0; z < len(m1.Elts); z++ {
@@ -66,7 +67,7 @@ func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 
 					v1 := &ast.KeyValueExpr{
 						Key: &ast.Ident{
-							Name: st.Fields.List[z].Names[0].Name,
+							Name: names[z].Name,
 						},
 						Value: val,
 					}
@@ -76,6 +77,14 @@ func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 		}
 	}
 	// ast.Print(fileSet, n)
+}
+
+func structFields(st *ast.StructType) []*ast.Ident {
+	var fs []*ast.Ident
+	for i := 0; i < len(st.Fields.List); i++ {
+		fs = append(fs, st.Fields.List[i].Names...)
+	}
+	return fs
 }
 
 func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
@@ -119,7 +128,7 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 	if st == nil {
 		return
 	}
-
+	names := structFields(st)
 	for i := 0; i < len(n.Elts); i++ {
 		item := n.Elts[i]
 		if _, ok := item.(*ast.CompositeLit); ok {
@@ -130,7 +139,7 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 		}
 		v1 := &ast.KeyValueExpr{
 			Key: &ast.Ident{
-				Name: st.Fields.List[i].Names[0].Name,
+				Name: names[i].Name,
 			},
 			Value: item,
 		}

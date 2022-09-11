@@ -19,6 +19,7 @@ func ParseOneFile(fileName string, src []byte) (*token.FileSet, *ast.File, error
 	return fileSet, file, err
 }
 
+// ParseFile 解析文件，优先尝试使用 ParseDir
 func ParseFile(fileName string, src []byte) (*token.FileSet, *ast.File, error) {
 	fileSet := token.NewFileSet()
 	var file *ast.File

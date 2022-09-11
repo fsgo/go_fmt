@@ -15,26 +15,26 @@ type T2 struct {
 
 var _ = [42]T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = [...]T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = []T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = []T{
 	{},
-	10: {1, 2},
-	20: {3, 4},
+	10: {x: 1, y: 2},
+	20: {x: 3, y: 4},
 }
 
 var _ = []struct {
@@ -47,8 +47,8 @@ var _ = []struct {
 
 var _ = []interface{}{
 	T{},
-	10: T{1, 2},
-	20: T{3, 4},
+	10: T{x: 1, y: 2},
+	20: T{x: 3, y: 4},
 }
 
 var _ = [][]int{
@@ -74,8 +74,8 @@ var _ = [][][]int{
 
 var _ = map[string]T{
 	"foo": {},
-	"bar": {1, 2},
-	"bal": {3, 4},
+	"bar": {x: 1, y: 2},
+	"bal": {x: 3, y: 4},
 }
 
 var _ = map[string]struct {
@@ -88,8 +88,8 @@ var _ = map[string]struct {
 
 var _ = map[string]interface{}{
 	"foo": T{},
-	"bar": T{1, 2},
-	"bal": T{3, 4},
+	"bar": T{x: 1, y: 2},
+	"bal": T{x: 3, y: 4},
 }
 
 var _ = map[string][]int{
@@ -114,26 +114,26 @@ var pieces4 = []Piece{
 
 var _ = [42]*T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = [...]*T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = []*T{
 	{},
-	{1, 2},
-	{3, 4},
+	{x: 1, y: 2},
+	{x: 3, y: 4},
 }
 
 var _ = []*T{
 	{},
-	10: {1, 2},
-	20: {3, 4},
+	10: {x: 1, y: 2},
+	20: {x: 3, y: 4},
 }
 
 var _ = []*struct {
@@ -146,8 +146,8 @@ var _ = []*struct {
 
 var _ = []interface{}{
 	&T{},
-	10: &T{1, 2},
-	20: &T{3, 4},
+	10: &T{x: 1, y: 2},
+	20: &T{x: 3, y: 4},
 }
 
 var _ = []*[]int{
@@ -173,8 +173,8 @@ var _ = []*[]*[]int{
 
 var _ = map[string]*T{
 	"foo": {},
-	"bar": {1, 2},
-	"bal": {3, 4},
+	"bar": {x: 1, y: 2},
+	"bal": {x: 3, y: 4},
 }
 
 var _ = map[string]*struct {
@@ -187,8 +187,8 @@ var _ = map[string]*struct {
 
 var _ = map[string]interface{}{
 	"foo": &T{},
-	"bar": &T{1, 2},
-	"bal": &T{3, 4},
+	"bar": &T{x: 1, y: 2},
+	"bal": &T{x: 3, y: 4},
 }
 
 var _ = map[string]*[]int{
@@ -211,11 +211,11 @@ var pieces4 = []*Piece{
 }
 
 var _ = map[T]T2{
-	{1, 2}: {3, 4},
-	{5, 6}: {7, 8},
+	{x: 1, y: 2}: {w: 3, z: 4},
+	{x: 5, y: 6}: {w: 7, z: 8},
 }
 
 var _ = map[*T]*T2{
-	{1, 2}: {3, 4},
-	{5, 6}: {7, 8},
+	{x: 1, y: 2}: {w: 3, z: 4},
+	{x: 5, y: 6}: {w: 7, z: 8},
 }

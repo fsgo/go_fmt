@@ -33,30 +33,22 @@ func Test_isGoFileName(t *testing.T) {
 	}{
 		{
 			name: "case 1",
-			args: args{
-				"files.go",
-			},
+			args: args{fileName: "files.go"},
 			want: true,
 		},
 		{
 			name: "case 2",
-			args: args{
-				"files_test.go",
-			},
+			args: args{fileName: "files_test.go"},
 			want: true,
 		},
 		{
 			name: "case 3",
-			args: args{
-				"abc/not_exists.go",
-			},
+			args: args{fileName: "abc/not_exists.go"},
 			want: false,
 		},
 		{
 			name: "case 4",
-			args: args{
-				"testdata/rule1/input/demo_1.go.txt",
-			},
+			args: args{fileName: "testdata/rule1/input/demo_1.go.txt"},
 			want: false,
 		},
 	}
