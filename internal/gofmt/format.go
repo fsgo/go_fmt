@@ -21,23 +21,22 @@ import (
 type Options = common.Options
 
 // Format 输出格式化的go代码
-func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
+func Format(fileName string, src []byte, opts *Options) (code []byte, formatted bool, err error) {
 	options := opts.Clone()
 	if src == nil {
-		var err error
 		src, err = os.ReadFile(fileName)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
-	if common.DoNotEdit(src) {
-		return src, nil
+	if common.DoNotEdit(fileName, src) {
+		return src, false, nil
 	}
 
 	module, err := localmodule.Get(options, fileName)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if options.Trace {
@@ -47,22 +46,23 @@ func Format(fileName string, src []byte, opts *Options) ([]byte, error) {
 	options.LocalModule = module
 	outImports, errImports := ximports.FormatImports(fileName, src, options)
 	if errImports != nil {
-		return nil, errImports
+		return nil, false, errImports
 	}
 	src = outImports
 
 	fileSet, file, err := common.ParseFile(fileName, src)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// ast.Print(fileSet, file)
 
 	file, err = fix(fileSet, file, options)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return common.PrintCode(fileSet, file)
+	code, err = common.PrintCode(fileSet, file)
+	return code, true, err
 }
 
 func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error) {

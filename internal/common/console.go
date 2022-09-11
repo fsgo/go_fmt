@@ -10,6 +10,9 @@ import (
 
 const consoleColorTag = 0x1B
 
+// ConsoleColor 字符颜色
+type ConsoleColor func(string) string
+
 // ConsoleRed 控制台红色字符
 func ConsoleRed(txt string) string {
 	return fmt.Sprintf("%c[31m%s%c[0m", consoleColorTag, txt, consoleColorTag)
@@ -18,4 +21,9 @@ func ConsoleRed(txt string) string {
 // ConsoleGreen 控制台绿色字符
 func ConsoleGreen(txt string) string {
 	return fmt.Sprintf("%c[32m%s%c[0m", consoleColorTag, txt, consoleColorTag)
+}
+
+// ConsoleGrey 控制台灰色字符
+func ConsoleGrey(txt string) string {
+	return fmt.Sprintf("%c[90m%s%c[0m", consoleColorTag, txt, consoleColorTag)
 }

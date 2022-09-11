@@ -93,17 +93,13 @@ func (ft *Formatter) execute(opt *Options) error {
 	return nil
 }
 
-func (ft *Formatter) printFmtResult(fileName string, change bool, event string, err error) {
+func (ft *Formatter) printFmtResult(fileName string, change bool, event string, color common.ConsoleColor, err error) {
 	if ft.PrintResult != nil {
 		ft.PrintResult(fileName, change, err)
 		return
 	}
 	txt := fmt.Sprintf(" %8s : %s", event, fileName)
-	if change {
-		txt = common.ConsoleRed(txt)
-	} else {
-		txt = common.ConsoleGreen(txt)
-	}
+	txt = color(txt)
 	fmt.Fprint(os.Stderr, txt, "\n")
 }
 
@@ -128,25 +124,29 @@ func (ft *Formatter) execCallBack(opt *Options, fileName string, originSrc []byt
 }
 
 func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
-	originSrc, prettySrc, err := ft.Format(fileName, nil, opt)
+	originSrc, prettySrc, formatted, err := ft.Format(fileName, nil, opt)
 	ft.execCallBack(opt, fileName, originSrc, prettySrc, err)
 	changed := !bytes.Equal(originSrc, prettySrc)
 	if err != nil {
-		ft.printFmtResult(fileName, true, "error", err)
+		ft.printFmtResult(fileName, true, "error", common.ConsoleRed, err)
 		return changed, err
 	}
 
 	if !changed {
-		ft.printFmtResult(fileName, false, "pretty", nil)
+		if formatted {
+			ft.printFmtResult(fileName, false, "pretty", common.ConsoleGreen, nil)
+		} else {
+			ft.printFmtResult(fileName, false, "skipped", common.ConsoleGrey, nil)
+		}
 		return changed, nil
 	}
 
 	if opt.Write {
 		err = os.WriteFile(fileName, prettySrc, 0)
-		ft.printFmtResult(fileName, true, "rewrote", err)
+		ft.printFmtResult(fileName, true, "rewrote", common.ConsoleGreen, err)
 		return changed, err
 	} else if opt.DisplayDiff {
-		ft.printFmtResult(fileName, true, "ugly", err)
+		ft.printFmtResult(fileName, true, "ugly", common.ConsoleRed, err)
 	}
 	if !opt.DisplayDiff {
 		fmt.Println(string(prettySrc))
@@ -155,24 +155,24 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 }
 
 // Format 格式化文件，获取格式化后的内容
-func (ft *Formatter) Format(fileName string, src []byte, opt *Options) (originSrc []byte, prettySrc []byte, err error) {
+func (ft *Formatter) Format(fileName string, src []byte, opt *Options) (origin []byte, pretty []byte, formatted bool, err error) {
 	if len(src) == 0 {
 		src, err = os.ReadFile(fileName)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, false, err
 		}
 	}
-	prettySrc, err = Format(fileName, src, opt)
+	pretty, formatted, err = Format(fileName, src, opt)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	return src, prettySrc, nil
+	return src, pretty, formatted, nil
 }
 
 // FormatAndWriteFile 格式化并写入文件
 func (ft *Formatter) FormatAndWriteFile(fileName string, opt *Options) (bool, error) {
-	originSrc, prettySrc, err := ft.Format(fileName, nil, opt)
+	originSrc, prettySrc, _, err := ft.Format(fileName, nil, opt)
 
 	if err != nil {
 		return false, err

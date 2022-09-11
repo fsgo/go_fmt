@@ -6,7 +6,6 @@ package gofmt
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,13 +82,13 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 			if err == nil && strings.HasSuffix(path, ".go.txt") {
 				checkFileTotal++
 
-				got, err := Format(path, nil, opt)
+				got, _, err := Format(path, nil, opt)
 				if err != nil {
 					t.Errorf("Format returl error: %s", err)
 					return
 				}
 				got = bytes.TrimSpace(got)
-				want, err := ioutil.ReadFile(rule1Dir + "want/" + filepath.Base(path))
+				want, err := os.ReadFile(rule1Dir + "want/" + filepath.Base(path))
 				if err != nil {
 					t.Fatalf("ioutil.ReadFile with error: %s", err)
 				}
@@ -97,8 +96,8 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 				if !bytes.Equal(got, want) {
 					fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
 					fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
-					err1 := ioutil.WriteFile(fileGot, got, 0644)
-					err2 := ioutil.WriteFile(fileWant, want, 0644)
+					err1 := os.WriteFile(fileGot, got, 0644)
+					err2 := os.WriteFile(fileWant, want, 0644)
 					t.Errorf("not eq, fileget=%q (write=%v), filewant=%q (write=%v)", fileGot, err1, fileWant, err2)
 				}
 			}
