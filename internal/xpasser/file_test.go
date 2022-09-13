@@ -13,6 +13,7 @@ import (
 )
 
 func TestFile_Load(t *testing.T) {
+	enableLoader = true
 	f := &File{
 		FileName: "file.go",
 	}

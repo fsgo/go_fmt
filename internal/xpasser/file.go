@@ -27,6 +27,8 @@ type File struct {
 	TypesInfo *types.Info    // type information about the syntax trees
 }
 
+var enableLoader = false
+
 // Load parser and load Program
 func (f *File) Load(src any) error {
 	f.FileSet = token.NewFileSet()
@@ -39,7 +41,10 @@ func (f *File) Load(src any) error {
 		return err
 	}
 	f.AstFile = file
-	return nil
+
+	if !enableLoader {
+		return nil
+	}
 	// todo 优化性能
 
 	prog, err := f.loadProgram(conf)
@@ -101,7 +106,7 @@ func loadFiles(conf *loader.Config, dir string, ignore string) ([]*ast.File, err
 		wg.Go(func() error {
 			f, err1 := conf.ParseFile(fileName, nil)
 			if err1 != nil {
-				return fmt.Errorf("parser %s failed: %w", err1)
+				return fmt.Errorf("parser %s failed: %w", fileName, err1)
 			}
 			mux.Lock()
 			files = append(files, f)
