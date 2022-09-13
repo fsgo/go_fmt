@@ -47,6 +47,12 @@ usage: go_fmt [flags] [path ...]
     	put imports beginning with this string as 3rd-party packages (default "auto")
   -mi
     	merge imports into one
+  -r value
+    	rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')
+  -rr
+    	rewrite with build in rules:
+    	a[b:len(a)] -> a[b:]
+    	interface{} -> any
   -s	simplify code (default true)
   -slcr
     	multiline copyright to single-line

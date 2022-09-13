@@ -143,7 +143,7 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 
 	if opt.Write {
 		err = os.WriteFile(fileName, prettySrc, 0)
-		ft.printFmtResult(fileName, true, "rewrote", common.ConsoleGreen, err)
+		ft.printFmtResult(fileName, true, "rewrote", common.ConsoleRed, err)
 		return changed, err
 	} else if opt.DisplayDiff {
 		ft.printFmtResult(fileName, true, "ugly", common.ConsoleRed, err)

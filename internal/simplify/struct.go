@@ -25,16 +25,17 @@ func fixStructExprNoKey(fileSet *token.FileSet, f *ast.File) {
 }
 
 // for
-// var tests=[]struct{
-//    name string
-//    id string
-// }{
-//    {
-//       "name",
-//       "id"
-//    },
-// }
 //
+//	var tests=[]struct{
+//	   name string
+//	   id string
+//	}{
+//
+//	   {
+//	      "name",
+//	      "id"
+//	   },
+//	}
 func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 	// log.Println("before:")
 	// ast.Print(fileSet, n)
@@ -130,6 +131,9 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 		return
 	}
 	names := structFields(st)
+	if len(names) < len(n.Elts) {
+		return
+	}
 	for i := 0; i < len(n.Elts); i++ {
 		item := n.Elts[i]
 		if _, ok := item.(*ast.CompositeLit); ok {
@@ -154,4 +158,21 @@ func nodeCode(n ast.Node) string {
 	fset := token.NewFileSet()
 	_ = format.Node(bf, fset, n)
 	return bf.String()
+}
+
+// fixStructBlankLine 给 struct 的字段定义添加空行
+func fixStructBlankLine(fileSet *token.FileSet, f *ast.File) {
+	ast.Inspect(f, func(node ast.Node) bool {
+		if nv, ok := node.(*ast.StructType); ok {
+			doFixStructBlankLine(fileSet, nv)
+		}
+		return true
+	})
+}
+
+func doFixStructBlankLine(fileSet *token.FileSet, st *ast.StructType) {
+	if len(st.Fields.List) == 0 {
+		return
+	}
+	// todo
 }

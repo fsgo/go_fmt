@@ -7,7 +7,6 @@ package gofmt
 import (
 	"fmt"
 	"go/ast"
-	"go/token"
 	"os"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -15,6 +14,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
 	"github.com/fsgo/go_fmt/internal/ximports"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // Options 别名
@@ -50,28 +50,32 @@ func Format(fileName string, src []byte, opts *Options) (code []byte, formatted 
 	}
 	src = outImports
 
-	fileSet, file, err := common.ParseFile(fileName, src)
-	if err != nil {
-		return nil, false, err
+	f := &xpasser.File{
+		FileName: fileName,
 	}
 
+	if err = f.Load(src); err != nil {
+		return nil, false, err
+	}
 	// ast.Print(fileSet, file)
 
-	file, err = fix(fileSet, file, options)
+	file, err := fix(f, options)
 	if err != nil {
 		return nil, false, err
 	}
-	code, err = common.PrintCode(fileSet, file)
+	code, err = common.PrintCode(f.FileSet, file)
 	return code, true, err
 }
 
-func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error) {
+func fix(f *xpasser.File, opt *Options) (*ast.File, error) {
 	// ast.Print(fileSet,file)
 	if opt.Simplify {
-		simplify.Format(fileSet, file)
+		simplify.Format(f.FileSet, f.AstFile)
 	}
-	FormatComments(fileSet, file, opt)
 
+	FormatComments(f.FileSet, f.AstFile, opt)
+
+	file := f.AstFile
 	if len(opt.RewriteRules) > 0 {
 		var err error
 		file, err = simplify.Rewrites(file, opt.RewriteRules)
@@ -89,7 +93,7 @@ func fix(fileSet *token.FileSet, file *ast.File, opt *Options) (*ast.File, error
 	}
 
 	if opt.FieldAlignment == 1 {
-		fieldalignment.Run(fileSet, file, true)
+		fieldalignment.Run(f.FileSet, file, true)
 	}
 
 	return file, nil

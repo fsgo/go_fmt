@@ -18,6 +18,7 @@ import (
 func Format(fileSet *token.FileSet, f *ast.File) {
 	fixStructExprNoKey(fileSet, f)
 	simplify(f)
+	fixStructBlankLine(fileSet, f)
 }
 
 // Rewrite 简化代码
