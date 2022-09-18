@@ -35,7 +35,7 @@ func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 				}
 			} else if strings.HasPrefix(cm.Text, "/*") {
 				// 多行注释
-				if !fixMultilineComment(cm, options) {
+				if !fixMultilineComment(fileSet, cm, options) {
 					continue
 				}
 			}
@@ -47,9 +47,9 @@ func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 }
 
 // fixMultilineComment 多行注释处理
-func fixMultilineComment(cm *ast.Comment, options *Options) (ok bool) {
+func fixMultilineComment(fileSet *token.FileSet, cm *ast.Comment, options *Options) (ok bool) {
 	if options.SingleLineCopyright {
-		fixCopyright(cm)
+		fixCopyright(fileSet, cm)
 	}
 	return true
 
@@ -124,8 +124,9 @@ func fixMultilineComment(cm *ast.Comment, options *Options) (ok bool) {
 	// return true
 }
 
-func fixCopyright(cm *ast.Comment) {
-	if cm.Pos() != 1 {
+func fixCopyright(fset *token.FileSet, cm *ast.Comment) {
+	p := fset.Position(cm.Pos())
+	if p.Line != 1 {
 		return
 	}
 	cm.Text = multilineCommentSingle(cm.Text)

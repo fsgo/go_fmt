@@ -7,6 +7,7 @@ package common
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -160,7 +161,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 			tmpList, err = filesGitDirChange()
 			if err != nil {
 				if opt.Trace {
-					fmt.Println("git_change:", err.Error())
+					log.Println("git_change:", err.Error())
 				}
 				// 若获取 git 变化的文件失败，则获取当前目录下所有文件
 				tmpList, err = allGoFiles("./")

@@ -59,6 +59,9 @@ func doFixAssignStmt(fileSet *token.FileSet, n *ast.AssignStmt) {
 		names := structFields(st)
 		for j := 0; j < len(n1.Elts); j++ {
 			if m1, ok1 := n1.Elts[j].(*ast.CompositeLit); ok1 {
+				if len(names) != len(m1.Elts) {
+					return
+				}
 				for z := 0; z < len(m1.Elts); z++ {
 					val := m1.Elts[z]
 					if _, ok3 := val.(*ast.KeyValueExpr); ok3 {
@@ -131,7 +134,7 @@ func doFixStructKey(fileSet *token.FileSet, n *ast.CompositeLit) {
 		return
 	}
 	names := structFields(st)
-	if len(names) < len(n.Elts) {
+	if len(names) != len(n.Elts) {
 		return
 	}
 	for i := 0; i < len(n.Elts); i++ {

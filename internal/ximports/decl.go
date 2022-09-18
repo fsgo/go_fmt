@@ -170,8 +170,11 @@ func formatImportDecls(decls []*importDecl, options *common.Options) []byte {
 			buf.WriteString(string(groupCode))
 		}
 	}
+	if !bytes.HasSuffix(buf.Bytes(), []byte("\n")) {
+		buf.WriteString("\n")
+	}
 
-	buf.WriteString("\n)\n")
+	buf.WriteString(")\n")
 
 	return buf.Bytes()
 }

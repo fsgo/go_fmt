@@ -93,12 +93,15 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 					t.Fatalf("ioutil.ReadFile with error: %s", err)
 				}
 				want = bytes.TrimSpace(want)
+				fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
+				fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
 				if !bytes.Equal(got, want) {
-					fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
-					fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
 					err1 := os.WriteFile(fileGot, got, 0644)
 					err2 := os.WriteFile(fileWant, want, 0644)
 					t.Errorf("not eq, fileget=%q (write=%v), filewant=%q (write=%v)", fileGot, err1, fileWant, err2)
+				} else {
+					_ = os.Remove(fileGot)
+					_ = os.Remove(fileWant)
 				}
 			}
 		})

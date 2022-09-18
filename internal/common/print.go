@@ -23,3 +23,12 @@ func PrintCode(fileSet *token.FileSet, file *ast.File) (out []byte, err error) {
 	}
 	return buf.Bytes(), nil
 }
+
+// FormatSource 格式化源代码
+func FormatSource(src []byte) ([]byte, error) {
+	fset, f, err := ParseOneFile("code.go", src)
+	if err != nil {
+		return nil, err
+	}
+	return PrintCode(fset, f)
+}

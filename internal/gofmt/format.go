@@ -7,10 +7,10 @@ package gofmt
 import (
 	"fmt"
 	"go/ast"
+	"log"
 	"os"
 
 	"github.com/fsgo/go_fmt/internal/common"
-	"github.com/fsgo/go_fmt/internal/fieldalignment"
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
 	"github.com/fsgo/go_fmt/internal/ximports"
@@ -40,47 +40,39 @@ func Format(fileName string, src []byte, opts *Options) (code []byte, formatted 
 	}
 
 	if options.Trace {
-		fmt.Println("[go.module]", fileName, "--->", module)
+		log.Println("[go.module]", fileName, "--->", module)
 	}
 
 	options.LocalModule = module
-	outImports, errImports := ximports.FormatImports(fileName, src, options)
-	if errImports != nil {
-		return nil, false, errImports
-	}
-	src = outImports
 
-	f := &xpasser.File{
-		FileName: fileName,
-	}
+	file, err := xpasser.ParserFile(fileName, src)
 
-	if err = f.Load(src); err != nil {
+	if err != nil {
 		return nil, false, err
 	}
 	// ast.Print(fileSet, file)
 
-	file, err := fix(f, options)
+	code, err = fix(fileName, file, options)
 	if err != nil {
 		return nil, false, err
 	}
-	code, err = common.PrintCode(f.FileSet, file)
 	return code, true, err
 }
 
-func fix(f *xpasser.File, opt *Options) (*ast.File, error) {
+func fix(fileName string, file *ast.File, opt *Options) ([]byte, error) {
 	// ast.Print(fileSet,file)
+	fset := xpasser.Default.FSet
 	if opt.Simplify {
-		simplify.Format(f.FileSet, f.AstFile)
+		simplify.Format(fset, file)
 	}
 
-	FormatComments(f.FileSet, f.AstFile, opt)
+	FormatComments(fset, file, opt)
 
-	file := f.AstFile
 	if len(opt.RewriteRules) > 0 {
 		var err error
 		file, err = simplify.Rewrites(file, opt.RewriteRules)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("rewrite failed: %w", err)
 		}
 	}
 
@@ -88,13 +80,21 @@ func fix(f *xpasser.File, opt *Options) (*ast.File, error) {
 		var err error
 		file, err = simplify.Rewrites(file, simplify.BuildInRewriteRules())
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("rewrite with build in rules failed: %w", err)
 		}
 	}
 
-	if opt.FieldAlignment == 1 {
-		fieldalignment.Run(f.FileSet, file, true)
-	}
+	// if opt.FieldAlignment == 1 {
+	// 	fieldalignment.Run(fset, file, true)
+	// }
 
-	return file, nil
+	code, err := ximports.FormatImports(fileName, file, opt)
+	if err != nil {
+		return nil, fmt.Errorf("format import failed: %w", err)
+	}
+	code, err = common.FormatSource(code)
+	if err != nil {
+		return nil, fmt.Errorf("reformat failed: %w, code=\n%s", err, code)
+	}
+	return code, nil
 }

@@ -8,10 +8,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // NewFormatter 创建一个新的带默认格式化规则的格式化实例
@@ -36,6 +38,11 @@ func (ft *Formatter) Execute(opt *Options) error {
 }
 
 func (ft *Formatter) execute(opt *Options) error {
+	err := xpasser.Load(opt.Files)
+	if opt.Trace {
+		log.Println("xpasser.Load:", err)
+	}
+
 	files, err := opt.AllGoFiles()
 	if err != nil {
 		return err
@@ -99,6 +106,9 @@ func (ft *Formatter) printFmtResult(fileName string, change bool, event string, 
 		return
 	}
 	txt := fmt.Sprintf(" %8s : %s", event, fileName)
+	if err != nil {
+		txt += " " + err.Error()
+	}
 	txt = color(txt)
 	fmt.Fprint(os.Stderr, txt, "\n")
 }

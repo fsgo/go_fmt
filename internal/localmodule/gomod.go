@@ -5,7 +5,7 @@
 package localmodule
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -14,7 +14,7 @@ import (
 func detectByGoMod(opt *common.Options, fileName string) (string, error) {
 	goModPath, err := common.FindGoModPath(fileName)
 	if opt.Trace {
-		fmt.Println("detect go.module, file=", fileName, "go.mod=", goModPath, "err=", err)
+		log.Println("detect go.module, file=", fileName, "go.mod=", goModPath, "err=", err)
 	}
 	if err != nil {
 		return "", err

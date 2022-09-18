@@ -5,7 +5,7 @@
 package ximports
 
 import (
-	"fmt"
+	"log"
 
 	"golang.org/x/tools/go/ast/astutil"
 
@@ -25,7 +25,7 @@ func Clean(fileName string, src []byte) ([]byte, error) {
 	for _, imp := range file.Imports {
 		if !astutil.UsesImport(file, imp.Path.Value) {
 			suc := astutil.DeleteImport(fileSet, file, imp.Path.Value)
-			fmt.Println("clean:", imp.Path.Value, suc)
+			log.Println("clean:", imp.Path.Value, suc)
 		}
 	}
 	return common.PrintCode(fileSet, file)

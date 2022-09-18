@@ -5,6 +5,7 @@
 package ximports
 
 import (
+
 	/*
 	 * 多行注释1
 	 */
@@ -17,6 +18,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
+	"log"
 	"path/filepath"
 	"regexp"
 	"strconv" // strconv 后面
@@ -24,6 +26,7 @@ import (
 
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // FormatImports 格式化 import 部分
@@ -31,10 +34,16 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的 import
-func FormatImports(fileName string, src []byte, opts *common.Options) (out []byte, err error) {
+func FormatImports(fileName string, file *ast.File, opts *common.Options) (out []byte, err error) {
 	opts = opts.Clone()
 
-	_, file, err := common.ParseOneFile(fileName, src)
+	bf := &bytes.Buffer{}
+	if err = format.Node(bf, xpasser.Default.FSet, file); err != nil {
+		return nil, err
+	}
+	src := bf.Bytes()
+
+	_, file, err = common.ParseOneFile(fileName, src)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +59,7 @@ func FormatImports(fileName string, src []byte, opts *common.Options) (out []byt
 	}
 
 	if opts.Trace {
-		fmt.Println("ThirdParty Modules:", opts.ThirdModules)
+		log.Println("ThirdParty Modules:", opts.ThirdModules)
 	}
 
 	var importDecls []*ast.GenDecl
@@ -95,34 +104,34 @@ func FormatImports(fileName string, src []byte, opts *common.Options) (out []byt
 	}
 
 	if opts.Trace {
-		fmt.Println("originImports:", originImports)
+		log.Println("originImports:", originImports)
 	}
 
 	var buf bytes.Buffer
 	var start int
 	for i := 0; i < len(importDecls); i++ {
 		decl := importDecls[i]
+
 		buf.Write(src[start : decl.Pos()-1])
 
 		importNew := formatImportDecls(originImports[i], opts)
 		if len(importNew) > 0 {
 			buf.Write(importNew)
 		}
-
 		start = int(decl.End())
 	}
 
 	buf.Write(src[start:])
-	code, err := format.Source(buf.Bytes())
+	code := cleanSpecCode(buf.Bytes())
+	code, err = common.FormatSource(code)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("format.Source failed: %w, code=\n%s", err, buf.String())
 	}
-	return cleanSpecCode(code), nil
+	return code, err
 }
 
 // parserImportSrc 直接对 import 部分的源代码进行解析
 func parserImportSrc(src []byte) (lines []*importDecl, err error) {
-
 	body := bytes.TrimSpace(src[len("import"):])
 	body = bytes.TrimLeft(body, "(")
 	body = bytes.TrimRight(body, ")")
