@@ -3,9 +3,24 @@
 ## 1.功能说明
 * 格式化 import 部分：分3段式，依默认为 `标准库`、`第三方库`、`项目自身库`
 * 格式化单行注释：若为 `//注释内容`，调整为 `//{空格}注释内容`
-* 默认只对git项目库里有修改的进行格式化
+* 默认只对 git 项目库里有修改的进行格式化
 * 支持将多行的 copyright 注释修改为单行格式(默认不调整)
 * 简化代码
+* struct 赋值表达式，自动补齐 key
+
+
+<details><summary><i>Example</i></summary>
+
+```
+type User struct {
+	Name string
+	Age int
+}
+- u2 := User{"hello", 12}
+
++ u2 := User{Name: "hello", Age: 12}
+```
+</details>
 
 对于 import 部分：
 > 1.可使用`-mi`参数来控制是否将多段import合并为一段（默认否）。  

@@ -8,11 +8,15 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 // FormatComments 对代码注释进行格式化
 // 若是空行注释将删除
-func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
+func FormatComments(req *common.Request) {
+	f := req.AstFile
+	options := req.Opt
 	for _, cms := range f.Comments {
 		var cmList []*ast.Comment
 		for _, cm := range cms.List {
@@ -35,7 +39,7 @@ func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 				}
 			} else if strings.HasPrefix(cm.Text, "/*") {
 				// 多行注释
-				if !fixMultilineComment(fileSet, cm, options) {
+				if !fixMultilineComment(req.FSet, cm, options) {
 					continue
 				}
 			}
@@ -47,7 +51,7 @@ func FormatComments(fileSet *token.FileSet, f *ast.File, options *Options) {
 }
 
 // fixMultilineComment 多行注释处理
-func fixMultilineComment(fileSet *token.FileSet, cm *ast.Comment, options *Options) (ok bool) {
+func fixMultilineComment(fileSet *token.FileSet, cm *ast.Comment, options Options) (ok bool) {
 	if options.SingleLineCopyright {
 		fixCopyright(fileSet, cm)
 	}

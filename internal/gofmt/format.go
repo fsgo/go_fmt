@@ -6,13 +6,13 @@ package gofmt
 
 import (
 	"fmt"
-	"go/ast"
 	"log"
 	"os"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
+	"github.com/fsgo/go_fmt/internal/xanalysis"
 	"github.com/fsgo/go_fmt/internal/ximports"
 	"github.com/fsgo/go_fmt/internal/xpasser"
 )
@@ -20,7 +20,7 @@ import (
 // Options 别名
 type Options = common.Options
 
-// Format 输出格式化的go代码
+// Format 输出格式化的 go 代码
 func Format(fileName string, src []byte, opts *Options) (code []byte, formatted bool, err error) {
 	options := opts.Clone()
 	if src == nil {
@@ -46,49 +46,57 @@ func Format(fileName string, src []byte, opts *Options) (code []byte, formatted 
 	options.LocalModule = module
 
 	file, err := xpasser.ParserFile(fileName, src)
-
 	if err != nil {
 		return nil, false, err
 	}
+
+	req := &common.Request{
+		FileName: fileName,
+		FSet:     xpasser.Default.FSet,
+		AstFile:  file,
+		Opt:      *options,
+	}
 	// ast.Print(fileSet, file)
 
-	code, err = fix(fileName, file, options)
+	code, err = fix(req)
 	if err != nil {
 		return nil, false, err
 	}
 	return code, true, err
 }
 
-func fix(fileName string, file *ast.File, opt *Options) ([]byte, error) {
+func fix(req *common.Request) ([]byte, error) {
 	// ast.Print(fileSet,file)
-	fset := xpasser.Default.FSet
-	if opt.Simplify {
-		simplify.Format(fset, file)
+	if req.Opt.Simplify {
+		simplify.Format(req)
 	}
+	FormatComments(req)
 
-	FormatComments(fset, file, opt)
-
-	if len(opt.RewriteRules) > 0 {
+	if len(req.Opt.RewriteRules) > 0 {
 		var err error
-		file, err = simplify.Rewrites(file, opt.RewriteRules)
+		file, err := simplify.Rewrites(req, req.Opt.RewriteRules)
 		if err != nil {
 			return nil, fmt.Errorf("rewrite failed: %w", err)
 		}
+		req.AstFile = file
 	}
 
-	if opt.RewriteWithBuildIn {
+	if req.Opt.RewriteWithBuildIn {
 		var err error
-		file, err = simplify.Rewrites(file, simplify.BuildInRewriteRules())
+		file, err := simplify.Rewrites(req, simplify.BuildInRewriteRules())
 		if err != nil {
 			return nil, fmt.Errorf("rewrite with build in rules failed: %w", err)
 		}
+		req.AstFile = file
 	}
 
 	// if opt.FieldAlignment == 1 {
 	// 	fieldalignment.Run(fset, file, true)
 	// }
 
-	code, err := ximports.FormatImports(fileName, file, opt)
+	xanalysis.Format(req)
+
+	code, err := ximports.FormatImports(req)
 	if err != nil {
 		return nil, fmt.Errorf("format import failed: %w", err)
 	}

@@ -11,8 +11,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-	"github.com/fsgo/go_fmt/internal/simplify"
 )
 
 // ImportGroupFunc import 排序逻辑
@@ -214,7 +212,7 @@ sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 	commandLine.Var(&rewriteRule, "r", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
 
 	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", false, `rewrite with build in rules:
-`+strings.Join(simplify.BuildInRewriteRules(), "\n"))
+`+strings.Join(BuildInRewriteRules(), "\n"))
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]

@@ -10,7 +10,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/common"
 )
 
-// 通过项目的go.mod 文件来获取项目的module值
+// 通过项目的 go.mod 文件来获取项目的 module 值
 func detectByGoMod(opt *common.Options, fileName string) (string, error) {
 	goModPath, err := common.FindGoModPath(fileName)
 	if opt.Trace {

@@ -16,7 +16,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/format"
 	"go/token"
 	"log"
 	"path/filepath"
@@ -26,7 +25,6 @@ import (
 
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
-	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // FormatImports 格式化 import 部分
@@ -34,16 +32,18 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的 import
-func FormatImports(fileName string, file *ast.File, opts *common.Options) (out []byte, err error) {
-	opts = opts.Clone()
+func FormatImports(req *common.Request) (out []byte, err error) {
+	opts := req.Opt.Clone()
 
-	bf := &bytes.Buffer{}
-	if err = format.Node(bf, xpasser.Default.FSet, file); err != nil {
+	file := req.AstFile
+	fileName := req.FileName
+
+	src, err := req.FormatFile()
+	if err != nil {
 		return nil, err
 	}
-	src := bf.Bytes()
 
-	_, file, err = common.ParseOneFile(fileName, src)
+	_, file, err = req.ReParse()
 	if err != nil {
 		return nil, err
 	}

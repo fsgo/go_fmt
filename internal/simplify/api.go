@@ -10,15 +10,15 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 // Format call simplify
 //
 // rewrite.go 和 simplify.go 来自于 go1.19
-func Format(fileSet *token.FileSet, f *ast.File) {
-	fixStructExprNoKey(fileSet, f)
-	simplify(f)
-	fixStructBlankLine(fileSet, f)
+func Format(req *common.Request) {
+	simplify(req.AstFile)
 }
 
 // Rewrite 简化代码
@@ -38,7 +38,8 @@ func Rewrite(f *ast.File, rule string) (*ast.File, error) {
 }
 
 // Rewrites rewrite with many rules
-func Rewrites(f *ast.File, rules []string) (*ast.File, error) {
+func Rewrites(req *common.Request, rules []string) (*ast.File, error) {
+	f := req.AstFile
 	var err error
 	for i := 0; i < len(rules); i++ {
 		if len(rules[i]) > 0 {
@@ -48,14 +49,4 @@ func Rewrites(f *ast.File, rules []string) (*ast.File, error) {
 		}
 	}
 	return f, nil
-}
-
-var rewriteRules = []string{
-	"a[b:len(a)] -> a[b:]",
-	"interface{} -> any",
-}
-
-// BuildInRewriteRules 获取内置的简化规则
-func BuildInRewriteRules() []string {
-	return rewriteRules
 }

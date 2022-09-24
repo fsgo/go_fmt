@@ -38,15 +38,15 @@ func (ft *Formatter) Execute(opt *Options) error {
 }
 
 func (ft *Formatter) execute(opt *Options) error {
-	err := xpasser.Load(opt.Files)
-	if opt.Trace {
-		log.Println("xpasser.Load:", err)
-	}
-
 	files, err := opt.AllGoFiles()
 	if err != nil {
 		return err
 	}
+	err = xpasser.Load(*opt, nil)
+	if err != nil {
+		log.Println("[wf] xpasser.Load:", err)
+	}
+
 	ft.diffs = nil
 
 	ch := make(chan bool, 20) // 控制并发

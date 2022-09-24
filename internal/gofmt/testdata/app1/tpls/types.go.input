@@ -1,0 +1,13 @@
+// Copyright(C) 2022 github.com/fsgo  All Rights Reserved.
+// Author: hidu <duv123@gmail.com>
+// Date: 2022/9/24
+
+package app1
+
+type Piece struct{
+  A,B,C,D,E,F any
+}
+
+type Point struct{
+  X,Y any
+}

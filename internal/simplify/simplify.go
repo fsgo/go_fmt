@@ -8,6 +8,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 type simplifier struct{}
@@ -166,4 +168,9 @@ func isEmpty(f *ast.File, g *ast.GenDecl) bool {
 	}
 
 	return true
+}
+
+// BuildInRewriteRules 获取内置的简化规则
+func BuildInRewriteRules() []string {
+	return common.BuildInRewriteRules()
 }

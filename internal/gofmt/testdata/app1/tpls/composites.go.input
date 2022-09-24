@@ -3,7 +3,7 @@
 
 // simplify code -> true
 
-package P
+package app1
 
 type T struct {
 	x, y int

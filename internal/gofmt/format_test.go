@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/fsgo/go_fmt/internal/xpasser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFormat_rule1(t *testing.T) {
@@ -77,42 +80,38 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 
 	var checkFileTotal int
 
-	err := filepath.Walk(rule1Dir+"/input/", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(rule1Dir+"/input/", func(path string, info os.FileInfo, errWalk error) error {
+		if errWalk != nil || !strings.HasSuffix(path, ".go.txt") {
+			return nil
+		}
+		checkFileTotal++
 		t.Run(path, func(t *testing.T) {
-			if err == nil && strings.HasSuffix(path, ".go.txt") {
-				checkFileTotal++
+			xpasser.Reset()
+			defer xpasser.Reset()
 
-				got, _, err := Format(path, nil, opt)
-				if err != nil {
-					t.Errorf("Format returl error: %s", err)
-					return
-				}
-				got = bytes.TrimSpace(got)
-				want, err := os.ReadFile(rule1Dir + "want/" + filepath.Base(path))
-				if err != nil {
-					t.Fatalf("ioutil.ReadFile with error: %s", err)
-				}
-				want = bytes.TrimSpace(want)
-				fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
-				fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
-				if !bytes.Equal(got, want) {
-					err1 := os.WriteFile(fileGot, got, 0644)
-					err2 := os.WriteFile(fileWant, want, 0644)
-					t.Errorf("not eq, fileget=%q (write=%v), filewant=%q (write=%v)", fileGot, err1, fileWant, err2)
-				} else {
-					_ = os.Remove(fileGot)
-					_ = os.Remove(fileWant)
-				}
+			pts := []string{"file=" + path}
+			require.NoError(t, xpasser.Load(*opt, pts))
+
+			got, _, err := Format(path, nil, opt)
+			require.NoError(t, err)
+			got = bytes.TrimSpace(got)
+			want, err := os.ReadFile(rule1Dir + "want/" + filepath.Base(path))
+			require.NoError(t, err)
+
+			want = bytes.TrimSpace(want)
+			fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
+			fileWant := rule1Dir + "/tmp/" + filepath.Base(path) + ".want"
+			if !bytes.Equal(got, want) {
+				err1 := os.WriteFile(fileGot, got, 0644)
+				err2 := os.WriteFile(fileWant, want, 0644)
+				t.Errorf("not eq, fileget=%q (write=%v), filewant=%q (write=%v)", fileGot, err1, fileWant, err2)
+			} else {
+				_ = os.Remove(fileGot)
+				_ = os.Remove(fileWant)
 			}
 		})
 		return nil
 	})
-
-	if err != nil {
-		t.Errorf("filepath.Walk with error:%s", err.Error())
-	}
-
-	if checkFileTotal < 1 {
-		t.Fatalf("checkFileTotal==0")
-	}
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, checkFileTotal, 1)
 }
