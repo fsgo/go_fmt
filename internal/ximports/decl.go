@@ -17,7 +17,12 @@ import (
 )
 
 type importDecl struct {
-	Path     string
+	// Path eg:
+	// "fmt"
+	// _ "http"
+	// a "fmt"
+	Path string
+
 	Comments []string
 }
 
@@ -64,7 +69,7 @@ func (decl *importDecl) realPathFromCmt() string {
 // "a.com/aa"
 func (decl *importDecl) RealPath() string {
 	name := strings.TrimLeft(decl.Path, `/*_ `)
-	if name == "" {
+	if len(name) == 0 {
 		name = decl.realPathFromCmt()
 	}
 
@@ -146,7 +151,7 @@ const importGroupSpit = "\"github.com/fsgo/gofmtgofmtgofmtgofmt\"\n"
 
 // formatImportDecls 格式化 import 的一个分组
 // 会对这个分组重新排序
-func formatImportDecls(decls []*importDecl, options *common.Options) []byte {
+func formatImportDecls(decls []*importDecl, options common.Options) []byte {
 	if len(decls) == 0 {
 		return nil
 	}

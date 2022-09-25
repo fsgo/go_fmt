@@ -33,7 +33,8 @@ import (
 // 单独的注释行会保留
 // 不会自动去除没使用的 import
 func FormatImports(req *common.Request) (out []byte, err error) {
-	opts := req.Opt.Clone()
+	_opts := req.Opt.Clone()
+	opts := *_opts
 
 	file := req.AstFile
 	fileName := req.FileName
@@ -54,7 +55,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 		return src, nil
 	}
 
-	if err = findSubModules(fileName, opts); err != nil {
+	if err = findSubModules(fileName, &opts); err != nil {
 		return nil, err
 	}
 

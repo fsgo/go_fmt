@@ -104,6 +104,13 @@ func Test_importDecl_RealPath(t *testing.T) {
 			},
 			want: `fmt`,
 		},
+		{
+			name: "case 10",
+			fields: fields{
+				Path: `_ "net/http" //注释`,
+			},
+			want: `net/http`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

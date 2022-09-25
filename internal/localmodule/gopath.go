@@ -27,7 +27,7 @@ import (
 // 2.查找src目录，其后第一个目录为域名
 // 3.默认域名再后面2级目录则为项目的模块名，如github上所有项目。
 // 4.若比较特殊，不是2级目录，也可以通过配置文件（~/.go_fmt/local_module.json）来设置
-func detectByGoPath(opt *common.Options, fileName string) (string, error) {
+func detectByGoPath(opt common.Options, fileName string) (string, error) {
 	srcDirName := fmt.Sprintf("%csrc%c", filepath.Separator, filepath.Separator)
 
 	// 若文件地址不是绝对地址，需要对地址进行补全，后续才可使用

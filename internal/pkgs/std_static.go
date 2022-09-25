@@ -1,6 +1,6 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.19
+// GO VersionFile: go1.19.1
 
 package pkgs
 

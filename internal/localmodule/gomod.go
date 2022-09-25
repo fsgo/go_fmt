@@ -11,7 +11,7 @@ import (
 )
 
 // 通过项目的 go.mod 文件来获取项目的 module 值
-func detectByGoMod(opt *common.Options, fileName string) (string, error) {
+func detectByGoMod(opt common.Options, fileName string) (string, error) {
 	goModPath, err := common.FindGoModPath(fileName)
 	if opt.Trace {
 		log.Println("detect go.module, file=", fileName, "go.mod=", goModPath, "err=", err)

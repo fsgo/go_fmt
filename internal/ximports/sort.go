@@ -11,7 +11,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/pkgs"
 )
 
-func defaultImportGroup(importPath string, opt *common.Options) int {
+func defaultImportGroup(importPath string, opt common.Options) int {
 	// 若是纯注释，则排在最上面
 	if importPath == "" {
 		return 0
@@ -39,7 +39,7 @@ func defaultImportGroup(importPath string, opt *common.Options) int {
 	return opt.GetImportGroup(common.ImportGroupThirdParty)
 }
 
-func sortImportDecls(decls []*importDecl, opts *common.Options) importDeclGroups {
+func sortImportDecls(decls []*importDecl, opts common.Options) importDeclGroups {
 	groupFn := opts.ImportGroupFn
 	if groupFn == nil {
 		groupFn = defaultImportGroup

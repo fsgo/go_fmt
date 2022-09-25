@@ -34,7 +34,7 @@ func Format(fileName string, src []byte, opts *Options) (code []byte, formatted 
 		return src, false, nil
 	}
 
-	module, err := localmodule.Get(options, fileName)
+	module, err := localmodule.Get(*options, fileName)
 	if err != nil {
 		return nil, false, err
 	}

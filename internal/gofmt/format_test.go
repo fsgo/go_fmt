@@ -11,8 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fsgo/go_fmt/internal/xpasser"
 	"github.com/stretchr/testify/require"
+
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 func TestFormat_rule1(t *testing.T) {

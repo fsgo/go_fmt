@@ -18,7 +18,7 @@ func PrintCode(fileSet *token.FileSet, file *ast.File) (out []byte, err error) {
 	printerMode |= printer.TabIndent
 	printConfig := &printer.Config{Mode: printerMode, Tabwidth: 8}
 
-	if err := printConfig.Fprint(&buf, fileSet, file); err != nil {
+	if err = printConfig.Fprint(&buf, fileSet, file); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil

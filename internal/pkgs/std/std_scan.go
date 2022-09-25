@@ -11,11 +11,24 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 )
+
+var curPkgs []string
+var curErr error
+
+var doOnce sync.Once
 
 // PKGs 获取当前环境所有的标准库
 // 值获取第一级目录
 func PKGs() ([]string, error) {
+	doOnce.Do(func() {
+		curPkgs, curErr = currentPKGs()
+	})
+	return curPkgs, curErr
+}
+
+func currentPKGs() ([]string, error) {
 	ctx := build.Default
 	if ctx.GOROOT == "" {
 		return nil, fmt.Errorf("GOROOT is empty")

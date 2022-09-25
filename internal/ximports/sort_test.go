@@ -7,13 +7,15 @@ package ximports
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/fsgo/go_fmt/internal/common"
 )
 
 func Test_sortImportDecls(t *testing.T) {
 	type args struct {
 		decls   []*importDecl
-		options *common.Options
+		options common.Options
 	}
 	tests := []struct {
 		name string
@@ -46,8 +48,12 @@ func Test_sortImportDecls(t *testing.T) {
 						},
 						Path: ``,
 					},
+					{
+						Comments: nil,
+						Path:     `_ "net/http"`,
+					},
 				},
-				options: &common.Options{
+				options: common.Options{
 					LocalModule: "github.com/a",
 				},
 			},
@@ -64,6 +70,10 @@ func Test_sortImportDecls(t *testing.T) {
 								"//a",
 							},
 							Path: ``,
+						},
+						{
+							Comments: nil,
+							Path:     `_ "net/http"`,
 						},
 					},
 				},
@@ -96,11 +106,7 @@ func Test_sortImportDecls(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := sortImportDecls(tt.args.decls, tt.args.options).String()
 			want := tt.want.String()
-			if got != want {
-				gotLen := len(got)
-				wantLen := len(want)
-				t.Errorf("sortImportDecls() len=(%d):\n%q\n======want(%d):\n%q", gotLen, got, wantLen, want)
-			}
+			require.Equal(t, want, got)
 		})
 	}
 }

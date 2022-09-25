@@ -1,0 +1,41 @@
+// Copyright(C) 2022 github.com/fsgo  All Rights Reserved.
+// Author: hidu <duv123@gmail.com>
+// Date: 2022/9/25
+
+package app2
+
+import (
+	"fmt"
+	"log"
+	"net" // after net
+	_ "net/http"
+
+	"golang.org/x/mod/modfile"
+
+	"github.com/go_fmt/app2/internal"
+)
+
+type User1 struct {
+	Name string
+	Age  int
+}
+
+func sayHello() {
+	_ = User1{Name: "hello", Age: 12}
+	_ = &User1{Name: "hello", Age: 13}
+
+	fmt.Println("hello")
+}
+
+func fn1() {
+	log.Println(modfile.AutoQuote("v1.0.0"))
+}
+
+func fn2() {
+	_ = internal.User2{Name: "hello", Age: 12}
+	_ = &internal.User2{Name: "hello", Age: 13}
+
+	log.Println(internal.Hello())
+
+	_ = net.IPNet{IP: net.IPv4zero, Mask: net.CIDRMask(31, 32)}
+}

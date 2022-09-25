@@ -11,7 +11,7 @@ import (
 )
 
 func Test_detectByGoMod(t *testing.T) {
-	opt := &common.Options{}
+	opt := common.Options{}
 	got, err := detectByGoMod(opt, "")
 	if err != nil {
 		t.Fatalf("detectByGoMod() with error:%s", err)

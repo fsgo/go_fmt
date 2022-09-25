@@ -14,7 +14,7 @@ import (
 )
 
 // ImportGroupFunc import 排序逻辑
-type ImportGroupFunc func(importPath string, opt *Options) int
+type ImportGroupFunc func(importPath string, opt Options) int
 
 // Options 选项
 type Options struct {

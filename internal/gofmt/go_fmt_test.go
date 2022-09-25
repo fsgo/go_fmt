@@ -15,12 +15,29 @@ import (
 )
 
 func TestFormatter_Execute(t *testing.T) {
-	fromDir := "testdata/app1/tpls"
-	runDir := "testdata/app1/dotest"
-	testExecute(t, fromDir, runDir)
+	tests := []struct {
+		name    string
+		caseDir string
+	}{
+		{
+			name:    "app1",
+			caseDir: "testdata/app1",
+		},
+		{
+			name:    "app2",
+			caseDir: "testdata/app2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testExecute(t, tt.caseDir)
+		})
+	}
 }
 
-func testExecute(t *testing.T, caseDir string, runDir string) {
+func testExecute(t *testing.T, caseDir string) {
+	runDir := filepath.Join(caseDir, "tmp")
+	caseDir = filepath.Join(caseDir, "tpls")
 	_ = os.RemoveAll(runDir)
 	require.NoError(t, os.MkdirAll(runDir, 0755))
 	wants := map[string]string{}
@@ -40,6 +57,7 @@ func testExecute(t *testing.T, caseDir string, runDir string) {
 			wants[to] = string(code)
 		} else {
 			to = strings.ReplaceAll(to, ".input", "")
+			_ = os.MkdirAll(filepath.Dir(to), 0755)
 			err = os.WriteFile(to, code, 0644)
 			require.NoError(t, err)
 		}

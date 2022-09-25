@@ -29,12 +29,7 @@ func IsStd(path string) bool {
 		log.Printf("scan std pkgs failed, err=%s\n", err)
 		return false
 	}
-
-	if inSlice(first, currentStds) {
-		return true
-	}
-
-	return false
+	return inSlice(first, currentStds)
 }
 
 func inSlice(needle string, haystack []string) bool {
