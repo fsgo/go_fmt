@@ -15,7 +15,7 @@ import (
 
 // DiffResult Diff 的结果
 type DiffResult interface {
-	Detail() interface{}
+	Detail() any
 	String() string
 }
 
@@ -164,6 +164,6 @@ func (r *diffReporter) String() string {
 	return strings.Join(lines, "\n\n")
 }
 
-func (r *diffReporter) Detail() interface{} {
+func (r *diffReporter) Detail() any {
 	return r.diffs
 }
