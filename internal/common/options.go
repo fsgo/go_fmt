@@ -147,7 +147,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 	var err error
 
 	for _, name := range opt.Files {
-		if name == "" {
+		if len(name) == 0 {
 			continue
 		}
 		var tmpList []string

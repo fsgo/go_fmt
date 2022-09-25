@@ -7,7 +7,8 @@ package common
 var rewriteRules = []string{
 	`a[b:len(a)] -> a[b:]`,
 	`interface{} -> any`,
-	`str == ""   -> len(str) == 0`,
+	`a == ""     -> len(a) == 0`,
+	`a != ""     -> len(a) != 0`,
 }
 
 // BuildInRewriteRules 获取内置的简化规则

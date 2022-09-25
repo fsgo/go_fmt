@@ -30,7 +30,7 @@ func PKGs() ([]string, error) {
 
 func currentPKGs() ([]string, error) {
 	ctx := build.Default
-	if ctx.GOROOT == "" {
+	if len(ctx.GOROOT) == 0 {
 		return nil, fmt.Errorf("GOROOT is empty")
 	}
 	cmd := exec.Command("go", "env", "GOROOT")

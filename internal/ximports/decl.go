@@ -40,7 +40,7 @@ func (decl *importDecl) CommentHasImportPath() bool {
 		return false
 	}
 
-	if decl.realPathFromCmt() != "" {
+	if len(decl.realPathFromCmt()) != 0 {
 		return true
 	}
 
@@ -52,7 +52,7 @@ func (decl *importDecl) realPathFromCmt() string {
 			continue
 		}
 		cmt = strings.TrimSpace(cmt[2:])
-		if cmt == "" {
+		if len(cmt) == 0 {
 			continue
 		}
 		if isImportPathLine([]byte(cmt)) {
@@ -91,7 +91,7 @@ func (decl *importDecl) Bytes() []byte {
 		buf.WriteString(cmt)
 		buf.WriteString("\n")
 	}
-	if decl.Path != "" {
+	if len(decl.Path) != 0 {
 		buf.WriteString(decl.Path)
 		buf.WriteString("\n")
 	}

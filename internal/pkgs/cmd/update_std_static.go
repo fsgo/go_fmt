@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if *out == "" {
+	if len(*out) == 0 {
 		fmt.Println("pkgs:", pkgs)
 		return
 	}

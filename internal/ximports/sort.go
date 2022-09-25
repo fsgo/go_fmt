@@ -13,7 +13,7 @@ import (
 
 func defaultImportGroup(importPath string, opt common.Options) int {
 	// 若是纯注释，则排在最上面
-	if importPath == "" {
+	if len(importPath) == 0 {
 		return 0
 	}
 

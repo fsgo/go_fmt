@@ -30,8 +30,8 @@ func Rewrite(f *ast.File, rule string) (*ast.File, error) {
 	if len(ps) != 2 {
 		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement', now got %q", rule)
 	}
-	pattern := parseExpr(ps[0], "pattern")
-	replace := parseExpr(ps[1], "replacement")
+	pattern := parseExpr(strings.TrimSpace(ps[0]), "pattern")
+	replace := parseExpr(strings.TrimSpace(ps[1]), "replacement")
 
 	fSet := token.NewFileSet()
 	return rewriteFile(fSet, pattern, replace, f), nil
