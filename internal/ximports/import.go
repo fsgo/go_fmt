@@ -5,7 +5,6 @@
 package ximports
 
 import (
-
 	/*
 	 * 多行注释1
 	 */
@@ -19,7 +18,8 @@ import (
 	"go/token"
 	"log"
 	"path/filepath"
-	"regexp"
+	"regexp" // after regexp
+	// on strconv
 	"strconv" // strconv 后面
 	"strings"
 
@@ -43,7 +43,6 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	_, file, err = req.ReParse()
 	if err != nil {
 		return nil, err
@@ -79,6 +78,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 		}
 		importDecls = append(importDecls, gen)
 
+		// 这个是整段的 import 语句
 		importSrc := src[decl.Pos()-1 : decl.End()]
 		lines, err := parserImportSrc(importSrc)
 		if err != nil {
@@ -98,7 +98,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 		originImports[nextID] = myImportDecls
 
 		// 若将多段 import merge 到一个里,nextID 不变化
-		// 下一段import 将和之前的merge到一起
+		// 下一段 import 将和之前的 merge 到一起
 		if !opts.MergeImports {
 			nextID++
 		}
@@ -124,7 +124,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 
 	buf.Write(src[start:])
 	code := cleanSpecCode(buf.Bytes())
-	code, err = common.FormatSource(code)
+	code, err = opts.Format(code)
 	if err != nil {
 		return nil, fmt.Errorf("format.Source failed: %w, code=\n%s", err, buf.String())
 	}

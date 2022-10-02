@@ -5,8 +5,12 @@
 package common
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"go/ast"
+	"go/printer"
+	"go/token"
 	"log"
 	"os"
 	"runtime"
@@ -245,4 +249,42 @@ func (opt *Options) Clone() *Options {
 	o1 := &Options{}
 	*o1 = *opt
 	return o1
+}
+
+func (opt *Options) getTabWidth() int {
+	if opt.TabWidth > 0 {
+		return opt.TabWidth
+	}
+	return 8
+}
+
+const printerNormalizeNumbers = 1 << 30
+
+// Source 格式化文件
+func (opt *Options) Source(fileSet *token.FileSet, file *ast.File) ([]byte, error) {
+	var buf bytes.Buffer
+	printerMode := printer.Mode(0) | printer.UseSpaces
+	if opt.TabIndent {
+		printerMode |= printer.TabIndent
+	}
+	printerMode |= printerNormalizeNumbers
+
+	printConfig := &printer.Config{
+		Mode:     printerMode,
+		Tabwidth: opt.getTabWidth(),
+	}
+
+	if err := printConfig.Fprint(&buf, fileSet, file); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// Format 重新格式化代码
+func (opt *Options) Format(src []byte) ([]byte, error) {
+	fset, f, err := ParseOneFile("tmp.go", src)
+	if err != nil {
+		return nil, err
+	}
+	return opt.Source(fset, f)
 }

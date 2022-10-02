@@ -27,30 +27,30 @@ func Test_sortImportDecls(t *testing.T) {
 			args: args{
 				decls: []*importDecl{
 					{
-						Comments: nil,
-						Path:     `"github.com/b"`,
+						Docs: nil,
+						Path: `"github.com/b"`,
 					},
 					{
-						Comments: nil,
-						Path:     `"a.com/a"`,
+						Docs: nil,
+						Path: `"a.com/a"`,
 					},
 					{
-						Comments: nil,
-						Path:     `"github.com/a"`,
+						Docs: nil,
+						Path: `"github.com/a"`,
 					},
 					{
-						Comments: nil,
-						Path:     `"fmt"`,
+						Docs: nil,
+						Path: `"fmt"`,
 					},
 					{
-						Comments: []string{
+						Docs: []string{
 							"//a",
 						},
 						Path: ``,
 					},
 					{
-						Comments: nil,
-						Path:     `_ "net/http"`,
+						Docs: nil,
+						Path: `_ "net/http"`,
 					},
 				},
 				options: common.Options{
@@ -62,18 +62,18 @@ func Test_sortImportDecls(t *testing.T) {
 					Group: 0,
 					Decls: []*importDecl{
 						{
-							Comments: nil,
-							Path:     `"fmt"`,
+							Docs: nil,
+							Path: `"fmt"`,
 						},
 						{
-							Comments: []string{
+							Docs: []string{
 								"//a",
 							},
 							Path: ``,
 						},
 						{
-							Comments: nil,
-							Path:     `_ "net/http"`,
+							Docs: nil,
+							Path: `_ "net/http"`,
 						},
 					},
 				},
@@ -81,12 +81,12 @@ func Test_sortImportDecls(t *testing.T) {
 					Group: 1,
 					Decls: []*importDecl{
 						{
-							Comments: nil,
-							Path:     `"github.com/b"`,
+							Docs: nil,
+							Path: `"github.com/b"`,
 						},
 						{
-							Comments: nil,
-							Path:     `"a.com/a"`,
+							Docs: nil,
+							Path: `"a.com/a"`,
 						},
 					},
 				},
@@ -94,8 +94,8 @@ func Test_sortImportDecls(t *testing.T) {
 					Group: 2,
 					Decls: []*importDecl{
 						{
-							Comments: nil,
-							Path:     `"github.com/a"`,
+							Docs: nil,
+							Path: `"github.com/a"`,
 						},
 					},
 				},

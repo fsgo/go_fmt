@@ -5,7 +5,16 @@
 package ximports
 
 import (
+	"bytes"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 func Test_isImportPathLine(t *testing.T) {
@@ -170,6 +179,247 @@ func Test_isImportPathLine(t *testing.T) {
 			if got := isImportPathLine(tt.args.bf); got != tt.want {
 				t.Errorf("isImportPathLine(%q) = %v, want %v", tt.args.bf, got, tt.want)
 			}
+		})
+	}
+}
+
+func Test_parserImportSrc(t *testing.T) {
+	type args struct {
+		src string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantLines []*importDecl
+		wantErr   bool
+	}{
+		{
+			name: "case 1",
+			args: args{
+				src: `
+import (
+	"reflect"
+	"testing"
+)`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `"reflect"`,
+				},
+				{
+					Path: `"testing"`,
+				},
+			},
+		},
+		{
+			name: "case 2",
+			args: args{
+				src: `
+import (
+    /* on reflect 1 */
+    // on reflect 2
+	"reflect"  /* after reflect */
+
+	// on fmt 1
+	// on fmt 2
+	"fmt" // after fmt
+)`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `"reflect"  /* after reflect */`,
+					Docs: []string{
+						`/* on reflect 1 */`,
+						`// on reflect 2`,
+					},
+				},
+				{
+					Path: `"fmt" // after fmt`,
+					Docs: []string{
+						`// on fmt 1`,
+						`// on fmt 2`,
+					},
+				},
+			},
+		},
+		{
+			name: "case 3",
+			args: args{
+				src: `
+import (
+    // cm 0-0   
+
+    /* on reflect 1 */
+    // on reflect 2
+	 r "reflect"  /* after reflect */
+
+	// cm 2-0
+
+	// on fmt 1
+	// on fmt 2
+	_ "fmt" // after fmt
+
+   // "http"
+
+   // cm 1-0
+   /* cm 1-1 */
+)`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `r "reflect"  /* after reflect */`,
+					Docs: []string{
+						`// cm 0-0`,
+						`/* on reflect 1 */`,
+						`// on reflect 2`,
+					},
+				},
+				{
+					Path: `_ "fmt" // after fmt`,
+					Docs: []string{
+						`// cm 2-0`,
+						`// on fmt 1`,
+						`// on fmt 2`,
+					},
+				},
+				{
+					Path: ``,
+					Docs: []string{
+						`// "http"`,
+					},
+				},
+				{
+					Path: ``,
+					Docs: []string{
+						`// cm 1-0`,
+						`/* cm 1-1 */`,
+					},
+				},
+			},
+		},
+		{
+			name: "case 4",
+			args: args{
+				src: `
+import "fmt"
+`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `"fmt"`,
+				},
+			},
+		},
+		{
+			name: "case 5",
+			args: args{
+				src: `
+import "fmt" // after fmt 
+`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `"fmt" // after fmt`,
+				},
+			},
+		},
+		{
+			name: "case 6",
+			args: args{
+				src: `
+import (
+	// on fmt
+	"fmt"
+	"log"
+	// on net
+	"net" // after net
+	"github.com/go_fmt/app2/internal"
+	"golang.org/x/mod/modfile"
+	_ "net/http" // after http
+)
+`,
+			},
+			wantLines: []*importDecl{
+				{
+					Path: `"fmt"`,
+					Docs: []string{
+						`// on fmt`,
+					},
+				},
+				{
+					Path: `"log"`,
+				},
+				{
+					Path: `"net" // after net`,
+					Docs: []string{
+						`// on net`,
+					},
+				},
+				{
+					Path: `"github.com/go_fmt/app2/internal"`,
+				},
+				{
+					Path: `"golang.org/x/mod/modfile"`,
+				},
+				{
+					Path: `_ "net/http" // after http`,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			src := strings.TrimSpace(tt.args.src)
+			gotLines, err := parserImportSrc([]byte(src))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parserImportSrc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotLines, tt.wantLines) {
+				t.Errorf("parserImportSrc() \ngot  = %v, \nwant = %v", gotLines, tt.wantLines)
+			}
+		})
+	}
+}
+
+func TestFormatImports(t *testing.T) {
+	ms, err := filepath.Glob("./testdata/*.input")
+	require.NoError(t, err)
+	require.NotEmpty(t, ms)
+	for i := 0; i < len(ms); i++ {
+		fp := ms[i]
+		t.Run(fp, func(t *testing.T) {
+			tmpPath := fp + ".got"
+			_ = os.Remove(tmpPath)
+
+			src, err := os.ReadFile(fp)
+			require.NoError(t, err)
+			fs, af, err := common.ParseOneFile(fp, src)
+
+			require.NoError(t, err)
+			req := &common.Request{
+				FileName: fp,
+				FSet:     fs,
+				AstFile:  af,
+				Opt: common.Options{
+					LocalModule: "github.com/go_fmt/app2",
+					TabIndent:   true,
+					TabWidth:    8,
+				},
+			}
+			got, err := FormatImports(req)
+			require.NoError(t, err)
+
+			wantFp := fp[:len(fp)-len(".input")] + ".want"
+			want, err := os.ReadFile(wantFp)
+			require.NoError(t, err)
+
+			if !bytes.Equal(want, got) {
+				_ = os.WriteFile(tmpPath, got, 0644)
+				t.Logf("got file=%s", tmpPath)
+			}
+
+			require.Equal(t, string(want), string(got))
 		})
 	}
 }

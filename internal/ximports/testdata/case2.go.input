@@ -6,12 +6,12 @@ package app2
 
 import (
 	// on fmt
-	"fmt"
-	"log"
+	"fmt" // after fmt
+	"log" // after log
 	// on net
 	"net" // after net
-	"github.com/go_fmt/app2/internal"
-	"golang.org/x/mod/modfile"
+	"github.com/go_fmt/app2/internal" // after internal
+	"golang.org/x/mod/modfile" /* after modfile */
 	_ "net/http" // after http
 )
 

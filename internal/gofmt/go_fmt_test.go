@@ -12,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 func TestFormatter_Execute(t *testing.T) {
@@ -36,6 +38,9 @@ func TestFormatter_Execute(t *testing.T) {
 }
 
 func testExecute(t *testing.T, caseDir string) {
+	defer xpasser.Reset()
+	xpasser.Reset()
+
 	runDir := filepath.Join(caseDir, "tmp")
 	caseDir = filepath.Join(caseDir, "tpls")
 	_ = os.RemoveAll(runDir)
@@ -95,5 +100,4 @@ func testExecute(t *testing.T, caseDir string) {
 			require.Equal(t, want, string(bf))
 		})
 	}
-
 }

@@ -19,11 +19,17 @@ import (
 type importDecl struct {
 	// Path eg:
 	// "fmt"
+	// "fmt" // after fmt
 	// _ "http"
 	// a "fmt"
 	Path string
 
-	Comments []string
+	// Docs 在 path 之上的 文档
+	// eg：
+	// // on fmt
+	// /* on fmt */
+	// // "http" -> 被注释的 import line
+	Docs []string
 }
 
 func (decl *importDecl) AddComment(bf []byte) {
@@ -31,12 +37,12 @@ func (decl *importDecl) AddComment(bf []byte) {
 	if len(v) == 0 {
 		return
 	}
-	decl.Comments = append(decl.Comments, string(v))
+	decl.Docs = append(decl.Docs, string(v))
 }
 
 // CommentHasImportPath 是否有注释 掉的import path
 func (decl *importDecl) CommentHasImportPath() bool {
-	if len(decl.Comments) == 0 {
+	if len(decl.Docs) == 0 {
 		return false
 	}
 
@@ -47,7 +53,7 @@ func (decl *importDecl) CommentHasImportPath() bool {
 	return false
 }
 func (decl *importDecl) realPathFromCmt() string {
-	for _, cmt := range decl.Comments {
+	for _, cmt := range decl.Docs {
 		if !strings.HasPrefix(cmt, "//") || len(cmt) < 3 {
 			continue
 		}
@@ -83,7 +89,7 @@ func (decl *importDecl) RealPath() string {
 // Bytes 重新序列化
 func (decl *importDecl) Bytes() []byte {
 	var buf bytes.Buffer
-	for _, cmt := range decl.Comments {
+	for _, cmt := range decl.Docs {
 
 		// 对注释中的多个空格替换为一个空格
 		cmt = regexp.MustCompile(`\s+`).ReplaceAllString(cmt, " ")
@@ -96,6 +102,11 @@ func (decl *importDecl) Bytes() []byte {
 		buf.WriteString("\n")
 	}
 	return buf.Bytes()
+}
+
+func (decl *importDecl) String() string {
+	bf, _ := json.Marshal(decl)
+	return string(bf)
 }
 
 type importDeclGroups []*importDeclGroup
@@ -155,9 +166,8 @@ func formatImportDecls(decls []*importDecl, options common.Options) []byte {
 	if len(decls) == 0 {
 		return nil
 	}
-	var buf bytes.Buffer
+	var buf0 bytes.Buffer
 
-	buf.WriteString("import (\n")
 	groups := sortImportDecls(decls, options)
 
 	if options.Trace {
@@ -170,17 +180,16 @@ func formatImportDecls(decls []*importDecl, options common.Options) []byte {
 
 		// 每个分组使用特定分割
 		if len(groupCode) > 0 {
-			buf.WriteString("\n")
-			buf.WriteString(importGroupSpit)
-			buf.WriteString(string(groupCode))
+			buf0.WriteString(importGroupSpit)
+			buf0.WriteString(string(groupCode))
+			buf0.WriteString("\n")
 		}
 	}
-	if !bytes.HasSuffix(buf.Bytes(), []byte("\n")) {
-		buf.WriteString("\n")
-	}
-
-	buf.WriteString(")\n")
-
+	var buf bytes.Buffer
+	buf.WriteString("import (\n")
+	buf.Write(bytes.TrimSpace(buf0.Bytes()))
+	buf.WriteString("\n)\n")
+	// log.Println("after sort=\n",buf.String())
 	return buf.Bytes()
 }
 

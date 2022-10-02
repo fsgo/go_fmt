@@ -9,21 +9,22 @@ import (
 	"fmt"
 	"log"
 	// on net
-	"net" // after net
+	"net"        // after net
+	_ "net/http" // after http
+
 	"github.com/go_fmt/app2/internal"
 	"golang.org/x/mod/modfile"
-	_ "net/http" // after http
 )
 
 type User1 struct {
 	Name string
-	Age int
+	Age  int
 }
 
 func sayHello() {
-    _= User1{"hello", 12}
-    _= &User1{"hello", 13}
-    
+	_ = User1{"hello", 12}
+	_ = &User1{"hello", 13}
+
 	fmt.Println("hello")
 }
 
@@ -32,10 +33,10 @@ func fn1() {
 }
 
 func fn2() {
-    _= internal.User2{"hello", 12}
-    _= &internal.User2{"hello", 13}
-    
+	_ = internal.User2{"hello", 12}
+	_ = &internal.User2{"hello", 13}
+
 	log.Println(internal.Hello())
-	
-	_=net.IPNet{net.IPv4zero,net.CIDRMask(31,32)}
+
+	_ = net.IPNet{net.IPv4zero, net.CIDRMask(31, 32)}
 }

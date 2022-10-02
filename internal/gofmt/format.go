@@ -100,7 +100,7 @@ func fix(req *common.Request) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("format import failed: %w", err)
 	}
-	code, err = common.FormatSource(code)
+	code, err = req.Opt.Format(code)
 	if err != nil {
 		return nil, fmt.Errorf("reformat failed: %w, code=\n%s", err, code)
 	}

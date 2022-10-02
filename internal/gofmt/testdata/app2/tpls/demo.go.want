@@ -5,10 +5,12 @@
 package app2
 
 import (
+	// on fmt
 	"fmt"
 	"log"
-	"net" // after net
-	_ "net/http"
+	// on net
+	"net"        // after net
+	_ "net/http" // after http
 
 	"golang.org/x/mod/modfile"
 

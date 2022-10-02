@@ -115,8 +115,8 @@ func Test_importDecl_RealPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			decl := &importDecl{
-				Comments: tt.fields.Comments,
-				Path:     tt.fields.Path,
+				Docs: tt.fields.Comments,
+				Path: tt.fields.Path,
 			}
 			if got := decl.RealPath(); got != tt.want {
 				t.Errorf("RealPath() = %v, want %v", got, tt.want)

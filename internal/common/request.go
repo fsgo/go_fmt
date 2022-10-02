@@ -5,9 +5,7 @@
 package common
 
 import (
-	"bytes"
 	"go/ast"
-	"go/format"
 	"go/token"
 )
 
@@ -21,11 +19,7 @@ type Request struct {
 
 // FormatFile 将 AstFile 格式化、得到源码
 func (req *Request) FormatFile() ([]byte, error) {
-	bf := &bytes.Buffer{}
-	if err := format.Node(bf, req.FSet, req.AstFile); err != nil {
-		return nil, err
-	}
-	return bf.Bytes(), nil
+	return req.Opt.Source(req.FSet, req.AstFile)
 }
 
 // ReParse 重新解析
