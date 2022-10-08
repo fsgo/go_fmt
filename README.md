@@ -56,18 +56,18 @@ type User struct{
 1. 移除 struct 内部前后多余的空行：
 ```diff
 type userfn91 struct{
--
+-				
 	name string
--
+-				
 }
 ```
 
 2. 移除 func 内部前后多余的空行：
 ``` diff
 fn1() {
--
+-				
 	println("hello")
--
+-				
 }
 
 ```
@@ -85,13 +85,13 @@ fn1() {
 
 ```diff
 type User1 struct {
--
+-				
 	// on Name
 	Name string
-+
++				
 	// on Age
 	Age int
-+
++				
 	Grade int
 	Class int
 
@@ -103,19 +103,19 @@ type User1 struct {
 
 ```diff
 type Group1 interface {
--
+-				
 	// Register 注册延迟函数
 	Register(fn func())
-+
++				
 	Add()
-+
++				
 	// on Delete
 	Delete()
-+
++				
 	Fn1()
 
 	Fn2() // 前面有空行，会保持
--
+-				
 }
 ```
 
@@ -126,9 +126,9 @@ type (
 	User1 struct {
 		name string
 	}
-+
++				
 	User1 struct {
--
+-				
 		name string
 	}
 )
@@ -139,9 +139,9 @@ type (
 ```diff
 var a="hello"
 var b="world" // after b
-+
++				
 const c01="say"
-+ 
++ 				
 var a0 = "a0"
 ```
 
