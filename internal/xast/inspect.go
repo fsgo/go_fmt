@@ -18,8 +18,10 @@ func dealWithInspect(req *common.Request) {
 	ast.Inspect(req.AstFile, func(node ast.Node) bool {
 		switch vt := node.(type) {
 		case *ast.TypeSpec:
-			if tts, ok2 := vt.Type.(*ast.StructType); ok2 {
-				fixStructType(req, vt, tts)
+			switch vt.Type.(type) {
+			case *ast.StructType,
+				*ast.InterfaceType:
+				fixStructInterfaceType(req, vt)
 			}
 		case *ast.BlockStmt:
 			fixBlockStmt(req, vt)
@@ -105,34 +107,47 @@ func lastSpecPos(fl []ast.Spec, def token.Pos) token.Pos {
 	return last.End()
 }
 
-func fixStructType(req *common.Request, ts *ast.TypeSpec, st *ast.StructType) {
+func fixStructInterfaceType(req *common.Request, ts *ast.TypeSpec) {
+	tp := ts.Type
 	if common.Debug {
 		common.DebugPrintln(0, "fixStructType", ts.Name.Name,
-			"start:", req.FSet.Position(st.Pos()),
-			"end:", req.FSet.Position(st.End()),
+			"start:", req.FSet.Position(tp.Pos()),
+			"end:", req.FSet.Position(tp.End()),
 		)
 	}
 
+	var fields *ast.FieldList
+	switch vt := tp.(type) {
+	case *ast.StructType:
+		fields = vt.Fields
+	case *ast.InterfaceType:
+		fields = vt.Methods
+	default:
+		return
+	}
 	// 处理头部多余的空行
 	{
-		firstFieldPos := fieldsFirstPos(st.Fields, st.End())
-		trimHeadEmptyLine(req, st.Pos(), firstFieldPos)
+		firstFieldPos := fieldsFirstPos(fields, tp.End())
+		trimHeadEmptyLine(req, tp.Pos(), firstFieldPos)
 	}
 
 	// 给字段定义之间，若有文档，则添加空行
 	{
-		for i := 0; i < len(st.Fields.List); i++ {
-			fd := st.Fields.List[i]
-			if fd.Doc != nil && i > 0 {
-				req.TokenLine().AddLine(0, fd.Doc.Pos())
+		for i := 0; i < len(fields.List); i++ {
+			fd := fields.List[i]
+			if fd.Doc != nil {
+				if i > 0 {
+					req.TokenLine().AddLine(0, fd.Doc.Pos())
+				}
+				req.TokenLine().AddLine(0, nodeEndPos(req, fd))
 			}
 		}
 	}
 
 	// 处理尾部多余的空行
 	{
-		lastFieldPos := fieldsLastPos(st.Fields, st.Pos())
-		trimTailEmptyLine(req, lastFieldPos, st.End())
+		lastFieldPos := fieldsLastPos(fields, tp.Pos())
+		trimTailEmptyLine(req, lastFieldPos, tp.End())
 	}
 }
 

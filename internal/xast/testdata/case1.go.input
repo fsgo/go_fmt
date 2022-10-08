@@ -37,3 +37,29 @@ func fn2() {
 	
 	_=net.IPNet{net.IPv4zero,net.CIDRMask(31,32)}
 }
+// Group1 一个init 分组
+type Group1 interface {
+
+	// Register 注册延迟函数
+	Register(fn func())
+	Add()
+	// on Delete
+	Delete()
+}
+type Group2 interface {
+
+	// in Group2
+	
+}
+type Group3 interface {
+
+    Delete()
+	// in Group3
+	
+}
+type Group4 interface {
+	// in Group4
+	
+    Delete()
+	
+}

@@ -9,17 +9,18 @@ import (
 	"fmt"
 	"log"
 	// on net
-	"net"	// after net
+	"net" // after net
 	"github.com/go_fmt/app2/internal"
 	"golang.org/x/mod/modfile"
-	_ "net/http"	// after http
+	_ "net/http" // after http
 )
 
 type User1 struct {
 	// on Name
-	Name	string
+	Name string
+
 	// on Age
-	Age	int
+	Age int
 }
 
 func sayHello() {
@@ -40,4 +41,30 @@ func fn2() {
 	log.Println(internal.Hello())
 
 	_ = net.IPNet{net.IPv4zero, net.CIDRMask(31, 32)}
+}
+
+// Group1 一个init 分组
+type Group1 interface {
+	// Register 注册延迟函数
+	Register(fn func())
+
+	Add()
+
+	// on Delete
+	Delete()
+}
+
+type Group2 interface {
+	// in Group2
+}
+
+type Group3 interface {
+	Delete()
+	// in Group3
+}
+
+type Group4 interface {
+	// in Group4
+
+	Delete()
 }

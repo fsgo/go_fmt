@@ -154,6 +154,14 @@ type (
    
   } 
   
+  user23 struct{
+  // on name
+       name string
+       age int
+       grade int
+       
+    }
+  
 )
 func sayHello() {
     _= User1{"hello", 12}

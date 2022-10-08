@@ -81,19 +81,41 @@ fn1() {
 </details>
 
 <details><summary><i>Example 5：补充空行</i></summary>
-1. struct 有文档的字段添加换行：
+1. struct 有文档的字段前后添加换行：
 
 ```diff
 type User1 struct {
+-
 	// on Name
 	Name string
 +
 	// on Age
 	Age int
++
+	Grade int
+	Class int
 }
 ```
 
-2. 多个定义之间添加空行:
+2. interface 有文档的方法前后添加换行：
+
+```diff
+type Group1 interface {
+-
+	// Register 注册延迟函数
+	Register(fn func())
++
+	Add()
++
+	// on Delete
+	Delete()
+	
+	Fn1()
+	Fn2()
+}
+```
+
+3. 多个定义之间添加空行:
 
 ```diff
 type (
@@ -105,6 +127,17 @@ type (
 		name string
 	}
 )
+```
+
+4. 全局的，不同类型定义之间添加空行：
+
+```diff
+var a="hello"
+var b="world" // after b
++
+const c01="say"
++ 
+var a0 = "a0"
 ```
 
 </details>
