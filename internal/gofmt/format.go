@@ -13,6 +13,7 @@ import (
 	"github.com/fsgo/go_fmt/internal/localmodule"
 	"github.com/fsgo/go_fmt/internal/simplify"
 	"github.com/fsgo/go_fmt/internal/xanalysis"
+	"github.com/fsgo/go_fmt/internal/xast"
 	"github.com/fsgo/go_fmt/internal/ximports"
 	"github.com/fsgo/go_fmt/internal/xpasser"
 )
@@ -22,6 +23,11 @@ type Options = common.Options
 
 // Format 输出格式化的 go 代码
 func Format(fileName string, src []byte, opts *Options) (code []byte, formatted bool, err error) {
+	defer func() {
+		if re := recover(); re != nil {
+			panic(fmt.Sprintf("when Format %q", fileName))
+		}
+	}()
 	options := opts.Clone()
 	if src == nil {
 		src, err = os.ReadFile(fileName)
@@ -95,6 +101,10 @@ func fix(req *common.Request) ([]byte, error) {
 	// }
 
 	xanalysis.Format(req)
+
+	if req.Opt.Extra {
+		xast.Format(req)
+	}
 
 	code, err := ximports.FormatImports(req)
 	if err != nil {

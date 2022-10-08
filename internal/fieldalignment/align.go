@@ -10,6 +10,4 @@ import (
 )
 
 // Run todo
-func Run(fileSet *token.FileSet, file *ast.File, fix bool) {
-
-}
+func Run(fileSet *token.FileSet, file *ast.File, fix bool) {}

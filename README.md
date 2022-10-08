@@ -7,20 +7,7 @@
 * 支持将多行的 copyright 注释修改为单行格式(默认不调整)
 * 简化代码
 * struct 赋值表达式，自动补齐 key
-
-
-<details><summary><i>Example</i></summary>
-
-```
-type User struct {
-	Name string
-	Age int
-}
-- u2 := User{"hello", 12}
-
-+ u2 := User{Name: "hello", Age: 12}
-```
-</details>
+* 补充空行、移除多余的空行
 
 对于 import 部分：
 > 1.可使用`-mi`参数来控制是否将多段import合并为一段（默认否）。  
@@ -31,6 +18,79 @@ type User struct {
 
 会忽略当前目录以及子目录下的 `testdata` 和 `vendor` 目录。  
 若需要可进入其目录里执行该命令。  
+
+
+<details><summary><i>Example 1：补齐 struct key</i></summary>
+
+```
+- u2 := User{"hello", 12}
++ u2 := User{Name: "hello", Age: 12}
+```
+</details>
+
+<details><summary><i>Example 2：注释格式化</i></summary>
+
+```
+- //User 注释内容
+- type User struct{
+
++ // User 注释内容
++ type User struct{
+```
+</details>
+
+<details><summary><i>Example 3：简化代码</i></summary>
+
+```
+- s[a:len(s)]
++ s[a:]
+
+- for x, _ = range v {...}
++ for x = range v {...}
+
+- for _ = range v {...}
++ for range v {...}
+```
+</details>
+
+<details><summary><i>Example 4：移除多余的空行</i></summary>
+
+1. 移除 struct 内部前后多余的空行：
+```
+- type userfn91 struct{
+-    
+-  name string
+- 
+- }
+
++ type userfn91 struct{
++  name string
++ }
+```
+
+2. 移除 func 内部前后多余的空行：
+```
+- fn1() {
+-	
+-	println("hello")
+-	
+- }
+
++ fn1() {
++	println("hello")
++	
++ }
+```
+
+3. 空 func 变为一行：
+```
+- fn1() {
+- }
+
++ fn1() {}
+```
+
+</details>
 
 ## 2.安装/更新
 ```bash
@@ -53,6 +113,7 @@ usage: go_fmt [flags] [path ...]
   -d	display diffs instead of rewriting files
   -df string
     	display diffs format, support: text, json (default "text")
+  -e	enable extra rules (default true)
   -ig string
     	import group sort rule,
     	stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
@@ -68,6 +129,8 @@ usage: go_fmt [flags] [path ...]
     	rewrite with build in rules:
     	a[b:len(a)] -> a[b:]
     	interface{} -> any
+    	a == ""     -> len(a) == 0
+    	a != ""     -> len(a) != 0
   -s	simplify code (default true)
   -slcr
     	multiline copyright to single-line

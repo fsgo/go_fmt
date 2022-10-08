@@ -52,6 +52,7 @@ func (decl *importDecl) CommentHasImportPath() bool {
 
 	return false
 }
+
 func (decl *importDecl) realPathFromCmt() string {
 	for _, cmt := range decl.Docs {
 		if !strings.HasPrefix(cmt, "//") || len(cmt) < 3 {
@@ -90,7 +91,6 @@ func (decl *importDecl) RealPath() string {
 func (decl *importDecl) Bytes() []byte {
 	var buf bytes.Buffer
 	for _, cmt := range decl.Docs {
-
 		// 对注释中的多个空格替换为一个空格
 		cmt = regexp.MustCompile(`\s+`).ReplaceAllString(cmt, " ")
 
@@ -177,7 +177,6 @@ func formatImportDecls(decls []*importDecl, options common.Options) []byte {
 
 	for _, group := range groups {
 		groupCode := group.Bytes()
-
 		// 每个分组使用特定分割
 		if len(groupCode) > 0 {
 			buf0.WriteString(importGroupSpit)

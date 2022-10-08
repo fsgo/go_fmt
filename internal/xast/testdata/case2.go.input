@@ -1,0 +1,231 @@
+// Copyright(C) 2022 github.com/fsgo  All Rights Reserved.
+// Author: hidu <duv123@gmail.com>
+// Date: 2022/9/25
+
+package app2
+
+import (
+	// on fmt
+	"fmt"
+	"log"
+	// on net
+	"net" // after net
+	"github.com/go_fmt/app2/internal"
+	"golang.org/x/mod/modfile"
+	_ "net/http" // after http
+)
+var a="hello"
+var b="world" // after b
+const c01="say" 
+const c02="1"
+var a0="a0"
+type sayHello1 func()
+type sayHello2 func()
+
+type sayHello3 func()
+var ()
+var () // after empty var 1
+// on empty var 2
+var () // after empty var 2
+const ()
+var (
+  s01="b"
+  s02="d"
+  // on s03
+  s03="d"
+  s04="c"
+)
+var s05="c"
+var (
+ s06 = "s06"
+) // after var s6
+var (s07="s07") // after var s07
+var s08 = /* in s08*/ "val_s08"
+/* before s09 */ var s09 = /* in s09*/ "val s09"
+var s10,s11="a","b"
+var i1,s12=123,"s11"
+const (
+ c1=123
+ c2=456
+ 
+ c3=789
+ // on c4
+ c4=789
+ c5=789
+)
+var(
+  // on s21
+  s21="1" // after s21
+  
+  // between s21 s22
+  
+  // on s22
+  s22="1" // after s22
+) // after var ss2
+// under var s22
+
+
+var (
+)
+// on var2
+var (
+)
+// on var3
+var (
+// on var4
+)
+
+var(
+
+  s31="1" // after s31
+  
+  
+  // on s32
+  s32="1" // after s32
+  
+  
+  
+)
+
+type User1 struct {
+    // on Name
+	Name string
+	// on Age
+	Age int
+}
+type (
+    user2 struct{
+      name string
+    }
+    user3 struct{
+      name string
+      age int
+    }
+    user4 struct{
+      name string
+      // on age
+      age int
+    }
+    user5 struct{
+    // in user5
+    
+      name string
+    }
+    user6 struct{
+    
+    // in user6
+    
+      name string /* 前后各有一个空行 */
+      
+    }
+    user7 struct{
+    
+    // in user7
+    
+    }
+    user8 struct{ // in user8.0
+        
+    // in user8.1
+        
+        
+   }
+   ufn1 func() // after ufn1
+   // on ufn2
+   ufn2 func()
+)
+type (
+  user20 struct{
+    name string
+  }
+  user21 struct{
+     age int
+     
+  }
+  
+  
+)
+func sayHello() {
+    _= User1{"hello", 12}
+    _= &User1{"hello", 13}
+    
+	fmt.Println("hello")
+}
+
+
+// 上面有 2 个空行
+func fn1() {
+
+	log.Println(modfile.AutoQuote("v1.0.0")) // 这行前后有空行
+	
+}
+// on fn2
+func fn2() { // in fn2
+
+// 前面有一个空行
+    _= internal.User2{"hello", 12}
+    _= &internal.User2{"hello", 13}
+    
+	log.Println(internal.Hello())
+	
+	_=net.IPNet{net.IPv4zero,net.CIDRMask(31,32)}
+// 后面有2个空行
+	
+	
+} // after fn2
+func fn3(){
+}
+// under fn3 on fn4
+func fn4(){
+}
+/* before fn5 这段格式化后会变成单独一行 */func fn5(){}
+func fn6(){} // after fn6
+func fn7(){ // in fn7
+}
+func fn8(){}
+func fn9(){
+   const fn9c1=12
+   
+   // in fn9
+   
+   // on userfn91
+   type userfn91 struct{
+    
+     name string
+     
+     
+   }
+   _=userfn91{} // 格式化之后，和 type 定义之间也没有空行
+   
+   doEmpty:=func(){
+   
+   }
+   
+   doEmpty()
+   
+   do1:=func(){
+   
+    // do1
+    
+   }
+   do1()
+   
+   var (
+      t1="a"
+      
+      t2="b"
+      // on t3
+      t3="c"
+      
+   )
+   
+}
+type user14 struct{ name string} // after user14
+type signed1 interface {
+	~int | ~int8
+}
+type ulist[T any] struct {
+    vals []T
+}
+func (s *ulist[T]) Push(val T) {
+    s.vals = append(s.vals, val)
+}

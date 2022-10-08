@@ -83,6 +83,9 @@ type Options struct {
 
 	// 是否使用内置的 rewrite 规则简化代码，可选，默认 false
 	RewriteWithBuildIn bool
+
+	// Extra 更多额外的、高级的格式化规则
+	Extra bool
 }
 
 // ImportGroupType import 分组类型
@@ -138,6 +141,7 @@ func NewDefaultOptions() *Options {
 		Write:        true,
 		MergeImports: true,
 		Simplify:     true,
+		Extra:        false,
 	}
 }
 
@@ -175,8 +179,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 			}
 			if info.IsDir() {
 				tmpList, err = allGoFiles(name)
-			} else {
-				// 若属实传入 文件名 可以不用检查是否是.go文件
+			} else { // 若属实传入 文件名 可以不用检查是否是.go文件
 				// 在一些特殊场景可能会有用
 				if len(opt.Files) == 1 || isGoFileName(name) {
 					tmpList = []string{name}
@@ -206,6 +209,7 @@ func (opt *Options) BindFlags() {
 	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
 	commandLine.StringVar(&opt.LocalModule, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
+	commandLine.BoolVar(&opt.Extra, "e", true, "enable extra rules")
 	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")
 	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", false, "multiline copyright to single-line")
 	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import group sort rule,

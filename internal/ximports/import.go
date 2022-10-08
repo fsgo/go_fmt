@@ -7,12 +7,9 @@ package ximports
 import (
 	/*
 	 * 多行注释1
-	 */
-	/*
-	 * 多行注释2
-	 */
-	/* 多行注释3 */
-	"bytes"
+	 */ /*
+	* 多行注释2
+	 */ /* 多行注释3 */ "bytes"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -22,7 +19,6 @@ import (
 	// on strconv
 	"strconv" // strconv 后面
 	"strings"
-
 	// common 上面
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -35,18 +31,16 @@ import (
 func FormatImports(req *common.Request) (out []byte, err error) {
 	_opts := req.Opt.Clone()
 	opts := *_opts
-
-	file := req.AstFile
-	fileName := req.FileName
-
+	err = req.ReParse()
+	if err != nil {
+		return nil, err
+	}
 	src, err := req.FormatFile()
 	if err != nil {
 		return nil, err
 	}
-	_, file, err = req.ReParse()
-	if err != nil {
-		return nil, err
-	}
+	fileName := req.FileName
+	file := req.AstFile
 
 	// 将分组的 import 合并为一组，方便后续处理
 	// 已知若 import 区域出现单独行的注释将不正确
@@ -110,6 +104,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 
 	var buf bytes.Buffer
 	var start int
+	var end int
 	for i := 0; i < len(importDecls); i++ {
 		decl := importDecls[i]
 
@@ -120,9 +115,13 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 			buf.Write(importNew)
 		}
 		start = int(decl.End())
+		end = int(decl.End())
+		if decl.Rparen.IsValid() {
+			end = int(decl.Rparen) + 2
+		}
 	}
 
-	buf.Write(src[start:])
+	buf.Write(src[end:])
 	code := cleanSpecCode(buf.Bytes())
 	code, err = opts.Format(code)
 	if err != nil {

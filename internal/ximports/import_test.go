@@ -15,12 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xtest"
 )
 
 func Test_isImportPathLine(t *testing.T) {
 	type args struct {
 		bf []byte
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -187,6 +189,7 @@ func Test_parserImportSrc(t *testing.T) {
 	type args struct {
 		src string
 	}
+
 	tests := []struct {
 		name      string
 		args      args
@@ -422,4 +425,12 @@ func TestFormatImports(t *testing.T) {
 			require.Equal(t, string(want), string(got))
 		})
 	}
+}
+
+func TestFormatImports2(t *testing.T) {
+	xtest.Check(t, "import.go", "", func(req *common.Request) {
+		got, err := FormatImports(req)
+		require.NoError(t, err)
+		require.NotEmpty(t, got)
+	})
 }

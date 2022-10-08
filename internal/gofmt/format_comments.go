@@ -22,7 +22,6 @@ func FormatComments(req *common.Request) {
 		for _, cm := range cms.List {
 			if strings.HasPrefix(cm.Text, "//") {
 				// 单行注释
-
 				// @see https://github.com/golang/go/blob/master/src/runtime/HACKING.md
 				// @see go doc compile
 				if strings.HasPrefix(cm.Text, "//go:") ||
