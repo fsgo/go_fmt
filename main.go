@@ -18,7 +18,6 @@ func main() {
 	opt.BindFlags()
 
 	err := gf.Execute(opt)
-
 	if err != nil {
 		fmt.Fprint(os.Stderr, common.ConsoleRed(err.Error())+"\n")
 		os.Exit(2)

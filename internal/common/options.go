@@ -22,6 +22,7 @@ type ImportGroupFunc func(importPath string, opt Options) int
 
 // Options 选项
 type Options struct {
+	// ImportGroupFn 排序函数，可选，若不为空，将不会使用默认内置的规则
 	ImportGroupFn ImportGroupFunc
 
 	// DisplayFormat 输出 DisplayDiff 的格式，默认为 text，还可以是 json
@@ -59,7 +60,7 @@ type Options struct {
 	// 可选值:
 	// 1-对发现的进行修正，同时打印日志
 	// 2-只打印出需优化的日志信息
-	FieldAlignment int
+	// FieldAlignment int
 
 	// Write 是否直接将格式化后的内容写入文件
 	Write bool

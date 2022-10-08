@@ -15,11 +15,11 @@ import (
 
 // Request 一次格式化的请求
 type Request struct {
-	FileName  string
 	FSet      *token.FileSet
 	AstFile   *ast.File
-	Opt       Options
 	tokenLine *TokenLine
+	FileName  string
+	Opt       Options
 }
 
 // TokenLine 获取 TokenLine
@@ -90,9 +90,9 @@ func (req *Request) Clone() *Request {
 
 // TokenLine 记录对文件的换行的处理
 type TokenLine struct {
+	file       *token.File
 	addPos     []int
 	deleteLine []int
-	file       *token.File
 }
 
 // AddLine 在指定位置添加新行
