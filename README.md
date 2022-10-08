@@ -32,10 +32,8 @@
 
 ```diff
 - //User 注释内容
-- type User struct{
-
 + // User 注释内容
-+ type User struct{
+type User struct{
 ```
 </details>
 
@@ -57,36 +55,27 @@
 
 1. 移除 struct 内部前后多余的空行：
 ```diff
-- type userfn91 struct{
--    
--  name string
-- 
-- }
-
-+ type userfn91 struct{
-+  name string
-+ }
+type userfn91 struct{
+-
+	name string
+-
+}
 ```
 
 2. 移除 func 内部前后多余的空行：
 ``` diff
-- fn1() {
--	
--	println("hello")
--	
-- }
+fn1() {
+-
+	println("hello")
+-
+}
 
-+ fn1() {
-+	println("hello")
-+	
-+ }
 ```
 
 3. 空 func 变为一行：
 ```diff
 - fn1() {
 - }
-
 + fn1() {}
 ```
 
