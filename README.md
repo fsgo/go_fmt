@@ -78,8 +78,11 @@ fn1() {
 - }
 + fn1() {}
 ```
+</details>
 
-4. struct 有文档的字段添加换行：
+<details><summary><i>Example 5：补充空行</i></summary>
+1. struct 有文档的字段添加换行：
+
 ```diff
 type User1 struct {
 	// on Name
@@ -90,7 +93,8 @@ type User1 struct {
 }
 ```
 
-5. 多个定义之间添加空行
+2. 多个定义之间添加空行:
+
 ```diff
 type (
 	User1 struct {
