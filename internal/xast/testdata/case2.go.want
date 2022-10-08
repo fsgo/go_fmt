@@ -180,6 +180,10 @@ type (
 
 		age   int
 		grade int
+
+		class int // 前面有空行，会保持
+
+		address string // 前面有空行，会保持
 	}
 )
 

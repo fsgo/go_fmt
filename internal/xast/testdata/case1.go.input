@@ -45,6 +45,12 @@ type Group1 interface {
 	Add()
 	// on Delete
 	Delete()
+	Fn1()
+	Fn2()
+
+	Fn3() // Fn3 之前有一个空行
+
+	Fn4() // Fn4 之前有一个空行
 }
 type Group2 interface {
 

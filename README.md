@@ -94,6 +94,8 @@ type User1 struct {
 +
 	Grade int
 	Class int
+
+	Address string // 前面有空行，会保持
 }
 ```
 
@@ -109,9 +111,11 @@ type Group1 interface {
 +
 	// on Delete
 	Delete()
-	
++
 	Fn1()
-	Fn2()
+
+	Fn2() // 前面有空行，会保持
+-
 }
 ```
 
@@ -124,6 +128,7 @@ type (
 	}
 +
 	User1 struct {
+-
 		name string
 	}
 )
