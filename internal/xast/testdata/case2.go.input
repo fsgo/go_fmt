@@ -143,6 +143,17 @@ type (
   }
   
   
+  user22 struct{
+    // in user22.1
+    
+    // on name.1
+    // on name.2
+    name string
+    
+   // in user22.2
+   
+  } 
+  
 )
 func sayHello() {
     _= User1{"hello", 12}
@@ -183,6 +194,8 @@ func fn7(){ // in fn7
 }
 func fn8(){}
 func fn9(){
+    // in fn9.0
+
    const fn9c1=12
    
    // in fn9
@@ -221,6 +234,7 @@ func fn9(){
 }
 type user14 struct{ name string} // after user14
 type signed1 interface {
+
 	~int | ~int8
 }
 type ulist[T any] struct {

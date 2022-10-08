@@ -70,8 +70,12 @@ func trimHeadEmptyLine(req *common.Request, start, end token.Pos) {
 	for j := 0; j < len(cmts); j++ {
 		cmt := cmts[j]
 		lineNo := req.FSet.Position(cmt.Pos()).Line
+		// 紧接着下一行就是评论内容
+		// eg: type user struct{
+		//   // 这是评论
+		// }
 		if lineBegin == lineNo {
-			continue
+			return
 		}
 		if lineNo > lineBegin {
 			lineEnd = lineNo

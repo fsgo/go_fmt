@@ -131,6 +131,7 @@ type (
 
 	user5 struct {
 		// in user5
+
 		name string
 	}
 
@@ -161,6 +162,16 @@ type (
 
 	user21 struct {
 		age int
+	}
+
+	user22 struct {
+		// in user22.1
+
+		// on name.1
+		// on name.2
+		name string
+
+		// in user22.2
 	}
 )
 
@@ -204,6 +215,8 @@ func fn7() { // in fn7
 func fn8() {}
 
 func fn9() {
+	// in fn9.0
+
 	const fn9c1 = 12
 
 	// in fn9
