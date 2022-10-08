@@ -22,7 +22,7 @@
 
 <details><summary><i>Example 1：补齐 struct key</i></summary>
 
-```
+``` diff
 - u2 := User{"hello", 12}
 + u2 := User{Name: "hello", Age: 12}
 ```
@@ -30,7 +30,7 @@
 
 <details><summary><i>Example 2：注释格式化</i></summary>
 
-```
+```diff
 - //User 注释内容
 - type User struct{
 
@@ -41,7 +41,7 @@
 
 <details><summary><i>Example 3：简化代码</i></summary>
 
-```
+```diff
 - s[a:len(s)]
 + s[a:]
 
@@ -56,7 +56,7 @@
 <details><summary><i>Example 4：移除多余的空行</i></summary>
 
 1. 移除 struct 内部前后多余的空行：
-```
+```diff
 - type userfn91 struct{
 -    
 -  name string
@@ -69,7 +69,7 @@
 ```
 
 2. 移除 func 内部前后多余的空行：
-```
+``` diff
 - fn1() {
 -	
 -	println("hello")
@@ -83,7 +83,7 @@
 ```
 
 3. 空 func 变为一行：
-```
+```diff
 - fn1() {
 - }
 
