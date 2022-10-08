@@ -79,7 +79,33 @@ fn1() {
 + fn1() {}
 ```
 
+4. struct 有文档的字段添加换行：
+```diff
+type User1 struct {
+	// on Name
+	Name string
++
+	// on Age
+	Age int
+}
+```
+
+5. 多个定义之间添加空行
+```diff
+type (
+	User1 struct {
+		name string
+	}
++
+	User1 struct {
+		name string
+	}
+)
+```
+
 </details>
+
+
 
 ## 2.安装/更新
 ```bash
