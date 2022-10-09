@@ -32,7 +32,7 @@ func Check(t *testing.T, inputFile, wantFile string, do func(req *common.Request
 			Opt:      *common.NewDefaultOptions(),
 		}
 		do(req)
-
+		req.MustReParse() // 重新格式化
 		code, err := req.FormatFile()
 		require.NoError(t, err)
 

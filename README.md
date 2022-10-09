@@ -48,10 +48,28 @@ type User struct{
 
 - for _ = range v {...}
 + for range v {...}
-
 ```
 
-2. 替换废弃的 `ioutil` 的函数调用 (使用 `go_fmt -rr` 以使用默认内置规则)：
+2. 简化判断逻辑：
+```diff
+- if b == true {
++ if b { 
+
+- if b == false {
++ if !b {
+
+- if b != true {
++ if !b {
+
+- if b != false {
++ if b {
+```
+
+</details>
+
+<details><summary><i>Example 4：重写代码</i></summary>
+
+1. 替换废弃的 `ioutil` 的函数调用 (使用 `go_fmt -rr` 以使用默认内置规则)：
 
 ```diff
 import (
@@ -64,7 +82,7 @@ import (
 ```
 </details>
 
-<details><summary><i>Example 4：移除多余的空行</i></summary>
+<details><summary><i>Example 5：移除多余的空行</i></summary>
 
 1. 移除 struct 内部前后多余的空行：
 ```diff
@@ -93,7 +111,7 @@ fn1() {
 ```
 </details>
 
-<details><summary><i>Example 5：补充空行</i></summary>
+<details><summary><i>Example 6：补充空行</i></summary>
 1. struct 有文档的字段前后添加换行：
 
 ```diff

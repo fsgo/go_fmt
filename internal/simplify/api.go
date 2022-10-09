@@ -18,6 +18,7 @@ import (
 // rewrite.go 和 simplify.go 来自于 go1.19
 func Format(req *common.Request) {
 	simplify(req.AstFile)
+	customSimplify(req.AstFile)
 }
 
 // Rewrite 简化代码
@@ -54,6 +55,13 @@ func Rewrites(req *common.Request, rules []string) error {
 		}
 	}
 	return nil
+}
+
+// RewriteWithExpr  使用指定的规则替换
+func RewriteWithExpr(req *common.Request, pattern, replace ast.Expr) {
+	result := rewriteFile(req.FSet, pattern, replace, req.AstFile)
+	req.AstFile = result
+	req.MustReParse()
 }
 
 type expr struct {

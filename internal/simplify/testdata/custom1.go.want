@@ -1,0 +1,45 @@
+package demo
+
+import (
+	"fmt"
+)
+
+func do() {
+	var id int
+	id++
+	id++
+	id--
+	id += 12
+
+	var num int64
+	num++
+	num++
+	num += 2
+	num--
+	fmt.Println("ok", a, num)
+
+	var b bool
+	if b { // if b==true{
+		fmt.Println("1")
+	}
+
+	if !b { //  if b!=true{
+		fmt.Println("2")
+	}
+
+	if !b { //  if b==false{
+		fmt.Println("3")
+	}
+
+	if b { // if b!=false{
+		fmt.Println("4")
+	}
+
+	if b {
+		fmt.Println("5")
+	}
+
+	if !b {
+		fmt.Println("6")
+	}
+}
