@@ -19,7 +19,6 @@
 会忽略当前目录以及子目录下的 `testdata` 和 `vendor` 目录。  
 若需要可进入其目录里执行该命令。  
 
-
 <details><summary><i>Example 1：补齐 struct key</i></summary>
 
 ``` diff
@@ -52,9 +51,8 @@ type User struct{
 
 ```
 
-2. 替换废弃的 `ioutil` 的函数调用：
+2. 替换废弃的 `ioutil` 的函数调用 (使用 `go_fmt -rr` 以使用默认内置规则)：
 
-使用 `go_fmt -rr`
 ```diff
 import (
 -	"io/ioutil"
