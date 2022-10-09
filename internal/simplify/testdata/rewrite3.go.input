@@ -1,0 +1,18 @@
+package demo
+
+import (
+   "io/ioutil"
+)
+
+func do(){
+     // 使用 ioutil.WriteFile
+     // 替换所有 ioutil 下所有的函数
+	_=ioutil.WriteFile("name.txt",[]byte("hello"),0655)
+	_=ioutil.NopCloser
+	_=ioutil.ReadAll
+	_=ioutil.ReadFile
+	_=ioutil.TempFile
+	_, _ := ioutil.TempDir("", "example")
+}
+
+var a=ioutil.ReadAll

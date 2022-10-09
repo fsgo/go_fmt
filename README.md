@@ -39,6 +39,7 @@ type User struct{
 
 <details><summary><i>Example 3：简化代码</i></summary>
 
+1. 简化循环逻辑：
 ```diff
 - s[a:len(s)]
 + s[a:]
@@ -48,6 +49,20 @@ type User struct{
 
 - for _ = range v {...}
 + for range v {...}
+
+```
+
+2. 替换废弃的 `ioutil` 的函数调用：
+
+使用 `go_fmt -rr`
+```diff
+import (
+-	"io/ioutil"
++	"io
+)
+
+- buf, err := ioutil.ReadAll(f)
++ buf, err := io.ReadAll(f)
 ```
 </details>
 
@@ -188,6 +203,13 @@ usage: go_fmt [flags] [path ...]
     	interface{} -> any
     	a == ""     -> len(a) == 0
     	a != ""     -> len(a) != 0
+    	io/#ioutil.NopCloser -> io.NopCloser
+    	io/#ioutil.ReadAll   -> io.ReadAll
+    	io/#ioutil.ReadFile  -> os.ReadFile
+    	io/#ioutil.TempFile  -> os.CreateTemp
+    	io/#ioutil.TempDir   -> os.MkdirTemp
+    	io/#ioutil.WriteFile -> os.WriteFile
+    	io/#ioutil.Discard   -> io.Discard
   -s	simplify code (default true)
   -slcr
     	multiline copyright to single-line

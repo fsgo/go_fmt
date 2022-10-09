@@ -1,0 +1,10 @@
+package demo
+
+import (
+	"os"
+)
+
+func do() {
+	// 使用 ioutil.WriteFile
+	_ = os.WriteFile("name.txt", []byte("hello"), 0655)
+}

@@ -77,6 +77,7 @@ func testExecute(t *testing.T, caseDir string) {
 		Write:        true,
 		MergeImports: false,
 		Trace:        true,
+		Extra:        true,
 		Files:        []string{"./..."},
 	}
 	pwd, err := os.Getwd()

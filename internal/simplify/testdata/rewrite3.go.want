@@ -1,0 +1,19 @@
+package demo
+
+import (
+	"os"
+	"io"
+)
+
+func do() {
+	// 使用 ioutil.WriteFile
+	// 替换所有 ioutil 下所有的函数
+	_ = os.WriteFile("name.txt", []byte("hello"), 0655)
+	_ = io.NopCloser
+	_ = io.ReadAll
+	_ = os.ReadFile
+	_ = os.CreateTemp
+	_, _ := os.MkdirTemp("", "example")
+}
+
+var a = io.ReadAll

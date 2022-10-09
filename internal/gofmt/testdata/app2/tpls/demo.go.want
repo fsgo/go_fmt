@@ -17,9 +17,14 @@ import (
 	"github.com/go_fmt/app2/internal"
 )
 
+// DefaultReplicas 默认的副本数 256
+var DefaultReplicas = 256
+
 type User1 struct {
+	// Name 用户名
 	Name string
-	Age  int
+
+	Age int
 }
 
 func sayHello() {

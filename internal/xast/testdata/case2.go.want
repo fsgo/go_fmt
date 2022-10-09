@@ -64,6 +64,9 @@ var s09 = /* in s09*/ "val s09"
 var s10, s11 = "a", "b"
 var i1, s12 = 123, "s11"
 
+// S13 on s13
+var S13 = "13"
+
 const (
 	c1 = 123
 	c2 = 456

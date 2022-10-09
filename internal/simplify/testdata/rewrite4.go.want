@@ -1,0 +1,9 @@
+package demo
+
+import (
+	"fmt"
+)
+
+func do() {
+	fmt.Println("ok")
+}

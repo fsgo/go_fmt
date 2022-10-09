@@ -117,7 +117,7 @@ func FormatImports(req *common.Request) (out []byte, err error) {
 		start = int(decl.End())
 		end = int(decl.End())
 		if decl.Rparen.IsValid() {
-			end = int(decl.Rparen) + 2
+			end = int(decl.Rparen)
 		}
 	}
 

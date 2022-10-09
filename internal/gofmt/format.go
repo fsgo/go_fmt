@@ -72,6 +72,8 @@ func Format(fileName string, src []byte, opts *Options) (code []byte, formatted 
 }
 
 func fix(req *common.Request) ([]byte, error) {
+	xanalysis.Format(req)
+
 	// ast.Print(fileSet,file)
 	if req.Opt.Simplify {
 		simplify.Format(req)
@@ -79,28 +81,22 @@ func fix(req *common.Request) ([]byte, error) {
 	FormatComments(req)
 
 	if len(req.Opt.RewriteRules) > 0 {
-		var err error
-		file, err := simplify.Rewrites(req, req.Opt.RewriteRules)
+		err := simplify.Rewrites(req, req.Opt.RewriteRules)
 		if err != nil {
 			return nil, fmt.Errorf("rewrite failed: %w", err)
 		}
-		req.AstFile = file
 	}
 
 	if req.Opt.RewriteWithBuildIn {
-		var err error
-		file, err := simplify.Rewrites(req, simplify.BuildInRewriteRules())
+		err := simplify.Rewrites(req, simplify.BuildInRewriteRules())
 		if err != nil {
 			return nil, fmt.Errorf("rewrite with build in rules failed: %w", err)
 		}
-		req.AstFile = file
 	}
 
 	// if opt.FieldAlignment == 1 {
 	// 	fieldalignment.Run(fset, file, true)
 	// }
-
-	xanalysis.Format(req)
 
 	if req.Opt.Extra {
 		xast.Format(req)
