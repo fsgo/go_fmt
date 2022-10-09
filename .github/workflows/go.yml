@@ -19,7 +19,10 @@ jobs:
         go-version: 1.19
 
     - name: Build
-      run: go build -v ./...
+      run: go build -v
 
     - name: Test
       run: go test -v ./...
+
+    - name: Self-Format
+      run: ./go_fmt -rr -d
