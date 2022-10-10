@@ -1,0 +1,56 @@
+package demo
+
+import (
+	"log"
+)
+
+func main() {
+	m := map[string]string{
+
+		"a": "b",
+
+		"b": "b",
+
+		"c": "c",
+
+	}
+	
+	m2 := map[string]string{ // a
+	
+		"a": "b",
+
+		"b": "b",
+
+		"c": "c",
+	}
+	
+	m3 := map[string]string{ // a
+	
+	// in m3
+		"a": "b",
+
+		"b": "b",
+
+	}
+	m4 := map[string]string{ // a
+	
+	    // in m4
+	
+		"a": "b",
+
+		"b": "b",
+
+	}
+	
+	m6 := map[string]string{ // a
+	    // in m6.0
+		"a": "b",
+		
+		// in m6.1
+		"b": "b",
+
+    // in m6.2
+	}
+	
+	log.Println(m,m2,m3,m4,m5,m6)
+}

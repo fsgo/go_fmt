@@ -27,6 +27,8 @@ func dealWithInspect(req *common.Request) {
 			fixBlockStmt(req, vt)
 		case *ast.GenDecl:
 			fixGenDecl(req, vt)
+		case *ast.CompositeLit:
+			fixCompositeLit(req, vt)
 		}
 		return true
 	})
@@ -190,4 +192,18 @@ func fixBlockStmt(req *common.Request, tts *ast.BlockStmt) {
 	trimTailEmptyLine(req, tailPos, tts.End())
 
 	fixEmptyFunc(req, tts)
+}
+
+// 处理 map 定义的空行
+func fixCompositeLit(req *common.Request, cl *ast.CompositeLit) {
+	_, ok := cl.Type.(*ast.MapType)
+	if !ok {
+		return
+	}
+	headPos := cl.End()
+	if len(cl.Elts) > 0 {
+		headPos = cl.Elts[0].Pos()
+	}
+	// 处理头部的空行
+	trimHeadEmptyLine(req, cl.Pos(), headPos)
 }
