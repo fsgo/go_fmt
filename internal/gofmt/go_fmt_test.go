@@ -50,11 +50,11 @@ func testExecute(t *testing.T, caseDir string) {
 		if info.IsDir() {
 			return nil
 		}
-		rel, err := filepath.Rel(caseDir, path)
-		require.NoError(t, err)
+		rel, err1 := filepath.Rel(caseDir, path)
+		require.NoError(t, err1)
 
-		code, err := os.ReadFile(path)
-		require.NoError(t, err)
+		code, err2 := os.ReadFile(path)
+		require.NoError(t, err2)
 
 		to := filepath.Join(runDir, rel)
 		if strings.HasSuffix(path, ".want") {
@@ -63,8 +63,8 @@ func testExecute(t *testing.T, caseDir string) {
 		} else {
 			to = strings.ReplaceAll(to, ".input", "")
 			_ = os.MkdirAll(filepath.Dir(to), 0755)
-			err = os.WriteFile(to, code, 0644)
-			require.NoError(t, err)
+			err3 := os.WriteFile(to, code, 0644)
+			require.NoError(t, err3)
 		}
 		return nil
 	})

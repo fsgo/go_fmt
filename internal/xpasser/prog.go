@@ -82,7 +82,9 @@ func Load(opt common.Options, patterns []string) error {
 	defer cancel()
 	conf := packages.Config{
 		Context: ctx,
-		Mode:    packages.LoadSyntax,
+		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
+			packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes |
+			packages.NeedSyntax | packages.NeedTypesInfo,
 		Tests:   true,
 		Fset:    Default.FSet,
 		Overlay: Overlay,

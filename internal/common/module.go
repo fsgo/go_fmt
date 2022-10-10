@@ -104,9 +104,9 @@ func ListModules(dir string) (Modules, error) {
 		if info.IsDir() || info.Name() != "go.mod" || root == path {
 			return nil
 		}
-		m, err := ModuleByFile(path)
-		if err != nil {
-			return err
+		m, err1 := ModuleByFile(path)
+		if err1 != nil {
+			return err1
 		}
 		result = append(result, m)
 		return nil
