@@ -70,8 +70,12 @@ func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
 
 func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
 	c.trueFalse(cond)
+
 	c.stringsCount0(cond)
 	c.bytesCount0(cond)
+
+	c.stringsIndex1(cond)
+	c.bytesIndex1(cond)
 }
 
 func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
@@ -119,16 +123,15 @@ func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
 	}
 }
 
-// strings.Count(s,"a")==0   -> !strings.Contains(s,"a")
-// strings.Count(s,"a") > 0  -> strings.Contains(s,"a")
-// strings.Count(s,"a") != 0 -> strings.Contains(s,"a")
+// strings.Count(s,"a") == 0   -> !strings.Contains(s,"a")
+// strings.Count(s,"a") <= 0   -> !strings.Contains(s,"a")
+// strings.Count(s,"a") < 1    -> !strings.Contains(s,"a")
+// strings.Count(s,"a") > 0    -> strings.Contains(s,"a")
+// strings.Count(s,"a") != 0   -> strings.Contains(s,"a")
 func (c *customApply) stringsCount0(cond *ast.BinaryExpr) {
 	c.stringsBytesCount0(cond, "strings")
 }
 
-// bytes.Count(s,[]byte("a"))==0   -> !bytes.Contains(s,[]byte("a"))
-// bytes.Count(s,[]byte("a")) > 0  -> bytes.Contains(s,[]byte("a"))
-// bytes.Count(s,[]byte("a")) != 0 -> bytes.Contains(s,[]byte("a"))
 func (c *customApply) bytesCount0(cond *ast.BinaryExpr) {
 	c.stringsBytesCount0(cond, "bytes")
 }
@@ -141,7 +144,9 @@ func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 	if !isFun(x.Fun, pkg, "Count") {
 		return
 	}
-	if !isBasicLit(cond.Y, token.INT, "0") {
+	isVal0 := isBasicLit(cond.Y, token.INT, "0")
+	isVal1 := !isVal0 && isBasicLit(cond.Y, token.INT, "1")
+	if !isVal0 && !isVal1 {
 		return
 	}
 	if !astutil.UsesImport(c.f, pkg) {
@@ -149,18 +154,93 @@ func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 	}
 
 	fun := x.Fun.(*ast.SelectorExpr)
-	switch cond.Op {
-	case token.EQL: // strings.Count(s,"a")==0
+
+	// strings.Contains(s,"a")
+	if (isVal0 && cond.Op == token.GTR) || // // strings.Count(s,"a") > 0
+		(isVal0 && cond.Op == token.NEQ) { // strings.Count(s,"a") != 0
+		fun.Sel.Name = "Contains"
+		c.Cursor.Replace(cond.X)
+		return
+	}
+
+	// !strings.Contains(s,"a")
+	if (isVal0 && cond.Op == token.EQL) || // strings.Count(s,"a") == 0
+		(isVal0 && cond.Op == token.LEQ) || // strings.Count(s,"a") <= 0
+		(isVal1 && cond.Op == token.LSS) { //  strings.Count(s,"a") < 1
 		fun.Sel.Name = "Contains"
 		c1 := &ast.UnaryExpr{
 			Op: token.NOT,
 			X:  x,
 		}
 		c.Cursor.Replace(c1)
-	case token.GTR, // strings.Count(s,"a") > 0
-		token.NEQ: // strings.Count(s,"a") != 0
+	}
+}
+
+// strings.Index(s,"a") == -1   ->  !strings.Contains(s,"a")
+// strings.Index(s,"a") <= -1   ->  !strings.Contains(s,"a")
+// strings.Index(s,"a") != -1   ->  strings.Contains(s,"a")
+// strings.Index(s,"a") >  -1   ->  strings.Contains(s,"a")
+// strings.Index(s,"a") >=  0   ->  strings.Contains(s,"a")
+// strings.Index(s,"a") <   0   ->  !strings.Contains(s,"a")
+func (c *customApply) stringsIndex1(cond *ast.BinaryExpr) {
+	c.stringsBytesIndex1(cond, "strings")
+}
+
+func (c *customApply) bytesIndex1(cond *ast.BinaryExpr) {
+	c.stringsBytesIndex1(cond, "bytes")
+}
+
+func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
+	x, ok1 := cond.X.(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+	if !isFun(x.Fun, pkg, "Index") {
+		return
+	}
+
+	//  判断的值是 0
+	isVal0 := isBasicLit(cond.Y, token.INT, "0")
+
+	//  判断的值是 -1
+	var isValSub1 bool
+
+	if !isVal0 {
+		y, ok2 := cond.Y.(*ast.UnaryExpr)
+		if !ok2 {
+			return
+		}
+		//  判断的值是 -1
+		isValSub1 = y.Op == token.SUB && isBasicLit(y.X, token.INT, "1")
+	}
+
+	if !isVal0 && !isValSub1 {
+		return
+	}
+
+	if !astutil.UsesImport(c.f, pkg) {
+		return
+	}
+
+	fun := x.Fun.(*ast.SelectorExpr)
+	if (isValSub1 && cond.Op == token.NEQ) || // strings.Index(s,"a") != -1
+		(isValSub1 && cond.Op == token.GTR) || // strings.Index(s,"a") >  -1
+		(isVal0 && cond.Op == token.GEQ) { // strings.Index(s,"a") >=  0
 		fun.Sel.Name = "Contains"
 		c.Cursor.Replace(cond.X)
+		return
+	}
+
+	if (isValSub1 && cond.Op == token.EQL) || //  strings.Index(s,"a") == -1
+		(isValSub1 && cond.Op == token.LEQ) || // strings.Index(s,"a") <= -1
+		(isVal0 && cond.Op == token.LSS) { // strings.Index(s,"a") <   0
+		fun.Sel.Name = "Contains"
+		c1 := &ast.UnaryExpr{
+			Op: token.NOT,
+			X:  x,
+		}
+		c.Cursor.Replace(c1)
+		return
 	}
 }
 
@@ -191,12 +271,12 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 	fun.Sel.Name = "ReplaceAll"
 }
 
-func isBasicLit(n ast.Expr, king token.Token, val string) bool {
+func isBasicLit(n ast.Expr, kind token.Token, val string) bool {
 	nv, ok := n.(*ast.BasicLit)
 	if !ok {
 		return false
 	}
-	return nv.Value == val && nv.Kind == king
+	return nv.Value == val && nv.Kind == kind
 }
 
 func isFun(fn ast.Expr, pkg string, name string) bool {

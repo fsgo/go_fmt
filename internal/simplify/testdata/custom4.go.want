@@ -6,14 +6,16 @@ import (
 	"strings"
 )
 
-func doStrings() {
+func doStringsCount() {
 	s := "abc"
-	b1 := !strings.Contains(s, "a") // strings.Count(s, "a") == 0
-	b3 := strings.Contains(s, "a")  // strings.Count(s, "a") > 0
-	b4 := strings.Contains(s, "a")  // strings.Count(s, "a") != 0
+	b1 := !strings.Contains(s, "a")  // strings.Count(s, "a") == 0
+	b10 := !strings.Contains(s, "a") // strings.Count(s, "a") <= 0
+	b3 := strings.Contains(s, "a")   // strings.Count(s, "a") > 0
+	b4 := strings.Contains(s, "a")   // strings.Count(s, "a") != 0
 	b2 := strings.Contains(s, "a")
 	b5 := !strings.Contains(s, "a")
-	log.Println(b1, b2, b3, b4, b5)
+	n1 := strings.Count(s, "a")
+	log.Println(b1, b2, b3, b4, b5, n1, b10)
 
 	//	if strings.Count(s, "a") == 0 || true {
 	if !strings.Contains(s, "a") || true {
@@ -25,15 +27,40 @@ func doStrings() {
 	}
 }
 
-func doBytes() {
+func doStringsIndex() {
+	s := "abc"
+	b1 := !strings.Contains(s, "a") // strings.Index(s, "a") == -1
+	b2 := strings.Contains(s, "a")  // strings.Index(s, "a") > -1
+	b3 := strings.Contains(s, "a")  // strings.Index(s, "a") != -1
+	b4 := strings.Contains(s, "a")  // strings.Index(s, "a") >= 0
+	b5 := !strings.Contains(s, "a") // strings.Index(s, "a") < 0
+	b6 := strings.Contains(s, "a")
+	b7 := !strings.Contains(s, "a")
+	n1 := strings.Index(s, "a")
+	log.Println(b1, b2, b3, b4, b5, b6, b7, n1)
+
+	//	if strings.Index(s, "a") != -1 || true {
+	if strings.Contains(s, "a") || true {
+		log.Println("ok")
+	}
+	//	if strings.Index(s, "a") >= 0 {
+	if strings.Contains(s, "a") {
+		log.Println("ok")
+	}
+}
+
+func doBytesCount() {
 	s := []byte("abc")
 	a := []byte("a")
-	b1 := !bytes.Contains(s, a) // bytes.Count(s, a) == 0
-	b3 := bytes.Contains(s, a)  // bytes.Count(s, a) > 0
-	b4 := bytes.Contains(s, a)  // bytes.Count(s, a) != 0
+	b1 := !bytes.Contains(s, a)  // bytes.Count(s, a) == 0
+	b10 := !bytes.Contains(s, a) // bytes.Count(s, a) <= 0
+	b11 := !bytes.Contains(s, a) // bytes.Count(s, a) < 1
+	b3 := bytes.Contains(s, a)   // bytes.Count(s, a) > 0
+	b4 := bytes.Contains(s, a)   // bytes.Count(s, a) != 0
 	b2 := bytes.Contains(s, a)
 	b5 := !bytes.Contains(s, a)
-	log.Println(b1, b2, b3, b4, b5)
+	n1 := bytes.Count(s, a)
+	log.Println(b1, b2, b3, b4, b5, n1, b10, b11)
 
 	// if bytes.Count(s, a) == 0 || true {
 	if !bytes.Contains(s, a) || true {
@@ -41,6 +68,29 @@ func doBytes() {
 	}
 
 	//if bytes.Count(s, a) != 0 {
+	if bytes.Contains(s, a) {
+		log.Println("ok")
+	}
+}
+
+func doBytesIndex() {
+	s := []byte("abc")
+	a := []byte("a")
+	b1 := !bytes.Contains(s, a) // bytes.Index(s, a) == -1
+	b2 := bytes.Contains(s, a)  // bytes.Index(s, a) > -1
+	b3 := bytes.Contains(s, a)  // bytes.Index(s, a) != -1
+	b4 := bytes.Contains(s, a)  // bytes.Index(s, a) >= 0
+	b5 := !bytes.Contains(s, a) // bytes.Index(s, a) < 0
+	b6 := bytes.Contains(s, a)
+	b7 := !bytes.Contains(s, a)
+	n1 := bytes.Index(s, a)
+	log.Println(b1, b2, b3, b4, b5, b6, b7, n1)
+
+	//	if bytes.Index(s, "a") != -1 || true {
+	if bytes.Contains(s, "a") || true {
+		log.Println("ok")
+	}
+	//	if bytes.Index(s, a) >= 0 {
 	if bytes.Contains(s, a) {
 		log.Println("ok")
 	}

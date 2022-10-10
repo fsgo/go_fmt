@@ -79,18 +79,17 @@ type User struct{
 - strings.Count(s, "a") != 0
 + strings.Contains(s, "a")
 ```
+`bytes.Count` 具有和 `strings.Count` 一样的规则。
 
-4. 使用 `bytes.Contains` 替换 `bytes.Count`
+4. 使用 `strings.Contains` 替换 `strings.Index`
 ```diff
-- bytes.Count(s, []byte("a")) == 0
-+ !bytes.Contains(s, []byte("a"))
+- strings.Index(s, "a") == -1
++ !strings.Contains(s, "a")
 
-- bytes.Count(s, []byte("a")) > 0
-+ bytes.Contains(s, []byte("a"))
-
-- bytes.Count(s, []byte("a")) != 0
-+ bytes.Contains(s, []byte("a"))
+- strings.Index(s, "a") != -1
++ strings.Contains(s, "a")
 ```
+`bytes.Index` 具有和 `strings.Index` 一样的规则。
 
 </details>
 
