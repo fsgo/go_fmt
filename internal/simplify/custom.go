@@ -7,29 +7,37 @@ package simplify
 import (
 	"go/ast"
 	"go/token"
-)
 
-var ins = &custom{}
+	"golang.org/x/tools/go/ast/astutil"
+)
 
 // customSimplify 自定义的简化规则
 func customSimplify(f *ast.File) {
-	ast.Inspect(f, func(node ast.Node) bool {
-		switch vt := node.(type) {
+	astutil.Apply(f, nil, func(c *astutil.Cursor) bool {
+		// log.Println("c.Name()", c.Name())
+		switch vt := c.Node().(type) {
 		case *ast.AssignStmt:
-			ins.fixAssignStmt(vt)
-		case *ast.IfStmt:
-			ins.fixIfStmt(vt)
+			newCustomApply(c).fixAssignStmt(vt)
+		case *ast.BinaryExpr:
+			newCustomApply(c).fixBinaryExpr(c, vt)
 		}
 		return true
 	})
 }
 
-type custom struct {
+func newCustomApply(c *astutil.Cursor) *customApply {
+	return &customApply{
+		Cursor: c,
+	}
+}
+
+type customApply struct {
+	Cursor *astutil.Cursor
 }
 
 // id+=1 -> id++
 // id-=1 -> id--
-func (c custom) fixAssignStmt(vt *ast.AssignStmt) {
+func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
 	if len(vt.Rhs) != 1 {
 		return
 	}
@@ -56,11 +64,7 @@ func (c custom) fixAssignStmt(vt *ast.AssignStmt) {
 	vt.Tok = newTok
 }
 
-func (c custom) fixIfStmt(vt *ast.IfStmt) {
-	cond, ok := vt.Cond.(*ast.BinaryExpr)
-	if !ok {
-		return
-	}
+func (c *customApply) fixBinaryExpr(cu *astutil.Cursor, cond *ast.BinaryExpr) {
 	y, ok2 := cond.Y.(*ast.Ident)
 	if !ok2 {
 		return
@@ -76,25 +80,31 @@ func (c custom) fixIfStmt(vt *ast.IfStmt) {
 		return
 	}
 
+	setCond := func(c ast.Expr) {
+		cu.Replace(c)
+	}
+
 	if cond.Op == token.EQL {
 		if isTrue { // if b==true  -> if b
-			vt.Cond = cond.X
+			setCond(cond.X)
 		} else { // if b==false -> if !b
-			vt.Cond = &ast.UnaryExpr{
+			c1 := &ast.UnaryExpr{
 				Op: token.NOT,
 				X:  cond.X,
 			}
+			setCond(c1)
 		}
 		return
 	}
 	if cond.Op == token.NEQ {
 		if isTrue { // if b!=true -> if !b
-			vt.Cond = &ast.UnaryExpr{
+			c1 := &ast.UnaryExpr{
 				Op: token.NOT,
 				X:  cond.X,
 			}
+			setCond(c1)
 		} else { // if b!=false -> if b
-			vt.Cond = cond.X
+			setCond(cond.X)
 		}
 	}
 }

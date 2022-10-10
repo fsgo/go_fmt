@@ -63,6 +63,9 @@ type User struct{
 
 - if b != false {
 + if b {
+
+- for b == true {
++ for b {
 ```
 
 </details>

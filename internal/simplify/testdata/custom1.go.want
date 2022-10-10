@@ -23,6 +23,10 @@ func do() {
 		fmt.Println("1")
 	}
 
+	b1 := b || num > 2
+	b2 := b
+	b3 := b || num > 2
+
 	if !b { //  if b!=true{
 		fmt.Println("2")
 	}
@@ -41,5 +45,21 @@ func do() {
 
 	if !b {
 		fmt.Println("6")
+	}
+
+	var s string
+	if s == "true" {
+		fmt.Println(s)
+	}
+
+	for b {
+		fmt.Println("5")
+	}
+
+	for !b {
+		fmt.Println("5")
+	}
+	for i := 0; !b && i < 10; i++ {
+		fmt.Println("5", i)
 	}
 }
