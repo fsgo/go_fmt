@@ -9,33 +9,35 @@ import (
 	"go/token"
 
 	"golang.org/x/tools/go/ast/astutil"
+
+	"github.com/fsgo/go_fmt/internal/common"
 )
 
 // customSimplify 自定义的简化规则
-func customSimplify(f *ast.File) {
-	astutil.Apply(f, nil, func(c *astutil.Cursor) bool {
+func customSimplify(req *common.Request) {
+	astutil.Apply(req.AstFile, nil, func(c *astutil.Cursor) bool {
 		// log.Println("c.Name()", c.Name())
 		switch vt := c.Node().(type) {
 		case *ast.AssignStmt:
-			newCustomApply(f, c).fixAssignStmt(vt)
+			newCustomApply(req, c).fixAssignStmt(vt)
 		case *ast.BinaryExpr:
-			newCustomApply(f, c).fixBinaryExpr(vt)
+			newCustomApply(req, c).fixBinaryExpr(vt)
 		case *ast.CallExpr:
-			newCustomApply(f, c).fixCallExpr(vt)
+			newCustomApply(req, c).fixCallExpr(vt)
 		}
 		return true
 	})
 }
 
-func newCustomApply(f *ast.File, c *astutil.Cursor) *customApply {
+func newCustomApply(req *common.Request, c *astutil.Cursor) *customApply {
 	return &customApply{
 		Cursor: c,
-		f:      f,
+		req:    req,
 	}
 }
 
 type customApply struct {
-	f      *ast.File
+	req    *common.Request
 	Cursor *astutil.Cursor
 }
 
@@ -76,6 +78,9 @@ func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
 
 	c.stringsIndex1(cond)
 	c.bytesIndex1(cond)
+
+	c.stringsCompare0(cond)
+	c.bytesCompare0(cond)
 }
 
 func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
@@ -149,7 +154,7 @@ func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 	if !isVal0 && !isVal1 {
 		return
 	}
-	if !astutil.UsesImport(c.f, pkg) {
+	if !astutil.UsesImport(c.req.AstFile, pkg) {
 		return
 	}
 
@@ -218,7 +223,7 @@ func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 		return
 	}
 
-	if !astutil.UsesImport(c.f, pkg) {
+	if !astutil.UsesImport(c.req.AstFile, pkg) {
 		return
 	}
 
@@ -244,6 +249,71 @@ func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 	}
 }
 
+// bytes.Compare(s,a) == 0 -> bytes.Equal(s,a)
+// bytes.Compare(s,a) != 0 -> !bytes.Equal(s,a)
+func (c *customApply) bytesCompare0(cond *ast.BinaryExpr) {
+	x, ok1 := cond.X.(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+	if !isFun(x.Fun, "bytes", "Compare") {
+		return
+	}
+	if !isBasicLit(cond.Y, token.INT, "0") {
+		return
+	}
+
+	if !astutil.UsesImport(c.req.AstFile, "bytes") {
+		return
+	}
+
+	fun := x.Fun.(*ast.SelectorExpr)
+
+	switch cond.Op {
+	case token.EQL: // bytes.Compare(s,a) == 0
+		fun.Sel.Name = "Equal"
+		c.Cursor.Replace(cond.X)
+	case token.NEQ: // bytes.Compare(s,a) != 0
+		fun.Sel.Name = "Equal"
+		c1 := &ast.UnaryExpr{
+			Op: token.NOT,
+			X:  x,
+		}
+		c.Cursor.Replace(c1)
+	}
+}
+
+// strings.Compare(s,a) == 0 -> s==a
+// strings.Compare(s,a) != 0 -> s!=a
+func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
+	x, ok1 := cond.X.(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+	if !isFun(x.Fun, "strings", "Compare") {
+		return
+	}
+	if !isBasicLit(cond.Y, token.INT, "0") {
+		return
+	}
+
+	switch cond.Op {
+	case token.EQL,
+		token.NEQ:
+		c1 := &ast.BinaryExpr{
+			X:  x.Args[0],
+			Op: cond.Op,
+			Y:  x.Args[1],
+		}
+		c.Cursor.Replace(c1)
+		if !astutil.UsesImport(c.req.AstFile, "strings") {
+			astutil.DeleteImport(c.req.FSet, c.req.AstFile, "strings")
+		}
+	default:
+		return
+	}
+}
+
 func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.stringsReplace(node)
 }
@@ -260,7 +330,7 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 	if !isBasicLit(arg3.X, token.INT, "1") {
 		return
 	}
-	if !astutil.UsesImport(c.f, "strings") {
+	if !astutil.UsesImport(c.req.AstFile, "strings") {
 		return
 	}
 	if !isFun(node.Fun, "strings", "Replace") {

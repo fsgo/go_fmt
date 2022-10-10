@@ -18,7 +18,7 @@ import (
 // rewrite.go 和 simplify.go 来自于 go1.19
 func Format(req *common.Request) {
 	simplify(req.AstFile)
-	customSimplify(req.AstFile)
+	customSimplify(req)
 }
 
 // Rewrite 简化代码

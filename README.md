@@ -68,7 +68,7 @@ type User struct{
 + for b {
 ```
 
-3. 使用 `strings.Contains` 替换 `strings.Count`
+3. 使用 `strings.Contains` 替换 `strings.Count`：
 ```diff
 - strings.Count(s, "a") == 0
 + !strings.Contains(s, "a")
@@ -81,7 +81,7 @@ type User struct{
 ```
 `bytes.Count` 具有和 `strings.Count` 一样的规则。
 
-4. 使用 `strings.Contains` 替换 `strings.Index`
+4. 使用 `strings.Contains` 替换 `strings.Index`：
 ```diff
 - strings.Index(s, "a") == -1
 + !strings.Contains(s, "a")
@@ -91,10 +91,28 @@ type User struct{
 ```
 `bytes.Index` 具有和 `strings.Index` 一样的规则。
 
+5. 使用 `bytes.Equal` 替换 `bytes.Compare`：
+```diff
+- bytes.Compare(s,a)==0
++ bytes.Equal(s, a)
+
+- bytes.Compare(s,a) !=0
++ !bytes.Equal(s, a)
+```
+
+6. 使用 `==` 替换 `strings.Compare`：
+```diff
+- strings.Compare("abc","a") == 0
++ "abc" == "a"
+
+- strings.Compare("abc","a") != 0
++ "abc" != "a"
+```
+
 </details>
 
 <details><summary><i>Example 4：重写代码</i></summary>
-目前默认为启用，需使用 `go_fmt -rr` 以使用默认内置规则生效。
+目前默认未启用，需使用 `go_fmt -rr` 以使用默认内置规则生效。
 
 1. 替换废弃的 `ioutil` 的函数调用：
 

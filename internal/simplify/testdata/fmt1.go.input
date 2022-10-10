@@ -1,12 +1,12 @@
 package demo
 
-func do(){
-	ls:=[]string{"1","2"}
-	all:=ls[1:len(ls)]
-	for x, _ := range all{
+func do() {
+	ls := []string{"1", "2"}
+	all := ls[1:len(ls)]
+	for x, _ := range all {
 		println(x)
 	}
-	for _ = range all{
+	for _ = range all {
 		println("ok")
 	}
 }

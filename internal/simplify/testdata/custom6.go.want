@@ -1,0 +1,18 @@
+package demo
+
+import (
+	"log"
+)
+
+// 这个 case 是验证所有的 strings.Compare 都会被替换掉
+// import "strings" 会被删除
+
+func doStringsCompare0() {
+	b1 := s == a // strings.Compare(s,a) == 0
+	b2 := s != a // strings.Compare(s,a) == 0
+	log.Println(b1, b2)
+
+	if b1 && (s == a || 1 > 2) || "abc" != "a" {
+		log.Println("1")
+	}
+}

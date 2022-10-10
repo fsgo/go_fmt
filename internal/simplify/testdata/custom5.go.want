@@ -1,0 +1,53 @@
+package demo
+
+import (
+	"bytes"
+	"log"
+	"strings"
+)
+
+func doBytesCompare0() {
+	s := []byte("abc")
+	a := []byte("a")
+
+	b1 := bytes.Equal(s, a) // bytes.Compare(s,a)==0
+	b3 := bytes.Equal(s, a)
+	b4 := !bytes.Equal(s, a) // bytes.Compare(s,a) !=0
+	n1 := bytes.Compare(s, a)
+	log.Println(b1, b3, b4, n1)
+
+	if bytes.Compare(s, a) == 1 {
+		log.Println("1")
+	}
+	if bytes.Compare(s, a) >= 0 {
+		log.Println("2")
+	}
+
+	// if bytes.Compare(s,a) == 0{
+	if bytes.Equal(s, a) {
+		log.Println("3")
+	}
+
+	// if bytes.Compare(s,a) != 0{
+	if !bytes.Equal(s, a) {
+		log.Println("4")
+	}
+}
+
+func doStringsCompare0() {
+	s := "abc"
+	a := "a"
+	b1 := s == a // strings.Compare(s,a) == 0
+	b2 := s != a // strings.Compare(s,a) == 0
+
+	b3 := strings.Compare(s, a) > 0
+	b4 := strings.Compare(s, a) < 0
+
+	b5 := "abc" == "a" // strings.Compare("abc","a") == 0
+
+	log.Println(b1, b2, b3, b4, b5)
+
+	if s == a {
+		log.Println("1")
+	}
+}
