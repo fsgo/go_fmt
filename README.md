@@ -1,6 +1,6 @@
 # Go 代码格式化
 
-## 1.功能说明
+## 1 功能说明
 * 格式化 import 部分：分3段式，依默认为 `标准库`、`第三方库`、`项目自身库`
 * 格式化单行注释：若为 `//注释内容`，调整为 `//{空格}注释内容`
 * 默认只对 git 项目库里有修改的进行格式化
@@ -249,7 +249,7 @@ var a0 = "a0"
 
 
 
-## 2.安装/更新
+## 2 安装/更新
 ```bash
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
@@ -260,7 +260,7 @@ go install github.com/fsgo/go_fmt@master
 最低 Go 版本：go1.19
 
 
-## 3.使用
+## 3 使用
 
 ### 3.0 help
 > go_fmt -help
@@ -317,7 +317,7 @@ $ go_fmt ./...
 $ go_fmt abc.go
 ```
 
-## 4.配置到 `git hooks`(commit 前自动格式化代码)
+## 4 配置到 `git hooks`(commit 前自动格式化代码)
 
 ### 4.1 配置项目 Hooks
 编辑项目的 `.git/hooks/pre-commit`文件，将`go_fmt`命令加入。
@@ -343,4 +343,18 @@ git config --global core.hooksPath ~/.git_config/hooks/
 
 wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O ~/.git_config/hooks/pre-commit
 chmod 777 ~/.git_config/hooks/pre-commit
+```
+
+## 5 GitHub Actions
+```yml
+- name: Set up Go
+  uses: actions/setup-go@v2
+  with:
+    go-version: 1.19
+
+- name: install go_fmt
+  run: go install github.com/fsgo/go_fmt@latest
+
+- name: run go_fmt
+  run: go_fmt -rr -d ./...
 ```
