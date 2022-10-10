@@ -1,10 +1,10 @@
 package demo
 
 import (
-   "io/ioutil"
+	"io/ioutil"
 )
 
-func do(){
-     // 使用 ioutil.WriteFile
-	_=ioutil.WriteFile("name.txt",[]byte("hello"),0655)
+func do() {
+	// 使用 ioutil.WriteFile
+	_ = ioutil.WriteFile("name.txt", []byte("hello"), 0655)
 }

@@ -1,13 +1,13 @@
 package demo
 
 import (
-   "io/ioutil"
+	"io/ioutil"
 )
 
-func do(){
-     // 使用 ioutil.WriteFile
-     // 这个 case 只替换 ioutil.WriteFile 其他函数不会替换
-	_=ioutil.WriteFile("name.txt",[]byte("hello"),0655)
-	_=ioutil.NopCloser
-	_=ioutil.ReadAll
+func do() {
+	// 使用 ioutil.WriteFile
+	// 这个 case 只替换 ioutil.WriteFile 其他函数不会替换
+	_ = ioutil.WriteFile("name.txt", []byte("hello"), 0655)
+	_ = ioutil.NopCloser
+	_ = ioutil.ReadAll
 }

@@ -5,6 +5,7 @@
 package simplify
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -12,7 +13,11 @@ import (
 )
 
 func Test_customSimplify(t *testing.T) {
-	xtest.Check(t, "testdata/custom1.go.input", "testdata/custom1.go.want", func(req *common.Request) {
-		customSimplify(req.AstFile)
-	})
+	for i := 1; i <= 4; i++ {
+		input := fmt.Sprintf("testdata/custom%d.go.input", i)
+		want := fmt.Sprintf("testdata/custom%d.go.want", i)
+		xtest.Check(t, input, want, func(req *common.Request) {
+			customSimplify(req.AstFile)
+		})
+	}
 }

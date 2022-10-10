@@ -1,9 +1,9 @@
 package demo
 
 import (
-   "fmt"
+	"fmt"
 )
 
-func do(){
-     fmt.Println("ok")
+func do() {
+	fmt.Println("ok")
 }

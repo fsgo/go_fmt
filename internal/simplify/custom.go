@@ -17,21 +17,25 @@ func customSimplify(f *ast.File) {
 		// log.Println("c.Name()", c.Name())
 		switch vt := c.Node().(type) {
 		case *ast.AssignStmt:
-			newCustomApply(c).fixAssignStmt(vt)
+			newCustomApply(f, c).fixAssignStmt(vt)
 		case *ast.BinaryExpr:
-			newCustomApply(c).fixBinaryExpr(c, vt)
+			newCustomApply(f, c).fixBinaryExpr(vt)
+		case *ast.CallExpr:
+			newCustomApply(f, c).fixCallExpr(vt)
 		}
 		return true
 	})
 }
 
-func newCustomApply(c *astutil.Cursor) *customApply {
+func newCustomApply(f *ast.File, c *astutil.Cursor) *customApply {
 	return &customApply{
 		Cursor: c,
+		f:      f,
 	}
 }
 
 type customApply struct {
+	f      *ast.File
 	Cursor *astutil.Cursor
 }
 
@@ -64,7 +68,13 @@ func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
 	vt.Tok = newTok
 }
 
-func (c *customApply) fixBinaryExpr(cu *astutil.Cursor, cond *ast.BinaryExpr) {
+func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
+	c.trueFalse(cond)
+	c.stringsCount0(cond)
+	c.bytesCount0(cond)
+}
+
+func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
 	y, ok2 := cond.Y.(*ast.Ident)
 	if !ok2 {
 		return
@@ -80,8 +90,8 @@ func (c *customApply) fixBinaryExpr(cu *astutil.Cursor, cond *ast.BinaryExpr) {
 		return
 	}
 
-	setCond := func(c ast.Expr) {
-		cu.Replace(c)
+	setCond := func(e ast.Expr) {
+		c.Cursor.Replace(e)
 	}
 
 	if cond.Op == token.EQL {
@@ -107,4 +117,99 @@ func (c *customApply) fixBinaryExpr(cu *astutil.Cursor, cond *ast.BinaryExpr) {
 			setCond(cond.X)
 		}
 	}
+}
+
+// strings.Count(s,"a")==0   -> !strings.Contains(s,"a")
+// strings.Count(s,"a") > 0  -> strings.Contains(s,"a")
+// strings.Count(s,"a") != 0 -> strings.Contains(s,"a")
+func (c *customApply) stringsCount0(cond *ast.BinaryExpr) {
+	c.stringsBytesCount0(cond, "strings")
+}
+
+// bytes.Count(s,[]byte("a"))==0   -> !bytes.Contains(s,[]byte("a"))
+// bytes.Count(s,[]byte("a")) > 0  -> bytes.Contains(s,[]byte("a"))
+// bytes.Count(s,[]byte("a")) != 0 -> bytes.Contains(s,[]byte("a"))
+func (c *customApply) bytesCount0(cond *ast.BinaryExpr) {
+	c.stringsBytesCount0(cond, "bytes")
+}
+
+func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
+	x, ok1 := cond.X.(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+	if !isFun(x.Fun, pkg, "Count") {
+		return
+	}
+	if !isBasicLit(cond.Y, token.INT, "0") {
+		return
+	}
+	if !astutil.UsesImport(c.f, pkg) {
+		return
+	}
+
+	fun := x.Fun.(*ast.SelectorExpr)
+	switch cond.Op {
+	case token.EQL: // strings.Count(s,"a")==0
+		fun.Sel.Name = "Contains"
+		c1 := &ast.UnaryExpr{
+			Op: token.NOT,
+			X:  x,
+		}
+		c.Cursor.Replace(c1)
+	case token.GTR, // strings.Count(s,"a") > 0
+		token.NEQ: // strings.Count(s,"a") != 0
+		fun.Sel.Name = "Contains"
+		c.Cursor.Replace(cond.X)
+	}
+}
+
+func (c *customApply) fixCallExpr(node *ast.CallExpr) {
+	c.stringsReplace(node)
+}
+
+// strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
+func (c *customApply) stringsReplace(node *ast.CallExpr) {
+	if len(node.Args) != 4 {
+		return
+	}
+	arg3, ok0 := node.Args[3].(*ast.UnaryExpr)
+	if !ok0 || arg3.Op != token.SUB {
+		return
+	}
+	if !isBasicLit(arg3.X, token.INT, "1") {
+		return
+	}
+	if !astutil.UsesImport(c.f, "strings") {
+		return
+	}
+	if !isFun(node.Fun, "strings", "Replace") {
+		return
+	}
+	fun := node.Fun.(*ast.SelectorExpr)
+	node.Args = node.Args[:3]
+	fun.Sel.Name = "ReplaceAll"
+}
+
+func isBasicLit(n ast.Expr, king token.Token, val string) bool {
+	nv, ok := n.(*ast.BasicLit)
+	if !ok {
+		return false
+	}
+	return nv.Value == val && nv.Kind == king
+}
+
+func isFun(fn ast.Expr, pkg string, name string) bool {
+	fun, ok2 := fn.(*ast.SelectorExpr)
+	if !ok2 {
+		return false
+	}
+	if fun.Sel.Name != name {
+		return false
+	}
+	x, ok3 := fun.X.(*ast.Ident)
+	if !ok3 || x.Name != pkg {
+		return false
+	}
+	return true
 }

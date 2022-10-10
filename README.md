@@ -68,11 +68,36 @@ type User struct{
 + for b {
 ```
 
+3. 使用 `strings.Contains` 替换 `strings.Count`
+```diff
+- strings.Count(s, "a") == 0
++ !strings.Contains(s, "a")
+
+- strings.Count(s, "a") > 0
++ strings.Contains(s, "a")
+
+- strings.Count(s, "a") != 0
++ strings.Contains(s, "a")
+```
+
+4. 使用 `bytes.Contains` 替换 `bytes.Count`
+```diff
+- bytes.Count(s, []byte("a")) == 0
++ !bytes.Contains(s, []byte("a"))
+
+- bytes.Count(s, []byte("a")) > 0
++ bytes.Contains(s, []byte("a"))
+
+- bytes.Count(s, []byte("a")) != 0
++ bytes.Contains(s, []byte("a"))
+```
+
 </details>
 
 <details><summary><i>Example 4：重写代码</i></summary>
+目前默认为启用，需使用 `go_fmt -rr` 以使用默认内置规则生效。
 
-1. 替换废弃的 `ioutil` 的函数调用 (使用 `go_fmt -rr` 以使用默认内置规则)：
+1. 替换废弃的 `ioutil` 的函数调用：
 
 ```diff
 import (
@@ -115,6 +140,8 @@ fn1() {
 </details>
 
 <details><summary><i>Example 6：补充空行</i></summary>
+在适当的位置添加空行可以增加代码的可读性。
+
 1. struct 有文档的字段前后添加换行：
 
 ```diff

@@ -1,0 +1,13 @@
+package demo
+
+import (
+	"fmt"
+	"strings"
+)
+
+func do() {
+	s := "abcd"
+	s = strings.ReplaceAll(s, "a", "b")
+	s = strings.ReplaceAll(s, "a", "b")
+	fmt.Println(s)
+}

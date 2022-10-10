@@ -1,0 +1,15 @@
+package demo
+
+import (
+	"fmt"
+	"github.com/xxx/strings"
+	s1 "strings"
+)
+
+func do() {
+	s := "abcd"
+	s = strings.Replace(s, "a", "b", -1) // 由于不是使用的标准库的 strings, 所以不会替换
+	s = s1.Replace(s, "a", "b", -1)      // 未支持 import 别名，所以也不会替换
+	s = strings.ReplaceAll(s, "a", "b")
+	fmt.Println(s)
+}
