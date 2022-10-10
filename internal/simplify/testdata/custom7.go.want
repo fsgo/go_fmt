@@ -14,3 +14,14 @@ func doTimeSub() {
 		log.Println("ok")
 	}
 }
+
+func doSubNow() {
+	n := time.Now()
+	a := time.Until(n)
+	b := time.Until(n)
+	log.Println(a, b)
+
+	if time.Until(n).Seconds() > 0 {
+		log.Println("ok")
+	}
+}

@@ -317,6 +317,7 @@ func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
 func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.stringsReplace(node)
 	c.timeNowSub(node)
+	c.timeSubNow(node)
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
@@ -343,19 +344,19 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 }
 
 // time.Now().Sub(n) -> time.Since(n)
-func (c *customApply)timeNowSub(node *ast.CallExpr){
-	if len(node.Args)!=1{
+func (c *customApply) timeNowSub(node *ast.CallExpr) {
+	if len(node.Args) != 1 {
 		return
 	}
 	x1, ok1 := node.Fun.(*ast.SelectorExpr)
 	if !ok1 {
 		return
 	}
-	if x1.Sel.Name!="Sub"{
+	if x1.Sel.Name != "Sub" {
 		return
 	}
-	x2,ok2:=x1.X.(*ast.CallExpr)
-	if !ok2{
+	x2, ok2 := x1.X.(*ast.CallExpr)
+	if !ok2 {
 		return
 	}
 	if !isFun(x2.Fun, "time", "Now") {
@@ -364,8 +365,8 @@ func (c *customApply)timeNowSub(node *ast.CallExpr){
 	if !astutil.UsesImport(c.req.AstFile, "time") {
 		return
 	}
-	
-	c1:=&ast.CallExpr{
+
+	c1 := &ast.CallExpr{
 		Fun: &ast.SelectorExpr{
 			X: &ast.Ident{
 				Name: "time",
@@ -375,6 +376,44 @@ func (c *customApply)timeNowSub(node *ast.CallExpr){
 			},
 		},
 		Args: node.Args,
+	}
+	c.Cursor.Replace(c1)
+}
+
+// t.Sub(time.Now()) -> time.Until(t)
+func (c *customApply) timeSubNow(node *ast.CallExpr) {
+	if len(node.Args) != 1 {
+		return
+	}
+	arg, ok := node.Args[0].(*ast.CallExpr)
+	if !ok {
+		return
+	}
+	if !isFun(arg.Fun, "time", "Now") {
+		return
+	}
+	fn, ok2 := node.Fun.(*ast.SelectorExpr)
+	if !ok2 {
+		return
+	}
+	if fn.Sel.Name != "Sub" {
+		return
+	}
+	if !astutil.UsesImport(c.req.AstFile, "time") {
+		return
+	}
+	c1 := &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "time",
+			},
+			Sel: &ast.Ident{
+				Name: "Until",
+			},
+		},
+		Args: []ast.Expr{
+			fn.X,
+		},
 	}
 	c.Cursor.Replace(c1)
 }
