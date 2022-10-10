@@ -355,6 +355,6 @@ chmod 777 ~/.git_config/hooks/pre-commit
 - name: install go_fmt
   run: go install github.com/fsgo/go_fmt@latest
 
-- name: run go_fmt
+- name: check style by go_fmt
   run: go_fmt -rr -d ./...
 ```
