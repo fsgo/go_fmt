@@ -132,8 +132,9 @@ type User struct{
 
 </details>
 
-<details><summary><i>Example 4：重写代码</i></summary>
-目前默认未启用，需使用 `go_fmt -rr` 以使用默认内置规则生效。
+<details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>
+
+目前默认未启用，需使用 `go_fmt -rr` 以使用默认内置规则生效，或者使用 `-r` 参数输入表达式。
 
 1. 替换废弃的 `ioutil` 的函数调用：
 
