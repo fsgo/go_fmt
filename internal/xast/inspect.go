@@ -196,14 +196,14 @@ func fixBlockStmt(req *common.Request, tts *ast.BlockStmt) {
 
 // 处理 map 定义的空行
 func fixCompositeLit(req *common.Request, cl *ast.CompositeLit) {
-	_, ok := cl.Type.(*ast.MapType)
+	tp, ok := cl.Type.(*ast.MapType)
 	if !ok {
 		return
 	}
-	headPos := cl.End()
+	headEltPos := cl.End()
 	if len(cl.Elts) > 0 {
-		headPos = cl.Elts[0].Pos()
+		headEltPos = cl.Elts[0].Pos()
 	}
 	// 处理头部的空行
-	trimHeadEmptyLine(req, cl.Pos(), headPos)
+	trimHeadEmptyLine(req, tp.End(), headEltPos)
 }

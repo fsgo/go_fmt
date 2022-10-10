@@ -45,5 +45,36 @@ func main() {
 		// in m6.2
 	}
 
+	m7 := map[string]string{"a": "b", "b": "c", "c": "d"}
+
+	var _ = map[string]*struct {
+		x, y int
+	}{
+		"foo": &struct{ x, y int }{},
+		"bar": &struct{ x, y int }{x: 1, y: 2},
+		"bal": &struct{ x, y int }{x: 3, y: 4},
+	}
+
+	var _ = map[string]*struct {
+		x, y int
+	}{
+		// ok
+
+		"foo": &struct{ x, y int }{},
+		"bar": &struct{ x, y int }{x: 1, y: 2},
+		"bal": &struct{ x, y int }{x: 3, y: 4},
+	}
+	var _ = map[string]*struct {
+		x, y int
+	}{
+		// ok 1
+
+		// ok 2
+
+		"foo": &struct{ x, y int }{},
+		"bar": &struct{ x, y int }{x: 1, y: 2},
+		"bal": &struct{ x, y int }{x: 3, y: 4},
+	}
+
 	log.Println(m, m2, m3, m4, m5, m6)
 }
