@@ -316,6 +316,7 @@ func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
 
 func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.stringsReplace(node)
+	c.timeNowSub(node)
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
@@ -339,6 +340,43 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 	fun := node.Fun.(*ast.SelectorExpr)
 	node.Args = node.Args[:3]
 	fun.Sel.Name = "ReplaceAll"
+}
+
+// time.Now().Sub(n) -> time.Since(n)
+func (c *customApply)timeNowSub(node *ast.CallExpr){
+	if len(node.Args)!=1{
+		return
+	}
+	x1, ok1 := node.Fun.(*ast.SelectorExpr)
+	if !ok1 {
+		return
+	}
+	if x1.Sel.Name!="Sub"{
+		return
+	}
+	x2,ok2:=x1.X.(*ast.CallExpr)
+	if !ok2{
+		return
+	}
+	if !isFun(x2.Fun, "time", "Now") {
+		return
+	}
+	if !astutil.UsesImport(c.req.AstFile, "time") {
+		return
+	}
+	
+	c1:=&ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "time",
+			},
+			Sel: &ast.Ident{
+				Name: "Since",
+			},
+		},
+		Args: node.Args,
+	}
+	c.Cursor.Replace(c1)
 }
 
 func isBasicLit(n ast.Expr, kind token.Token, val string) bool {

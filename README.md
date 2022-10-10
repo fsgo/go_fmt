@@ -109,6 +109,18 @@ type User struct{
 + "abc" != "a"
 ```
 
+7. `i++`  替换 `i+=1`:
+```diff
+- i+=1
++ i++
+```
+
+8. `time.Since`  替换 `time.Now().Sub`:
+```diff
+- time.Now().Sub(t1)
++ time.Since(t1)
+```
+
 </details>
 
 <details><summary><i>Example 4：重写代码</i></summary>

@@ -1,0 +1,16 @@
+package demo
+
+import (
+	"log"
+	"time"
+)
+
+func doTimeSub() {
+	n1 := time.Now()
+	s1 := time.Since(n1)
+	log.Println(s1)
+
+	if time.Since(n).Seconds() > 0 {
+		log.Println("ok")
+	}
+}

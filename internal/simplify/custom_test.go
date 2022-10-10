@@ -13,7 +13,7 @@ import (
 )
 
 func Test_customSimplify(t *testing.T) {
-	for i := 1; i <= 6; i++ {
+	for i := 1; i <= 7; i++ {
 		input := fmt.Sprintf("testdata/custom%d.go.input", i)
 		want := fmt.Sprintf("testdata/custom%d.go.want", i)
 		xtest.Check(t, input, want, func(req *common.Request) {
