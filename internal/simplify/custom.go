@@ -41,9 +41,15 @@ type customApply struct {
 	Cursor *astutil.Cursor
 }
 
+func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
+	c.numIncDec(vt)
+	c.chanReceive(vt)
+	c.mapRead(vt)
+}
+
 // id+=1 -> id++
 // id-=1 -> id--
-func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
+func (c *customApply) numIncDec(vt *ast.AssignStmt) {
 	if len(vt.Rhs) != 1 {
 		return
 	}
@@ -68,6 +74,47 @@ func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
 	vt.TokPos--
 	vt.Rhs = nil
 	vt.Tok = newTok
+}
+
+// _ = <-ch  ->  <-ch
+func (c *customApply) chanReceive(node *ast.AssignStmt) {
+	if len(node.Rhs) != 1 || len(node.Lhs) != 1 || node.Tok != token.ASSIGN {
+		return
+	}
+	x, ok1 := node.Lhs[0].(*ast.Ident)
+	if !ok1 {
+		return
+	}
+	if x.Name != "_" {
+		return
+	}
+	y, ok2 := node.Rhs[0].(*ast.UnaryExpr)
+	if !ok2 {
+		return
+	}
+	if y.Op != token.ARROW {
+		return
+	}
+	c1 := &ast.ExprStmt{
+		X: y,
+	}
+	c.Cursor.Replace(c1)
+}
+
+// x, _ := someMap["key"] -> x:=someMap["key"]
+func (c *customApply) mapRead(node *ast.AssignStmt) {
+	if len(node.Lhs) != 2 || len(node.Rhs) != 1 || node.Tok != token.DEFINE {
+		return
+	}
+	x1, ok1 := node.Lhs[1].(*ast.Ident)
+	if !ok1 || x1.Name != "_" {
+		return
+	}
+	_, ok2 := node.Rhs[0].(*ast.IndexExpr)
+	if !ok2 {
+		return
+	}
+	node.Lhs = node.Lhs[0:1]
 }
 
 func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {

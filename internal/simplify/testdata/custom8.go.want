@@ -1,0 +1,30 @@
+package demo
+
+import (
+	"net"
+	"log"
+)
+
+func doChan() {
+	done := make(chan bool)
+	done <- true
+	<-done
+	<-done
+	a := <-done
+}
+
+func doMapRead() {
+	m := map[string]string{}
+	x := m["key"]
+	y := m["key"]
+	log.Println(x, y)
+
+	m2 := make(map[int]int)
+	x2 := m2[1]
+	log.Println(x2)
+
+	m3 := make(map[net.Addr]string)
+	var z net.Addr
+	x3 := m3[z]
+	log.Println(x3)
+}
