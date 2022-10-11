@@ -262,6 +262,22 @@ var a0 = "a0"
 </details>
 
 
+<details><summary><i>Example 7：Array / Slice 格式化</i></summary>
+
+```diff
+- var _ = []int{
+-	1, 2, 
+-	3, 4, 5}
+// 当代码是如上这种 3 行格式的时候，会格式化为下面这样。
+// 上面第一行是 2 个元素，所以按照每行 2 个元素格式化对齐。
+
++	var _ = []int{
++	 1, 2,
++	 3, 4,
++	 5,
++	 }
+```
+</details>
 
 ## 2 安装/更新
 ```bash

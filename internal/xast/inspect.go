@@ -213,12 +213,60 @@ func doMapType(req *common.Request, cl *ast.CompositeLit, tp *ast.MapType) {
 	trimHeadEmptyLine(req, tp.End(), headEltPos)
 }
 
-// 处理 slice/array 定义的空行
+// 处理 slice/array 的格式
 func doArrayType(req *common.Request, cl *ast.CompositeLit, tp *ast.ArrayType) {
 	headEltPos := cl.End()
+	lastEltPos := cl.Lbrace
 	if len(cl.Elts) > 0 {
 		headEltPos = cl.Elts[0].Pos()
+		lastEltPos = cl.Elts[len(cl.Elts)-1].End()
 	}
 	// 处理头部的空行
 	trimHeadEmptyLine(req, tp.End(), headEltPos)
+
+	// 处理尾部的空行
+	// 普通原始后的空行 go/printer 会自动移除
+	// 但是最后一行数注释的时候，不会自动移除
+	trimTailEmptyLine(req, lastEltPos, cl.Rbrace)
+
+	doFormatArrayPretty(req, cl, tp)
+}
+
+// 将 slice 定义格式化为多行
+func doFormatArrayPretty(req *common.Request, cl *ast.CompositeLit, tp *ast.ArrayType) {
+	if len(cl.Elts) < 2 {
+		return
+	}
+	cmts := cmtsBetween(req, tp.End(), cl.End()-1)
+	if len(cmts) > 0 {
+		return
+	}
+	//
+	// var _=[]int{ // l1 是这个 { 所在的行
+	//  1,2,3,      // l2 是首个元素 1 所在的行
+	//  4,5,6,7}    // l3 是 } 所在的行
+	//
+	l1 := req.FSet.Position(tp.Lbrack).Line
+	l2 := req.FSet.Position(cl.Elts[0].Pos()).Line
+	if l1+1 != l2 {
+		return
+	}
+	l3 := req.FSet.Position(cl.Rbrace).Line
+	if l2+1 != l3 {
+		return
+	}
+	var l2ElCount int
+	var z int
+	for i := 0; i < len(cl.Elts); i++ {
+		e := cl.Elts[i]
+		if line := req.FSet.Position(e.Pos()).Line; line == l2 {
+			l2ElCount++
+		} else {
+			z++
+			if z == l2ElCount || i == len(cl.Elts)-1 {
+				req.TokenLine().AddLine(0, e.End())
+				z = 0
+			}
+		}
+	}
 }
