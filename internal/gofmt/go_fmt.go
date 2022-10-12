@@ -42,6 +42,8 @@ func (ft *Formatter) execute(opt *Options) error {
 	if err != nil {
 		return err
 	}
+	xpasser.TryGoModTidy(*opt, files)
+
 	err = xpasser.Load(*opt, nil)
 	if err != nil {
 		log.Println("[wf] xpasser.Load:", err)

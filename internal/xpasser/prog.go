@@ -5,7 +5,6 @@
 package xpasser
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"go/token"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -42,23 +40,6 @@ func Reset() {
 	Overlay = nil
 }
 
-func tryGoModTidy(opt common.Options) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-	// 若不执行 go mod tidy 可能由于 go.sum 文件未更新，导致 go list 命令失败
-	// 进而导致 pkg 不能正常的 load
-	cmd := exec.CommandContext(ctx, "go", "mod", "tidy")
-	stderr := &bytes.Buffer{}
-	cmd.Stderr = stderr
-	out, err := cmd.Output()
-	if err != nil {
-		log.Println("exec:", cmd.String(), ", failed:\n", stderr.String())
-	}
-	if opt.Trace {
-		log.Println("exec:", cmd.String(), "out:", string(out), ", err:", err)
-	}
-}
-
 // Overlay see packages.Config.Overlay
 var Overlay map[string][]byte
 
@@ -77,7 +58,6 @@ func LoadOverlay(fileName string) error {
 
 // Load 加载解析应用
 func Load(opt common.Options, patterns []string) error {
-	tryGoModTidy(opt)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	conf := packages.Config{
