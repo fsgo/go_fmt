@@ -148,7 +148,7 @@ type User struct{
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>
 
-目前默认未启用，需使用 `go_fmt -rr` 以使用默认内置规则生效，或者使用 `-r` 参数输入表达式。
+目前默认未启用，需使用 `-rr` 参数以使用默认内置规则生效，或者使用 `-r` 参数输入表达式。
 
 1. 替换废弃的 `ioutil` 的函数调用：
 
@@ -284,19 +284,19 @@ var a0 = "a0"
 export GO111MODULE=on
 go env GOPROXY=https://goproxy.cn,direct
 
-go install github.com/fsgo/go_fmt@master
+go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 ```
-升级 Go 版本后，请用最新版本 go 重新安装/更新 `go_fmt` 。  
+升级 Go 版本后，请用最新版本 go 重新安装/更新 `gorgeous` 。  
 最低 Go 版本：go1.19
 
 
 ## 3 使用
 
 ### 3.0 help
-> go_fmt -help
+> gorgeous -help
 
 ```bash
-usage: go_fmt [flags] [path ...]
+usage: gorgeous [flags] [path ...]
   -d	display diffs instead of rewriting files
   -df string
     	display diffs format, support: text, json (default "text")
@@ -334,27 +334,29 @@ usage: go_fmt [flags] [path ...]
 ```
 ### 3.1 格式化 `git` 项目里有修改的`.go`文件
 ```bash
-$ go_fmt
+$ gorgeous
 ```
 
 ### 3.2 对当前目录所有 `.go` 文件格式化
 ```bash
-$ go_fmt ./...
+$ gorgeous ./...
 ```
 
 ### 3.3 对指定 `.go` 文件格式化
 ```bash
-$ go_fmt abc.go
+$ gorgeous abc.go
 ```
 
-## 4 配置到 `git hooks`(commit 前自动格式化代码)
+## 4 git hooks
+
+git commit 前自动格式化代码
 
 ### 4.1 配置项目 Hooks
-编辑项目的 `.git/hooks/pre-commit`文件，将`go_fmt`命令加入。
+编辑项目的 `.git/hooks/pre-commit`文件，将`gorgeous`命令加入。
 
 方式1：
 ```bash
-echo -e '\ngo_fmt\n' >> $(git rev-parse --git-dir)/hooks/pre-commit
+echo -e '\ngorgeous\n' >> $(git rev-parse --git-dir)/hooks/pre-commit
 chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
 ```
 
@@ -382,9 +384,27 @@ chmod 777 ~/.git_config/hooks/pre-commit
   with:
     go-version: 1.19
 
-- name: install go_fmt
-  run: go install github.com/fsgo/go_fmt@latest
+- name: install gorgeous
+  run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 
-- name: check style by go_fmt
-  run: go_fmt -rr -d ./...
+- name: check style by gorgeous
+  run: gorgeous -rr -d ./...
+```
+
+## 6 Visual Studio Code
+
+1. 先安装插件 [Run on Save](https://marketplace.visualstudio.com/items?itemName=pucelle.run-on-save)
+2. 配置插件，在保存文件的时候执行格式化命令：
+```json
+  "runOnSave.commands": [
+    {
+        "match": "\\.go$",
+        "command": "cd ${fileDirname} && gorgeous -rr ${fileBasename}",
+        "runIn":"terminal"
+    }
+    ]
+```
+3.配置的 `Go: Format Tool`，设置为 "default"：
+```
+  "go.formatTool": "default"
 ```

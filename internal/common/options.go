@@ -232,7 +232,7 @@ sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 		titleFormat := "%15s : %s\n"
 		fmt.Fprintf(os.Stderr, titleFormat, "build with", runtime.Version())
 		fmt.Fprintf(os.Stderr, titleFormat, "site", "https://github.com/fsgo/go_fmt")
-		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install github.com/fsgo/go_fmt@master")
+		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install github.com/fsgo/go_fmt/cmd/gorgeous@master")
 		fmt.Fprintf(os.Stderr, titleFormat, "version", Version)
 		os.Exit(2)
 	}
