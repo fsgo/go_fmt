@@ -393,8 +393,8 @@ chmod 777 ~/.git_config/hooks/pre-commit
 
 ## 6 Visual Studio Code
 
-1. 先安装插件 [Run on Save](https://marketplace.visualstudio.com/items?itemName=pucelle.run-on-save)
-<img src="https://github.com/pucelle/vscode-run-on-save/raw/master/images/logo.png" width="30px">
+1. 先安装插件 [Run on Save](https://marketplace.visualstudio.com/items?itemName=pucelle.run-on-save) <img src="https://github.com/pucelle/vscode-run-on-save/raw/master/images/logo.png" width="20px"/>
+
 2. 配置插件，在保存文件的时候执行格式化命令：
 ```json
   "runOnSave.commands": [
@@ -403,7 +403,7 @@ chmod 777 ~/.git_config/hooks/pre-commit
         "command": "cd ${fileDirname} && gorgeous -rr ${fileBasename}",
         "runIn":"terminal"
     }
-    ]
+ ]
 ```
 3.配置的 `Go: Format Tool`，设置为 "default"：
 ```
