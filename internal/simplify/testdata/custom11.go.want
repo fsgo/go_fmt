@@ -1,0 +1,20 @@
+package demo
+
+import (
+	"fmt"
+	"log"
+	"os"
+)
+
+func doPrintf() {
+	fmt.Print("abc")
+	fmt.Print(123)
+	log.Print("abc")
+	log.Fatal("abc")
+	log.Panic("abc")
+}
+
+func doFxxF() {
+	fmt.Fprint(os.Stderr, "abc")
+	fmt.Fprint(os.Stderr, "abc")
+}

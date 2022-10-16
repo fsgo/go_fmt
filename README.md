@@ -143,10 +143,17 @@ type User struct{
 - x, _ := someMap["key"]
 + x := someMap["key"]
 ```
-9.fmt.Errorf:
+
+9.fmt:
 ```diff
 - fmt.Errorf("hello")
 + errors.New("hello")
+
+- fmt.Printf("abc")
++ fmt.Print("abc")
+
+- log.Printf("abc")
++ log.Print("abc")
 ```
 
 </details>

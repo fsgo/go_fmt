@@ -367,6 +367,7 @@ func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.timeNowSub(node)
 	c.timeSubNow(node)
 	c.fmtErrorf(node)
+	c.xPrintf(node)
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
@@ -484,7 +485,7 @@ func (c *customApply) fmtErrorf(node *ast.CallExpr) {
 	if !ok {
 		return
 	}
-	if strings.Contains(arg.Value, "%") {
+	if arg.Kind == token.STRING && strings.Contains(arg.Value, "%") {
 		return
 	}
 
@@ -507,6 +508,63 @@ func (c *customApply) fmtErrorf(node *ast.CallExpr) {
 	}
 	c.Cursor.Replace(c1)
 	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "errors")
+}
+
+func (c *customApply) xPrintf(node *ast.CallExpr) {
+	c.xPrintfByPkg(node, "fmt", "Printf", "Print")
+	c.xPrintfByPkg(node, "log", "Printf", "Print")
+
+	c.xPrintfByPkg(node, "log", "Fatalf", "Fatal")
+	c.xPrintfByPkg(node, "log", "Panicf", "Panic")
+
+	c.xFprintfByPkg(node, "fmt", "Fprintf", "Fprint")
+}
+
+// fmt.Printf("abc") -> fmt.Print("abc")
+// log.Printf("abc") -> log.Print("abc")
+// log.Fatalf("abc") -> log.Fatal("abc")
+// log.Panicf("abc") -> log.Panic("abc")
+func (c *customApply) xPrintfByPkg(node *ast.CallExpr, pkg string, fnOld string, fnNew string) {
+	if !isFun(node.Fun, pkg, fnOld) {
+		return
+	}
+	if len(node.Args) != 1 {
+		return
+	}
+	arg, ok := node.Args[0].(*ast.BasicLit)
+	if !ok {
+		return
+	}
+	if arg.Kind == token.STRING && strings.Contains(arg.Value, "%") {
+		return
+	}
+	if !astutil.UsesImport(c.req.AstFile, pkg) {
+		return
+	}
+	fn := node.Fun.(*ast.SelectorExpr)
+	fn.Sel.Name = fnNew
+}
+
+// fmt.Fprintf(os.Stderr,"abc") -> fmt.Fprint(os.Stderr,"abc")
+func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string, fnNew string) {
+	if !isFun(node.Fun, pkg, fnOld) {
+		return
+	}
+	if len(node.Args) != 2 {
+		return
+	}
+	arg1, ok := node.Args[1].(*ast.BasicLit)
+	if !ok {
+		return
+	}
+	if arg1.Kind == token.STRING && strings.Contains(arg1.Value, "%") {
+		return
+	}
+	if !astutil.UsesImport(c.req.AstFile, pkg) {
+		return
+	}
+	fn := node.Fun.(*ast.SelectorExpr)
+	fn.Sel.Name = fnNew
 }
 
 func isBasicLit(n ast.Expr, kind token.Token, val string) bool {

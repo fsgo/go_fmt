@@ -238,7 +238,7 @@ with env 'GORGEOUS_RR=false' to set default value as false
 		cmd := os.Args[0]
 		fmt.Fprintf(os.Stderr, "usage: %s [flags] [path ...]\n", cmd)
 		commandLine.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprint(os.Stderr, "\n")
 
 		titleFormat := "%15s : %s\n"
 		fmt.Fprintf(os.Stderr, titleFormat, "build with", runtime.Version())
