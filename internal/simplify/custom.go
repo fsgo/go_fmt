@@ -521,6 +521,7 @@ func (c *customApply) xPrintf(node *ast.CallExpr) {
 }
 
 // fmt.Printf("abc") -> fmt.Print("abc")
+// fmt.Printf("%s","abc") -> fmt.Print("abc")
 // log.Printf("abc") -> log.Print("abc")
 // log.Fatalf("abc") -> log.Fatal("abc")
 // log.Panicf("abc") -> log.Panic("abc")
@@ -528,21 +529,72 @@ func (c *customApply) xPrintfByPkg(node *ast.CallExpr, pkg string, fnOld string,
 	if !isFun(node.Fun, pkg, fnOld) {
 		return
 	}
-	if len(node.Args) != 1 {
+
+	if len(node.Args) == 1 {
+		arg, ok := node.Args[0].(*ast.BasicLit)
+		if !ok {
+			return
+		}
+		if arg.Kind == token.STRING && strings.Contains(arg.Value, "%") {
+			return
+		}
+		if !astutil.UsesImport(c.req.AstFile, pkg) {
+			return
+		}
+		fn := node.Fun.(*ast.SelectorExpr)
+		fn.Sel.Name = fnNew
 		return
 	}
-	arg, ok := node.Args[0].(*ast.BasicLit)
-	if !ok {
+
+	if len(node.Args) == 2 {
+		arg0, ok := node.Args[0].(*ast.BasicLit)
+		if !ok {
+			return
+		}
+		if arg0.Kind != token.STRING {
+			return
+		}
+		arg1 := node.Args[1]
+		if (arg0.Value == `"%s"` && isBasicLitKind(arg1, token.STRING)) ||
+			(arg0.Value == `"%d"` && isIntExprValue(arg1)) {
+			fn := node.Fun.(*ast.SelectorExpr)
+			fn.Sel.Name = fnNew
+			node.Args = node.Args[1:]
+			return
+		}
 		return
 	}
-	if arg.Kind == token.STRING && strings.Contains(arg.Value, "%") {
-		return
+}
+
+func isIntExprValue(v ast.Expr) bool {
+	if isBasicLitKind(v, token.INT) {
+		return true
 	}
-	if !astutil.UsesImport(c.req.AstFile, pkg) {
-		return
+	_, ok := v.(*ast.BasicLit) // fmt.Println(8)
+	if ok {
+		return true
 	}
-	fn := node.Fun.(*ast.SelectorExpr)
-	fn.Sel.Name = fnNew
+	cv, ok1 := v.(*ast.CallExpr) // fmt.Println(int16(8))
+	if !ok1 {
+		return false
+	}
+	fn, ok2 := cv.Fun.(*ast.Ident)
+	if ok2 {
+		switch fn.Name {
+		case "int8",
+			"int16",
+			"int32",
+			"int64",
+			"uint8",
+			"uint16",
+			"uint32",
+			"uint64":
+			return true
+		default:
+			return false
+		}
+	}
+	return false
 }
 
 // fmt.Fprintf(os.Stderr,"abc") -> fmt.Fprint(os.Stderr,"abc")
@@ -573,6 +625,14 @@ func isBasicLit(n ast.Expr, kind token.Token, val string) bool {
 		return false
 	}
 	return nv.Value == val && nv.Kind == kind
+}
+
+func isBasicLitKind(n ast.Expr, kind token.Token) bool {
+	nv, ok := n.(*ast.BasicLit)
+	if !ok {
+		return false
+	}
+	return nv.Kind == kind
 }
 
 func isFun(fn ast.Expr, pkg string, name string) bool {

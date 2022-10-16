@@ -9,6 +9,12 @@ import(
 
 func doPrintf() {
 	fmt.Printf("abc")
+	fmt.Printf("%s","abc")
+	fmt.Printf("%d",123)
+	fmt.Printf("%d",int64(123))
+	fmt.Printf("%d",int8(123))
+	fmt.Printf("%d",int32(123))
+	fmt.Printf("%s",[]byte("abc"))
 	fmt.Printf(123)
     log.Printf("abc")
     log.Fatalf("abc")
