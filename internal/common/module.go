@@ -5,6 +5,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -43,7 +44,7 @@ func FindGoModPath(fileName string) (string, error) {
 		}
 		pd = cpd
 	}
-	return "", fmt.Errorf("cannot found go.mod")
+	return "", errors.New("cannot found go.mod")
 }
 
 // ModuleByFile 解析 go.mod 文件里的  module 的值

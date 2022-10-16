@@ -6,6 +6,7 @@ package common
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -149,7 +150,7 @@ func NewDefaultOptions() *Options {
 // AllGoFiles 获取所有的待格式化的 .go 文件
 func (opt *Options) AllGoFiles() ([]string, error) {
 	if len(opt.Files) == 0 {
-		return nil, fmt.Errorf("opt.Files cannot empty")
+		return nil, errors.New("opt.Files cannot empty")
 	}
 
 	var files []string

@@ -6,6 +6,7 @@ package std
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/build"
 	"os"
@@ -31,7 +32,7 @@ func PKGs() ([]string, error) {
 func currentPKGs() ([]string, error) {
 	ctx := build.Default
 	if len(ctx.GOROOT) == 0 {
-		return nil, fmt.Errorf("GOROOT is empty")
+		return nil, errors.New("GOROOT is empty")
 	}
 	cmd := exec.Command("go", "env", "GOROOT")
 	out, err := cmd.Output()
@@ -40,7 +41,7 @@ func currentPKGs() ([]string, error) {
 	}
 	out = bytes.TrimSpace(out)
 	if len(out) == 0 {
-		return nil, fmt.Errorf("not found GOROOT")
+		return nil, errors.New("not found GOROOT")
 	}
 	var pkgs []string
 	stdSrcDir := filepath.Join(string(out), "src")
