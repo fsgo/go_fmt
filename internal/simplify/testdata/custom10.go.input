@@ -1,0 +1,12 @@
+package demo
+
+import(
+   "fmt"
+   "log"
+)
+
+
+func doFmt() {
+	a:=fmt.Errorf("abc")
+    log.Println(a)
+}

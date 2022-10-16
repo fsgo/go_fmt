@@ -7,6 +7,7 @@ package simplify
 import (
 	"go/ast"
 	"go/token"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 
@@ -365,6 +366,7 @@ func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.stringsReplace(node)
 	c.timeNowSub(node)
 	c.timeSubNow(node)
+	c.fmtErrorf(node)
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
@@ -463,6 +465,48 @@ func (c *customApply) timeSubNow(node *ast.CallExpr) {
 		},
 	}
 	c.Cursor.Replace(c1)
+}
+
+// fmt.Errorf("abc") -> errors.New("def")
+func (c *customApply) fmtErrorf(node *ast.CallExpr) {
+	if !isFun(node.Fun, "fmt", "Errorf") {
+		return
+	}
+	if len(node.Args) != 1 {
+		return
+	}
+
+	// 只处理 fmt.Errorf("abc")
+	// 而不处理
+	// var msg="abc"
+	// fmt.Errorf(msg)
+	arg, ok := node.Args[0].(*ast.BasicLit)
+	if !ok {
+		return
+	}
+	if strings.Contains(arg.Value, "%") {
+		return
+	}
+
+	if !astutil.UsesImport(c.req.AstFile, "fmt") {
+		return
+	}
+
+	c1 := &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "errors",
+			},
+			Sel: &ast.Ident{
+				Name: "New",
+			},
+		},
+		Args: []ast.Expr{
+			arg,
+		},
+	}
+	c.Cursor.Replace(c1)
+	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "errors")
 }
 
 func isBasicLit(n ast.Expr, kind token.Token, val string) bool {

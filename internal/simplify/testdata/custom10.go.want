@@ -1,0 +1,11 @@
+package demo
+
+import (
+	"errors"
+	"log"
+)
+
+func doFmt() {
+	a := errors.New("abc")
+	log.Println(a)
+}
