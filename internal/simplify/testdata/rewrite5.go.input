@@ -1,0 +1,11 @@
+package demo
+
+import (
+	"fmt"
+)
+
+// with rules/rule1.txt
+
+func do() {
+	fmt.Println("ok"=="")
+}

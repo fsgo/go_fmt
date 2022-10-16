@@ -1,0 +1,29 @@
+package pool_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/alicebob/miniredis/v2" // def
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega" // abc
+)
+
+// 会将多个 import merge 为一个
+
+func hello() {
+	//	前面是一个 tab， 不是空格
+	fmt.Println("hello")
+
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	defer s.Close()
+}
+
+// TestGinkgoSuite abcd
+func TestGinkgoSuite(t *testing.T) {
+	_ = GinkgoParallelNode()
+	_ = BeNil()
+}

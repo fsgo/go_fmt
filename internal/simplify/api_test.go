@@ -27,6 +27,30 @@ func TestRewrite(t *testing.T) {
 	}
 	xtest.Check(t, "testdata/rewrite1.go.input", "testdata/rewrite1.go.want", fn1)
 	xtest.Check(t, "testdata/rewrite2.go.input", "testdata/rewrite2.go.want", fn1)
+
+	fn2 := func(req *common.Request) {
+		f, err := Rewrite(req, "testdata/rules/rule1.txt")
+		require.NoError(t, err)
+		req.AstFile = f
+	}
+	xtest.Check(t, "testdata/rewrite5.go.input", "testdata/rewrite5.go.want", fn2)
+
+	t.Run("invalid rule", func(t *testing.T) {
+		req := common.NewTestRequest("testdata/rewrite5.go.input")
+		rules := []string{"invalid", "invalid ->", " -> ", "", " "}
+		for i := 0; i < len(rules); i++ {
+			f, err := Rewrite(req, rules[i])
+			require.Error(t, err)
+			require.Nil(t, f)
+		}
+	})
+
+	t.Run("invalid rule file", func(t *testing.T) {
+		req := common.NewTestRequest("testdata/rewrite5.go.input")
+		f, err := Rewrite(req, "testdata/rules/rule2.txt")
+		require.Error(t, err)
+		require.Nil(t, f)
+	})
 }
 
 func TestRewrites(t *testing.T) {

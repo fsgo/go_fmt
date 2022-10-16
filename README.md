@@ -309,9 +309,12 @@ usage: gorgeous [flags] [path ...]
   -local string
     	put imports beginning with this string as 3rd-party packages (default "auto")
   -mi
-    	merge imports into one
+    	merge imports into one.
+    	with env 'GORGEOUS_MI=false' to set default value as false (default true)
   -r value
     	rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')
+    	or a file path for rewrite rules (like -rr)
+
   -rr
     	rewrite with build in rules:
     	a[b:len(a)] -> a[b:]
@@ -325,9 +328,13 @@ usage: gorgeous [flags] [path ...]
     	io/#ioutil.TempDir   -> os.MkdirTemp
     	io/#ioutil.WriteFile -> os.WriteFile
     	io/#ioutil.Discard   -> io.Discard
+
+    	with env 'GORGEOUS_RR=false' to set default value as false
+    	 (default true)
   -s	simplify code (default true)
   -slcr
     	multiline copyright to single-line
+    	with env 'GORGEOUS_SLCR=true' to set default value as true
   -trace
     	show trace infos
   -w	write result to (source) file instead of stdout (default true)

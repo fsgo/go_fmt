@@ -211,17 +211,27 @@ func (opt *Options) BindFlags() {
 	commandLine.StringVar(&opt.LocalModule, "local", "auto", "put imports beginning with this string as 3rd-party packages")
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
 	commandLine.BoolVar(&opt.Extra, "e", true, "enable extra rules")
-	commandLine.BoolVar(&opt.MergeImports, "mi", false, "merge imports into one")
-	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", false, "multiline copyright to single-line")
+	commandLine.BoolVar(&opt.MergeImports, "mi", flagEnvBool("GORGEOUS_MI", true),
+		`merge imports into one.
+with env 'GORGEOUS_MI=false' to set default value as false`)
+	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", flagEnvBool("GORGEOUS_SLCR", false),
+		`multiline copyright to single-line
+with env 'GORGEOUS_SLCR=true' to set default value as true`)
 	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import group sort rule,
 stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
 sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
 `)
 	var rewriteRule stringSlice
-	commandLine.Var(&rewriteRule, "r", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
+	commandLine.Var(&rewriteRule, "r", `rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')
+or a file path for rewrite rules (like -rr)
+`)
 
-	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", false, `rewrite with build in rules:
-`+strings.Join(BuildInRewriteRules(), "\n"))
+	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", flagEnvBool("GORGEOUS_RR", true),
+		`rewrite with build in rules:
+`+strings.Join(BuildInRewriteRules(), "\n")+`
+
+with env 'GORGEOUS_RR=false' to set default value as false
+`)
 
 	commandLine.Usage = func() {
 		cmd := os.Args[0]
@@ -292,4 +302,15 @@ func (opt *Options) Format(src []byte) ([]byte, error) {
 		return nil, err
 	}
 	return opt.Source(fset, f)
+}
+
+func flagEnvBool(key string, def bool) bool {
+	switch os.Getenv(key) {
+	case "true":
+		return true
+	case "false":
+		return false
+	default:
+		return def
+	}
 }

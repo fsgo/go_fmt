@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
+	"os"
 	"strings"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -21,22 +23,72 @@ func Format(req *common.Request) {
 	customSimplify(req)
 }
 
+var ruleMsg1 = "rewrite rule must be of the form 'pattern -> replacement'"
+var ruleMsg2 = ruleMsg1 + " or a valid filepath"
+
 // Rewrite 简化代码
 func Rewrite(req *common.Request, rule string) (*ast.File, error) {
+	rule, _ = splitRule(rule)
 	if len(rule) == 0 {
 		return nil, errors.New("empty rewrite rule")
 	}
 	ps := strings.Split(rule, "->")
-	if len(ps) != 2 {
-		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement', now got %q", rule)
+	if len(ps) == 2 {
+		return doRewrite(req.FSet, req.AstFile, ps[0], ps[1], rule)
 	}
-	pattern := customParseExpr(ps[0], "pattern")
-	replace := customParseExpr(ps[1], "replacement")
 
-	result := rewriteFile(req.FSet, pattern.expr, replace.expr, req.AstFile)
+	if rules, err1 := parserRuleFile(rule); err1 == nil {
+		for i := 0; i < len(rules); i++ {
+			txt, _ := splitRule(rules[i])
+			if len(txt) == 0 {
+				continue
+			}
+			ps1 := strings.Split(txt, "->")
+			if len(ps1) != 2 {
+				return nil, fmt.Errorf(ruleMsg1+",but at %s:%d, rule is %q", rule, i+1, txt)
+			}
+			f, err := doRewrite(req.FSet, req.AstFile, ps1[0], ps1[1], txt)
+			if err != nil {
+				return nil, err
+			}
+			req.AstFile = f
+			if err = req.ReParse(); err != nil {
+				return nil, err
+			}
+		}
+		return req.AstFile, nil
+	}
+	return nil, fmt.Errorf(ruleMsg2+", now got %q", rule)
+}
 
-	fixImport(pattern, replace, req.FSet, result)
+// splitRule  将规则和注释分开
+//
+//	a == "" -> len(a) == 0 // comment
+//	a != "" -> len(a) != 0
+func splitRule(rule string) (r string, comment string) {
+	rule = strings.TrimSpace(rule)
+	arr := strings.SplitN(rule, "//", 2)
+	if len(arr) == 2 {
+		return arr[0], arr[1]
+	}
+	return rule, ""
+}
 
+func doRewrite(fs *token.FileSet, f *ast.File, patternExp string, replaceExp string, what string) (*ast.File, error) {
+	patternExp = strings.TrimSpace(patternExp)
+	if len(patternExp) == 0 {
+		return nil, fmt.Errorf("pattern is empty, %q", what)
+	}
+	pattern := customParseExpr(patternExp, "pattern")
+
+	replaceExp = strings.TrimSpace(replaceExp)
+	if len(replaceExp) == 0 {
+		return nil, fmt.Errorf("replacement is empty, %q", what)
+	}
+	replace := customParseExpr(replaceExp, "replacement")
+	result := rewriteFile(fs, pattern.expr, replace.expr, f)
+
+	fixImport(pattern, replace, fs, result)
 	return result, nil
 }
 
@@ -103,4 +155,12 @@ func customParseExpr(expStr string, what string) *expr {
 		e.expr = parseExpr(expStr, what)
 	}
 	return e
+}
+
+func parserRuleFile(name string) ([]string, error) {
+	content, err := os.ReadFile(name)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(string(content), "\n"), nil
 }

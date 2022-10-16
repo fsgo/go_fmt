@@ -1,0 +1,2 @@
+    	a == ""     -> len(a) == 0 // comment
+    	a != ""     -> len(a) != 0

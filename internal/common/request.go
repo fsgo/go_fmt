@@ -7,11 +7,28 @@ package common
 import (
 	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"os"
 	"reflect"
 	"sort"
 )
+
+// NewTestRequest 给测试场景使用的，创建一个新的 request 对象
+func NewTestRequest(fileName string) *Request {
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, fileName, nil, parser.ParseComments)
+	if err != nil {
+		panic(err)
+	}
+	opt := NewDefaultOptions()
+	return &Request{
+		FileName: fileName,
+		Opt:      *opt,
+		FSet:     fset,
+		AstFile:  f,
+	}
+}
 
 // Request 一次格式化的请求
 type Request struct {
