@@ -12,6 +12,9 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"sync"
+
+	"golang.org/x/mod/semver"
 )
 
 // NewTestRequest 给测试场景使用的，创建一个新的 request 对象
@@ -37,6 +40,9 @@ type Request struct {
 	tokenLine *TokenLine
 	FileName  string
 	Opt       Options
+
+	goVersion     string
+	goVersionOnce sync.Once
 }
 
 // TokenLine 获取 TokenLine
@@ -103,6 +109,15 @@ func (req *Request) Clone() *Request {
 	c.FSet = fs
 	c.AstFile = f
 	return c
+}
+
+// GoVersionGEQ 判断模块 Go 的版本是否 >= 指定版本
+// version: 版本号，如 1.19
+func (req *Request) GoVersionGEQ(version string) bool {
+	req.goVersionOnce.Do(func() {
+		req.goVersion = goVersionByFile(req.FileName)
+	})
+	return semver.Compare("v"+req.goVersion, "v"+version) >= 0
 }
 
 // TokenLine 记录对文件的换行的处理

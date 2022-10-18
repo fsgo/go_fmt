@@ -7,6 +7,8 @@ package common
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_intSliceDelete(t *testing.T) {
@@ -36,4 +38,16 @@ func Test_intSliceDelete(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRequest_IsGoVersion(t *testing.T) {
+	req := &Request{
+		FileName: "request.go",
+	}
+	require.True(t, req.GoVersionGEQ("1.13"))
+	require.True(t, req.GoVersionGEQ("1.19"))
+	require.True(t, req.GoVersionGEQ("1.18"))
+
+	require.False(t, req.GoVersionGEQ("1.20"))
+	require.False(t, req.GoVersionGEQ("1.99"))
 }

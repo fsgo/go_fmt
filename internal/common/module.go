@@ -118,3 +118,24 @@ func ListModules(dir string) (Modules, error) {
 	}
 	return result, err
 }
+
+// goVersionByFile 通过文件名查找模块的 go 版本
+// 若查找不到，会返回默认值 go1.19
+func goVersionByFile(fileName string) string {
+	fp, err := FindGoModPath(fileName)
+	if err != nil {
+		return "1.19"
+	}
+	content, err := os.ReadFile(fp)
+	if err != nil {
+		return "1.19"
+	}
+	f, err := modfile.Parse(fp, content, nil)
+	if err != nil {
+		return "1.19"
+	}
+	if f.Go != nil && len(f.Go.Version) > 0 {
+		return f.Go.Version
+	}
+	return "1.19"
+}

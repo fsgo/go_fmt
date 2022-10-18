@@ -5,11 +5,12 @@
 package simplify
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/token"
+	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -28,24 +29,36 @@ var ruleMsg2 = ruleMsg1 + " or a valid filepath"
 
 // Rewrite 简化代码
 func Rewrite(req *common.Request, rule string) (*ast.File, error) {
-	rule, _ = splitRule(rule)
+	rule, cmt := splitRule(rule)
 	if len(rule) == 0 {
-		return nil, errors.New("empty rewrite rule")
+		return nil, fmt.Errorf("empty rewrite rule: %q", rule)
 	}
 	ps := strings.Split(rule, "->")
 	if len(ps) == 2 {
+		if gv := goVersionFromComment(cmt); len(gv) != 0 && !req.GoVersionGEQ(gv) {
+			if req.Opt.Trace {
+				log.Println("[Rewrite]", rule, "ignored")
+			}
+			return req.AstFile, nil
+		}
 		return doRewrite(req.FSet, req.AstFile, ps[0], ps[1], rule)
 	}
 
 	if rules, err1 := parserRuleFile(rule); err1 == nil {
 		for i := 0; i < len(rules); i++ {
-			txt, _ := splitRule(rules[i])
+			txt, cmt1 := splitRule(rules[i])
 			if len(txt) == 0 {
 				continue
 			}
 			ps1 := strings.Split(txt, "->")
 			if len(ps1) != 2 {
 				return nil, fmt.Errorf(ruleMsg1+",but at %s:%d, rule is %q", rule, i+1, txt)
+			}
+			if gv := goVersionFromComment(cmt1); len(gv) != 0 && !req.GoVersionGEQ(gv) {
+				if req.Opt.Trace {
+					log.Println("[Rewrite]", txt, "ignored")
+				}
+				continue
 			}
 			f, err := doRewrite(req.FSet, req.AstFile, ps1[0], ps1[1], txt)
 			if err != nil {
@@ -59,6 +72,18 @@ func Rewrite(req *common.Request, rule string) (*ast.File, error) {
 		return req.AstFile, nil
 	}
 	return nil, fmt.Errorf(ruleMsg2+", now got %q", rule)
+}
+
+var goVersionReg = regexp.MustCompile(`\sgo(1.\d+)`)
+
+// 从注释里解析出 go 版本
+// 如： interface{} -> any // go1.19 ，解析得到 1.19
+func goVersionFromComment(comment string) string {
+	txt := goVersionReg.FindString(comment)
+	if len(txt) > 0 {
+		return txt[3:]
+	}
+	return ""
 }
 
 // splitRule  将规则和注释分开

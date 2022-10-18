@@ -73,3 +73,41 @@ func TestRewrites(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func Test_goVersionFromComment(t *testing.T) {
+	type args struct {
+		comment string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "empty",
+			args: args{},
+			want: "",
+		},
+		{
+			name: "go1.19",
+			args: args{
+				comment: "// go1.19",
+			},
+			want: "1.19",
+		},
+		{
+			name: "go1.19 with other",
+			args: args{
+				comment: "// go1.19 other",
+			},
+			want: "1.19",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := goVersionFromComment(tt.args.comment); got != tt.want {
+				t.Errorf("goVersionFromComment() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
