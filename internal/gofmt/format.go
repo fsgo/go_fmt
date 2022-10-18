@@ -85,9 +85,8 @@ func fix(req *common.Request) ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("rewrite failed: %w", err)
 		}
-	}
-
-	if req.Opt.RewriteWithBuildIn {
+	} else if req.Opt.RewriteWithBuildIn {
+		// 当传入 rewrite 规则的时候，不使用默认规则
 		err := simplify.Rewrites(req, simplify.BuildInRewriteRules())
 		if err != nil {
 			return nil, fmt.Errorf("rewrite with build in rules failed: %w", err)

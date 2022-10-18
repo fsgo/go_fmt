@@ -28,6 +28,7 @@ func FormatComments(req *common.Request) {
 					strings.HasPrefix(cm.Text, "//line ") ||
 					strings.HasPrefix(cm.Text, "//*line ") ||
 					strings.HasPrefix(cm.Text, "//nolint") ||
+					strings.HasPrefix(cm.Text, "//lint") ||
 					strings.HasPrefix(cm.Text, "//export ") {
 					// spec comment,ignore
 				} else {
