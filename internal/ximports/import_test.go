@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -415,7 +416,7 @@ func TestFormatImports(t *testing.T) {
 
 			wantFp := fp[:len(fp)-len(".input")] + ".want"
 			want, err := os.ReadFile(wantFp)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 
 			if !bytes.Equal(want, got) {
 				_ = os.WriteFile(tmpPath, got, 0644)

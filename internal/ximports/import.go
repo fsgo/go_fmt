@@ -6,7 +6,7 @@ package ximports
 
 import (
 	/*
-	 * 多行注释1
+	* 多行注释1
 	 */ /*
 	* 多行注释2
 	 */ /* 多行注释3 */ "bytes"

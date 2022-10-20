@@ -87,17 +87,21 @@ func (decl *importDecl) RealPath() string {
 	return arr[1]
 }
 
+var regSpace = regexp.MustCompile(`\s+`)
+
 // Bytes 重新序列化
 func (decl *importDecl) Bytes() []byte {
 	var buf bytes.Buffer
 	for _, cmt := range decl.Docs {
 		// 对注释中的多个空格替换为一个空格
-		cmt = regexp.MustCompile(`\s+`).ReplaceAllString(cmt, " ")
+		cmt = regSpace.ReplaceAllString(cmt, " ")
 
+		buf.WriteString("	")
 		buf.WriteString(cmt)
 		buf.WriteString("\n")
 	}
 	if len(decl.Path) != 0 {
+		buf.WriteString("	")
 		buf.WriteString(decl.Path)
 		buf.WriteString("\n")
 	}
