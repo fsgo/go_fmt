@@ -209,7 +209,7 @@ func (opt *Options) BindFlags() {
 	commandLine.BoolVar(&opt.DisplayDiff, "d", false, "display diffs instead of rewriting files")
 	commandLine.StringVar(&opt.DisplayFormat, "df", "text", "display diffs format, support: text, json")
 	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
-	commandLine.StringVar(&opt.LocalModule, "local", "auto", 
+	commandLine.StringVar(&opt.LocalModule, "local", "auto",
 		`current package path, will put imports beginning with this string as 3rd-party packages.
 by default, it will got from 'go.mod' file.
 `,

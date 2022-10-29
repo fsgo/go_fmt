@@ -16,7 +16,7 @@ import (
 
 // customSimplify 自定义的简化规则
 func customSimplify(req *common.Request) {
-	pre:=func(c *astutil.Cursor) bool {
+	pre := func(c *astutil.Cursor) bool {
 		switch vt := c.Node().(type) {
 		case *ast.BinaryExpr:
 			newCustomApply(req, c).fixBinaryExpr(vt)
@@ -342,14 +342,14 @@ func (c *customApply) bytesCompare0(cond *ast.BinaryExpr) {
 }
 
 // 策略还存在瑕疵
-const enableSortXY=false
+const enableSortXY = false
 
 // sortXY
 //
 //	ok1() && "a"=="b"       ->  "a"=="b" && ok1()
 //	ok1() && len("a") > 0   ->  len("a") > 0 && ok1()
 func (c *customApply) sortXY(cond *ast.BinaryExpr) {
-	if !enableSortXY{
+	if !enableSortXY {
 		return
 	}
 	if cond.Op != token.LAND && cond.Op != token.LOR {
