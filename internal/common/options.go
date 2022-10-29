@@ -147,6 +147,9 @@ func NewDefaultOptions() *Options {
 	}
 }
 
+// NameSTDIN 特殊的文件名，用于标志从 stdin 读取代码
+const NameSTDIN = "stdin"
+
 // AllGoFiles 获取所有的待格式化的 .go 文件
 func (opt *Options) AllGoFiles() ([]string, error) {
 	if len(opt.Files) == 0 {
@@ -174,6 +177,10 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 				// 若获取 git 变化的文件失败，则获取当前目录下所有文件
 				tmpList, err = allGoFiles("./")
 			}
+		case NameSTDIN:
+			files = append(files, name)
+			opt.Write = false
+			break
 		default:
 			info, errStat := os.Stat(name)
 			if errStat != nil {

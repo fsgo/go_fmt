@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -172,7 +173,11 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 // Format 格式化文件，获取格式化后的内容
 func (ft *Formatter) Format(fileName string, src []byte, opt *Options) (origin []byte, pretty []byte, formatted bool, err error) {
 	if len(src) == 0 {
-		src, err = os.ReadFile(fileName)
+		if fileName == common.NameSTDIN {
+			src, err = io.ReadAll(os.Stdin)
+		} else {
+			src, err = os.ReadFile(fileName)
+		}
 		if err != nil {
 			return nil, nil, false, err
 		}

@@ -368,6 +368,11 @@ $ gorgeous ./...
 $ gorgeous abc.go
 ```
 
+### 3.4 从 STDIN 读取代码并输出到 STDOUT
+```bash
+$ cat code.go|gorgeous stdin
+```
+
 ## 4 git hooks
 
 git commit 前自动格式化代码
