@@ -137,18 +137,24 @@ func (opt *Options) Check() error {
 // NewDefaultOptions 生成默认的 options
 func NewDefaultOptions() *Options {
 	return &Options{
-		TabIndent:    true,
-		TabWidth:     8,
-		LocalModule:  "auto",
-		Write:        true,
-		MergeImports: true,
-		Simplify:     true,
-		Extra:        false,
+		TabIndent:          true,
+		TabWidth:           8,
+		LocalModule:        "auto",
+		Write:              true,
+		MergeImports:       true,
+		Simplify:           true,
+		Extra:              true,
+		RewriteWithBuildIn: true,
 	}
 }
 
-// NameSTDIN 特殊的文件名，用于标志从 stdin 读取代码
-const NameSTDIN = "stdin"
+const (
+	// NameSTDIN 特殊的文件名，用于标志从 stdin 读取代码
+	NameSTDIN = "stdin"
+
+	// NameGitChange 特殊的文件名，表示查找所有当前有修改的文件
+	NameGitChange = "git_change"
+)
 
 // AllGoFiles 获取所有的待格式化的 .go 文件
 func (opt *Options) AllGoFiles() ([]string, error) {
@@ -168,7 +174,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 		switch name {
 		case "./...":
 			tmpList, err = allGoFiles("./")
-		case "git_change":
+		case NameGitChange:
 			tmpList, err = filesGitDirChange()
 			if err != nil {
 				if opt.Trace {
@@ -213,21 +219,21 @@ end:
 // BindFlags 绑定参数信息
 func (opt *Options) BindFlags() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	commandLine.BoolVar(&opt.Write, "w", true, "write result to (source) file instead of stdout")
+	commandLine.BoolVar(&opt.Write, "w", opt.Write, "write result to (source) file instead of stdout")
 	commandLine.BoolVar(&opt.DisplayDiff, "d", false, "display diffs instead of rewriting files")
 	commandLine.StringVar(&opt.DisplayFormat, "df", "text", "display diffs format, support: text, json")
-	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
+	commandLine.BoolVar(&opt.Simplify, "s", opt.Simplify, "simplify code")
 	commandLine.StringVar(&opt.LocalModule, "local", "auto",
 		`current package path, will put imports beginning with this string as 3rd-party packages.
 by default, it will got from 'go.mod' file.
 `,
 	)
 	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace messages")
-	commandLine.BoolVar(&opt.Extra, "e", true, "enable extra rules")
-	commandLine.BoolVar(&opt.MergeImports, "mi", flagEnvBool("GORGEOUS_MI", true),
+	commandLine.BoolVar(&opt.Extra, "e", opt.Extra, "enable extra rules")
+	commandLine.BoolVar(&opt.MergeImports, "mi", flagEnvBool("GORGEOUS_MI", opt.MergeImports),
 		`merge imports into one section.
 with env 'GORGEOUS_MI=false' to set default value as false`)
-	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", flagEnvBool("GORGEOUS_SLCR", false),
+	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", flagEnvBool("GORGEOUS_SLCR", opt.SingleLineCopyright),
 		`multiline copyright to single-line
 with env 'GORGEOUS_SLCR=true' to set default value as true`)
 	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import groups sort rule,
@@ -239,7 +245,7 @@ sct: Go Standard package, Current package, Third Party package
 or a file path for rewrite rules (like -rr)
 `)
 
-	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", flagEnvBool("GORGEOUS_RR", true),
+	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", flagEnvBool("GORGEOUS_RR", opt.RewriteWithBuildIn),
 		`rewrite with build in rules:
 `+strings.Join(BuildInRewriteRules(), "\n")+`
 
@@ -268,7 +274,7 @@ with env 'GORGEOUS_RR=false' to set default value as false
 	opt.Files = commandLine.Args()
 
 	if len(opt.Files) == 0 {
-		opt.Files = []string{"git_change"}
+		opt.Files = []string{NameGitChange}
 	}
 }
 

@@ -419,6 +419,17 @@ chmod 777 ~/.git_config/hooks/pre-commit
 
 ## 6 Visual Studio Code
 
+### 6.1 As goimports
+1. Install as goimports:
+```bash
+go install github.com/fsgo/go_fmt/cmd/goimports@latest
+```
+2. 配置的 `Go: Format Tool`，设置为 "default"：
+```
+  "go.formatTool": "default"
+```
+
+### 6.2 Run on Save
 1. 先安装插件 [Run on Save](https://marketplace.visualstudio.com/items?itemName=pucelle.run-on-save) <img src="https://github.com/pucelle/vscode-run-on-save/raw/master/images/logo.png" width="20px"/>
 
 2. 配置插件，在保存文件的时候执行格式化命令：

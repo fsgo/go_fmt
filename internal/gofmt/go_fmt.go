@@ -38,7 +38,15 @@ func (ft *Formatter) Execute(opt *Options) error {
 	return ft.execute(opt)
 }
 
+// OnExecute hook Before Execute
+var OnExecute = func(opt *Options) error {
+	return nil
+}
+
 func (ft *Formatter) execute(opt *Options) error {
+	if err := OnExecute(opt); err != nil {
+		return err
+	}
 	files, err := opt.AllGoFiles()
 	if err != nil {
 		return err
