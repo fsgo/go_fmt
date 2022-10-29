@@ -180,7 +180,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 		case NameSTDIN:
 			files = append(files, name)
 			opt.Write = false
-			break
+			goto end
 		default:
 			info, errStat := os.Stat(name)
 			if errStat != nil {
@@ -206,6 +206,7 @@ func (opt *Options) AllGoFiles() ([]string, error) {
 			files = append(files, tmpList...)
 		}
 	}
+end:
 	return files, nil
 }
 
