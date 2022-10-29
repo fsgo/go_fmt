@@ -144,6 +144,11 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 		return changed, err
 	}
 
+	if !opt.Write && !opt.DisplayDiff {
+		fmt.Print(string(prettySrc))
+		return changed, nil
+	}
+
 	if !changed {
 		if formatted {
 			ft.printFmtResult(fileName, false, "pretty", common.ConsoleGreen, nil)
@@ -158,11 +163,9 @@ func (ft *Formatter) doFormat(opt *Options, fileName string) (bool, error) {
 		ft.printFmtResult(fileName, true, "rewrote", common.ConsoleRed, err)
 		return changed, err
 	} else if opt.DisplayDiff {
-		ft.printFmtResult(fileName, true, "ugly", common.ConsoleRed, err)
+		ft.printFmtResult(fileName, true, "ugly", common.ConsoleRed, nil)
 	}
-	if !opt.DisplayDiff {
-		fmt.Println(string(prettySrc))
-	}
+
 	return changed, nil
 }
 
