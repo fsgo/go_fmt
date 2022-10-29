@@ -16,7 +16,14 @@ import (
 
 // customSimplify 自定义的简化规则
 func customSimplify(req *common.Request) {
-	astutil.Apply(req.AstFile, nil, func(c *astutil.Cursor) bool {
+	pre:=func(c *astutil.Cursor) bool {
+		switch vt := c.Node().(type) {
+		case *ast.BinaryExpr:
+			newCustomApply(req, c).fixBinaryExpr(vt)
+		}
+		return true
+	}
+	post := func(c *astutil.Cursor) bool {
 		// log.Println("c.Name()", c.Name())
 		switch vt := c.Node().(type) {
 		case *ast.AssignStmt:
@@ -27,7 +34,8 @@ func customSimplify(req *common.Request) {
 			newCustomApply(req, c).fixCallExpr(vt)
 		}
 		return true
-	})
+	}
+	astutil.Apply(req.AstFile, pre, post)
 }
 
 func newCustomApply(req *common.Request, c *astutil.Cursor) *customApply {
@@ -79,7 +87,7 @@ func (c *customApply) numIncDec(vt *ast.AssignStmt) {
 
 // _ = <-ch  ->  <-ch
 func (c *customApply) chanReceive(node *ast.AssignStmt) {
-	if len(node.Rhs) != 1 || len(node.Lhs) != 1 || node.Tok != token.ASSIGN {
+	if node.Tok != token.ASSIGN || (len(node.Rhs) != 1 || len(node.Lhs) != 1) || len(node.Lhs) != 1 {
 		return
 	}
 	x, ok1 := node.Lhs[0].(*ast.Ident)
@@ -104,7 +112,7 @@ func (c *customApply) chanReceive(node *ast.AssignStmt) {
 
 // x, _ := someMap["key"] -> x:=someMap["key"]
 func (c *customApply) mapRead(node *ast.AssignStmt) {
-	if len(node.Lhs) != 2 || len(node.Rhs) != 1 || node.Tok != token.DEFINE {
+	if node.Tok != token.DEFINE || (len(node.Lhs) != 2 || len(node.Rhs) != 1) || len(node.Rhs) != 1 {
 		return
 	}
 	x1, ok1 := node.Lhs[1].(*ast.Ident)
@@ -129,6 +137,8 @@ func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
 
 	c.stringsCompare0(cond)
 	c.bytesCompare0(cond)
+
+	c.sortXY(cond)
 }
 
 func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
@@ -197,8 +207,8 @@ func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 	if !isFun(x.Fun, pkg, "Count") {
 		return
 	}
-	isVal0 := isBasicLit(cond.Y, token.INT, "0")
-	isVal1 := !isVal0 && isBasicLit(cond.Y, token.INT, "1")
+	isVal0 := isBasicLitValue(cond.Y, token.INT, "0")
+	isVal1 := !isVal0 && isBasicLitValue(cond.Y, token.INT, "1")
 	if !isVal0 && !isVal1 {
 		return
 	}
@@ -253,7 +263,7 @@ func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 	}
 
 	//  判断的值是 0
-	isVal0 := isBasicLit(cond.Y, token.INT, "0")
+	isVal0 := isBasicLitValue(cond.Y, token.INT, "0")
 
 	//  判断的值是 -1
 	var isValSub1 bool
@@ -264,7 +274,7 @@ func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 			return
 		}
 		//  判断的值是 -1
-		isValSub1 = y.Op == token.SUB && isBasicLit(y.X, token.INT, "1")
+		isValSub1 = y.Op == token.SUB && isBasicLitValue(y.X, token.INT, "1")
 	}
 
 	if !isVal0 && !isValSub1 {
@@ -307,7 +317,7 @@ func (c *customApply) bytesCompare0(cond *ast.BinaryExpr) {
 	if !isFun(x.Fun, "bytes", "Compare") {
 		return
 	}
-	if !isBasicLit(cond.Y, token.INT, "0") {
+	if !isBasicLitValue(cond.Y, token.INT, "0") {
 		return
 	}
 
@@ -331,6 +341,41 @@ func (c *customApply) bytesCompare0(cond *ast.BinaryExpr) {
 	}
 }
 
+// 策略还存在瑕疵
+const enableSortXY=false
+
+// sortXY
+//
+//	ok1() && "a"=="b"       ->  "a"=="b" && ok1()
+//	ok1() && len("a") > 0   ->  len("a") > 0 && ok1()
+func (c *customApply) sortXY(cond *ast.BinaryExpr) {
+	if !enableSortXY{
+		return
+	}
+	if cond.Op != token.LAND && cond.Op != token.LOR {
+		return
+	}
+	if isSimpleCondExpr(cond.X) { // 左边已经是简单条件，则跳过
+		return
+	}
+	if !isSimpleCondExpr(cond.Y) { // 右边是复杂条件，则跳过
+		return
+	}
+	ny := cond.X
+	nx := cond.Y
+	// todo 调整树结构
+	if xv, ok := cond.X.(*ast.BinaryExpr); ok && xv.Op == cond.Op {
+		nx = &ast.BinaryExpr{
+			Op: cond.Op,
+			X:  cond.Y,
+			Y:  xv.X,
+		}
+		ny = xv.Y
+	}
+	cond.X = nx
+	cond.Y = ny
+}
+
 // strings.Compare(s,a) == 0 -> s==a
 // strings.Compare(s,a) != 0 -> s!=a
 func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
@@ -341,7 +386,7 @@ func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
 	if !isFun(x.Fun, "strings", "Compare") {
 		return
 	}
-	if !isBasicLit(cond.Y, token.INT, "0") {
+	if !isBasicLitValue(cond.Y, token.INT, "0") {
 		return
 	}
 
@@ -379,7 +424,7 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 	if !ok0 || arg3.Op != token.SUB {
 		return
 	}
-	if !isBasicLit(arg3.X, token.INT, "1") {
+	if !isBasicLitValue(arg3.X, token.INT, "1") {
 		return
 	}
 	if !astutil.UsesImport(c.req.AstFile, "strings") {
@@ -619,7 +664,7 @@ func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string
 	fn.Sel.Name = fnNew
 }
 
-func isBasicLit(n ast.Expr, kind token.Token, val string) bool {
+func isBasicLitValue(n ast.Expr, kind token.Token, val string) bool {
 	nv, ok := n.(*ast.BasicLit)
 	if !ok {
 		return false
@@ -648,4 +693,13 @@ func isFun(fn ast.Expr, pkg string, name string) bool {
 		return false
 	}
 	return true
+}
+
+func isExpVarBasic(e ast.Expr) bool {
+	_, ok1 := e.(*ast.BasicLit)
+	if ok1 {
+		return true
+	}
+	_, ok2 := e.(*ast.Ident)
+	return ok2
 }

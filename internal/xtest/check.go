@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,15 @@ import (
 
 	"github.com/fsgo/go_fmt/internal/common"
 )
+
+// CheckAuto inputFile 必须以 .input 结尾；wantFile 则自动依据 inputFile 推断
+// 如 inputFile=demo.go.input 则 wantFile=demo.go.want
+func CheckAuto(t *testing.T, inputFile string, do func(req *common.Request)){
+	suf:=".input"
+	require.True(t, strings.HasSuffix(inputFile,suf))
+	wantFile:=inputFile[:len(inputFile)-len(suf)]+".want"
+	Check(t,inputFile,wantFile,do)
+}
 
 // Check 运行测试 case
 func Check(t *testing.T, inputFile, wantFile string, do func(req *common.Request)) {

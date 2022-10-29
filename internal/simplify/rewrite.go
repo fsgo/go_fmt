@@ -39,7 +39,7 @@ func dump(msg string, val reflect.Value) {
 */
 
 // rewriteFile applies the rewrite rule 'pattern -> replace' to an entire file.
-func rewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File) *ast.File {
+func rewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File) (nf *ast.File, changed bool) {
 	cmap := ast.NewCommentMap(fileSet, p, p.Comments)
 	m := make(map[string]reflect.Value)
 	pat := reflect.ValueOf(pattern)
@@ -56,6 +56,7 @@ func rewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File)
 			delete(m, k)
 		}
 		if match(m, pat, val) {
+			changed = true
 			val = subst(m, repl, reflect.ValueOf(val.Interface().(ast.Node).Pos()))
 		}
 		return val
@@ -63,7 +64,7 @@ func rewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File)
 
 	r := apply(rewriteVal, reflect.ValueOf(p)).Interface().(*ast.File)
 	r.Comments = cmap.Filter(r).Comments() // recreate comments list
-	return r
+	return r, changed
 }
 
 // set is a wrapper for x.Set(y); it protects the caller from panics if x cannot be changed to y.

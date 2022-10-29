@@ -5,18 +5,20 @@
 package simplify
 
 import (
-	"fmt"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xtest"
 )
 
 func Test_customSimplify(t *testing.T) {
-	for i := 1; i <= 11; i++ {
-		input := fmt.Sprintf("testdata/custom%d.go.input", i)
-		want := fmt.Sprintf("testdata/custom%d.go.want", i)
-		xtest.Check(t, input, want, func(req *common.Request) {
+	fs, err := filepath.Glob("testdata/custom*.go.input")
+	require.NoError(t, err)
+	for _, input := range fs {
+		xtest.CheckAuto(t, input, func(req *common.Request) {
 			customSimplify(req)
 		})
 	}

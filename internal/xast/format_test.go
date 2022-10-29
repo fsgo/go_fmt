@@ -12,14 +12,14 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	testTestFormat(t, "testdata/case1.go.input", "testdata/case1.go.want")
-	testTestFormat(t, "testdata/case2.go.input", "testdata/case2.go.want")
-	testTestFormat(t, "testdata/case3.go.input", "testdata/case3.go.want")
+	testTestFormat(t, "testdata/case1.go.input")
+	testTestFormat(t, "testdata/case2.go.input")
+	testTestFormat(t, "testdata/case3.go.input")
 }
 
-func testTestFormat(t *testing.T, input string, want string) {
+func testTestFormat(t *testing.T, input string) {
 	t.Helper()
-	xtest.Check(t, input, want, func(req *common.Request) {
+	xtest.CheckAuto(t, input,  func(req *common.Request) {
 		Format(req)
 	})
 }

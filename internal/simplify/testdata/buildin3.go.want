@@ -1,0 +1,26 @@
+package demo
+
+import (
+	"os"
+	"io"
+)
+
+// 特殊的 case：
+// (os *OnceSuccess) 和 标准库的 "os" 同名了
+
+type OnceSuccess struct{}
+
+func (os *OnceSuccess) Do() {
+	if os.Ok() {
+		println("ok")
+	}
+}
+
+func (os *OnceSuccess) Ok() bool {
+	return true
+}
+
+func hello() {
+	_ = io.NopCloser
+	_ = os.CreateTemp
+}

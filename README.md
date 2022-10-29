@@ -314,14 +314,16 @@ usage: gorgeous [flags] [path ...]
     	display diffs format, support: text, json (default "text")
   -e	enable extra rules (default true)
   -ig string
-    	import group sort rule,
-    	stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
-    	sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
+    	import groups sort rule,
+    	stc: Go Standard package, Third Party package, Current package
+    	sct: Go Standard package, Current package, Third Party package
     	 (default "stc")
   -local string
-    	put imports beginning with this string as 3rd-party packages (default "auto")
+    	current package path, will put imports beginning with this string as 3rd-party packages.
+    	by default, it will got from 'go.mod' file.
+    	 (default "auto")
   -mi
-    	merge imports into one.
+    	merge imports into one section.
     	with env 'GORGEOUS_MI=false' to set default value as false (default true)
   -r value
     	rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')
@@ -330,25 +332,25 @@ usage: gorgeous [flags] [path ...]
   -rr
     	rewrite with build in rules:
     	a[b:len(a)] -> a[b:]
-    	interface{} -> any
     	a == ""     -> len(a) == 0
     	a != ""     -> len(a) != 0
-    	io/#ioutil.NopCloser -> io.NopCloser
-    	io/#ioutil.ReadAll   -> io.ReadAll
-    	io/#ioutil.ReadFile  -> os.ReadFile
-    	io/#ioutil.TempFile  -> os.CreateTemp
-    	io/#ioutil.TempDir   -> os.MkdirTemp
-    	io/#ioutil.WriteFile -> os.WriteFile
-    	io/#ioutil.Discard   -> io.Discard
+    	interface{} -> any                    // go1.18
+    	io/#ioutil.NopCloser -> io.NopCloser  // go1.16
+    	io/#ioutil.ReadAll   -> io.ReadAll    // go1.16
+    	io/#ioutil.ReadFile  -> os.ReadFile   // go1.16
+    	io/#ioutil.TempFile  -> os.CreateTemp // go1.16
+    	io/#ioutil.TempDir   -> os.MkdirTemp  // go1.16
+    	io/#ioutil.WriteFile -> os.WriteFile  // go1.16
+    	io/#ioutil.Discard   -> io.Discard    // go1.16
 
     	with env 'GORGEOUS_RR=false' to set default value as false
     	 (default true)
   -s	simplify code (default true)
   -slcr
     	multiline copyright to single-line
-    	with env 'GORGEOUS_SLCR=true' to set default value as true
+    	with env 'GORGEOUS_SLCR=true' to set default value as true (default true)
   -trace
-    	show trace infos
+    	show trace messages
   -w	write result to (source) file instead of stdout (default true)
 ```
 ### 3.1 格式化 `git` 项目里有修改的`.go`文件

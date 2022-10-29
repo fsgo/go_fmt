@@ -1,0 +1,15 @@
+package demo
+
+// 验证不会错误的导入 os pkg
+
+type OnceSuccess struct{}
+
+func (os *OnceSuccess) Do() {
+	if os.Ok() {
+		println("ok")
+	}
+}
+
+func (os *OnceSuccess) Ok() bool {
+	return true
+}

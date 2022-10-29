@@ -209,18 +209,22 @@ func (opt *Options) BindFlags() {
 	commandLine.BoolVar(&opt.DisplayDiff, "d", false, "display diffs instead of rewriting files")
 	commandLine.StringVar(&opt.DisplayFormat, "df", "text", "display diffs format, support: text, json")
 	commandLine.BoolVar(&opt.Simplify, "s", true, "simplify code")
-	commandLine.StringVar(&opt.LocalModule, "local", "auto", "put imports beginning with this string as 3rd-party packages")
-	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace infos")
+	commandLine.StringVar(&opt.LocalModule, "local", "auto", 
+		`current package path, will put imports beginning with this string as 3rd-party packages.
+by default, it will got from 'go.mod' file.
+`,
+	)
+	commandLine.BoolVar(&opt.Trace, "trace", false, "show trace messages")
 	commandLine.BoolVar(&opt.Extra, "e", true, "enable extra rules")
 	commandLine.BoolVar(&opt.MergeImports, "mi", flagEnvBool("GORGEOUS_MI", true),
-		`merge imports into one.
+		`merge imports into one section.
 with env 'GORGEOUS_MI=false' to set default value as false`)
 	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", flagEnvBool("GORGEOUS_SLCR", false),
 		`multiline copyright to single-line
 with env 'GORGEOUS_SLCR=true' to set default value as true`)
-	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import group sort rule,
-stc: Go Standard pkgs, Third Party pkgs, Current ModuleByFile pkg
-sct: Go Standard pkgs, Current ModuleByFile pkg, Third Party pkgs
+	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import groups sort rule,
+stc: Go Standard package, Third Party package, Current package
+sct: Go Standard package, Current package, Third Party package
 `)
 	var rewriteRule stringSlice
 	commandLine.Var(&rewriteRule, "r", `rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')

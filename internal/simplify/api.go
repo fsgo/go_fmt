@@ -111,9 +111,10 @@ func doRewrite(fs *token.FileSet, f *ast.File, patternExp string, replaceExp str
 		return nil, fmt.Errorf("replacement is empty, %q", what)
 	}
 	replace := customParseExpr(replaceExp, "replacement")
-	result := rewriteFile(fs, pattern.expr, replace.expr, f)
-
-	fixImport(pattern, replace, fs, result)
+	result, changed := rewriteFile(fs, pattern.expr, replace.expr, f)
+	if changed {
+		fixImport(pattern, replace, fs, result)
+	}
 	return result, nil
 }
 
@@ -136,16 +137,16 @@ func Rewrites(req *common.Request, rules []string) error {
 
 // RewriteWithExpr  使用指定的规则替换
 func RewriteWithExpr(req *common.Request, pattern, replace ast.Expr) {
-	result := rewriteFile(req.FSet, pattern, replace, req.AstFile)
+	result, _ := rewriteFile(req.FSet, pattern, replace, req.AstFile)
 	req.AstFile = result
 	req.MustReParse()
 }
 
 type expr struct {
+	expr   ast.Expr
 	input  string // 输入的原始的表达式,如 io/#ioutil.WriteFile
 	what   string
 	pkgDir string // 包所在目录，是 input 的最后一个 / 之前的部分（包括 /），如 "io/"
-	expr   ast.Expr
 }
 
 func (e *expr) PkgName() string {

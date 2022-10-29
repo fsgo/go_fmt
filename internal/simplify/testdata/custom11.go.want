@@ -24,3 +24,29 @@ func doFxxF() {
 	fmt.Fprint(os.Stderr, "abc")
 	fmt.Fprint(os.Stderr, "abc")
 }
+
+func doCondXy() {
+	_ = ok1() && "a" == "b"
+	if ok1() && "a" == "b" {
+		print("ok1")
+	}
+
+	s1 := ""
+	if ok1() || "a" == "b" || s1 == "" || !ok2() {
+		print("ok2")
+	}
+
+	_ = ok2() && len("s") > 0
+	_ = ok2() && len("s") > 0 && len(s1) == 1
+
+	sl1 := []sting{"a"}
+
+	_ = ok2() && len("s") > 0 && len(s1) == 1 && cap(sl1) > 0
+}
+
+func ok1() bool {
+	return true
+}
+func ok2() bool {
+	return true
+}
