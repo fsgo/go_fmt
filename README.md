@@ -159,8 +159,7 @@ type User struct{
 </details>
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>
-
-目前默认未启用，需使用 `-rr` 参数以使用默认内置规则生效，或者使用 `-r` 参数输入表达式。
+使用 `-rr=false` 可以使用默认内置规则不生效。
 
 1. 替换废弃的 `ioutil` 的函数调用：
 
@@ -374,22 +373,19 @@ $ cat code.go|gorgeous stdin
 ```
 
 ## 4 git hooks
-
-git commit 前自动格式化代码
+git commit 前自动检查是否格式化/自动格式化
 
 ### 4.1 配置项目 Hooks
 编辑项目的 `.git/hooks/pre-commit`文件，将`gorgeous`命令加入。
 
-方式1：
 ```bash
-echo -e '\ngorgeous\n' >> $(git rev-parse --git-dir)/hooks/pre-commit
-chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
-```
+# 检查是否格式化
+echo -e '\n gorgeous -d \n' >> $(git rev-parse --git-dir)/hooks/pre-commit
 
-方式2：
-```bash
-wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O $(git rev-parse --git-dir)/hooks/pre-commit
 chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
+
+# 或者：自动格式化
+echo -e '\n gorgeous \n git add . \n' >> $(git rev-parse --git-dir)/hooks/pre-commit
 ```
 
 ### 4.2 配置到全局 Hooks
@@ -399,7 +395,7 @@ chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
 mkdir -p ~/.git_config/hooks/
 git config --global core.hooksPath ~/.git_config/hooks/
 
-wget https://raw.githubusercontent.com/fsgo/go_fmt/master/pre-commit -O ~/.git_config/hooks/pre-commit
+echo -e '\n gorgeous -d\n' >>  ~/.git_config/hooks/pre-commit
 chmod 777 ~/.git_config/hooks/pre-commit
 ```
 
@@ -410,11 +406,8 @@ chmod 777 ~/.git_config/hooks/pre-commit
   with:
     go-version: 1.19
 
-- name: install gorgeous
-  run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
-
-- name: check style by gorgeous
-  run: gorgeous -rr -d ./...
+- name: gorgeous style check
+  run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest && gorgeous -d ./...
 ```
 
 ## 6 Visual Studio Code
