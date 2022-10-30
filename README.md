@@ -419,14 +419,14 @@ chmod 777 ~/.git_config/hooks/pre-commit
 
 ## 6 Visual Studio Code
 
-### 6.1 As goimports
-1. Install as goimports:
+### 6.1 As goformat
+1. Install as goformat:
 ```bash
-go install github.com/fsgo/go_fmt/cmd/goimports@latest
+go install github.com/fsgo/go_fmt/cmd/goformat@latest
 ```
 2. 配置的 `Go: Format Tool`，设置为 "default"：
 ```
-  "go.formatTool": "default"
+  "go.formatTool": "goformat"
 ```
 
 ### 6.2 Run on Save
