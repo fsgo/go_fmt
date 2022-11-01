@@ -417,7 +417,7 @@ chmod 777 ~/.git_config/hooks/pre-commit
 ```bash
 go install github.com/fsgo/go_fmt/cmd/goformat@latest
 ```
-2. 配置的 `Go: Format Tool`，设置为 "default"：
+2. 配置的 `Go: Format Tool`，设置为 "goformat"：
 ```
   "go.formatTool": "goformat"
 ```
