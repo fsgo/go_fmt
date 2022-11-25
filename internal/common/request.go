@@ -35,13 +35,21 @@ func NewTestRequest(fileName string) *Request {
 
 // Request 一次格式化的请求
 type Request struct {
-	FSet      *token.FileSet
-	AstFile   *ast.File
-	tokenLine *TokenLine
-	FileName  string
-	Opt       Options
+	FSet    *token.FileSet
+	AstFile *ast.File
 
-	goVersion     string
+	// tokenLine 用于处理 AstFile 的对应的 TokenLine
+	tokenLine *TokenLine
+
+	// FileName 文件名
+	FileName string
+
+	// goVersion 所属 go module(go.mod) 里的 定义的 go 版本
+	goVersion string
+
+	// Opt 处理的参数
+	Opt Options
+
 	goVersionOnce sync.Once
 }
 

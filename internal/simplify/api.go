@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -22,17 +23,40 @@ import (
 func Format(req *common.Request) {
 	simplify(req.AstFile)
 	customSimplify(req)
+
+	// rewrite 之后需要重新解析，否则 token.FileSet 可能和 ast.File 里的内容不匹配
+	// 导致 panic
+	req.MustReParse()
 }
 
 var ruleMsg1 = "rewrite rule must be of the form 'pattern -> replacement'"
 var ruleMsg2 = ruleMsg1 + " or a valid filepath"
 
 // Rewrite 简化代码
-func Rewrite(req *common.Request, rule string) (*ast.File, error) {
+func Rewrite(req *common.Request, rule string) (f *ast.File, e error) {
+	defer func() {
+		if re := recover(); re != nil {
+			st := debug.Stack()
+			e = fmt.Errorf("panic when Rewrite, file=%q rule=%q, detail=%v,stack=%s", req.FileName, rule, re, st)
+		}
+	}()
 	rule, cmt := splitRule(rule)
 	if len(rule) == 0 {
 		return nil, fmt.Errorf("empty rewrite rule: %q", rule)
 	}
+
+	callDoRewrite := func(patternExp string, replaceExp string, what string) error {
+		f1, err1 := doRewrite(req.FSet, req.AstFile, patternExp, replaceExp, what)
+		if err1 != nil {
+			return err1
+		}
+		req.AstFile = f1
+		if err2 := req.ReParse(); err2 != nil {
+			return err2
+		}
+		return nil
+	}
+
 	ps := strings.Split(rule, "->")
 	if len(ps) == 2 {
 		if gv := goVersionFromComment(cmt); len(gv) != 0 && !req.GoVersionGEQ(gv) {
@@ -41,7 +65,10 @@ func Rewrite(req *common.Request, rule string) (*ast.File, error) {
 			}
 			return req.AstFile, nil
 		}
-		return doRewrite(req.FSet, req.AstFile, ps[0], ps[1], rule)
+		if err3 := callDoRewrite(ps[0], ps[1], rule); err3 != nil {
+			return nil, err3
+		}
+		return req.AstFile, nil
 	}
 
 	if rules, err1 := parserRuleFile(rule); err1 == nil {
@@ -60,13 +87,8 @@ func Rewrite(req *common.Request, rule string) (*ast.File, error) {
 				}
 				continue
 			}
-			f, err := doRewrite(req.FSet, req.AstFile, ps1[0], ps1[1], txt)
-			if err != nil {
-				return nil, err
-			}
-			req.AstFile = f
-			if err = req.ReParse(); err != nil {
-				return nil, err
+			if err3 := callDoRewrite(ps1[0], ps1[1], txt); err3 != nil {
+				return nil, err3
 			}
 		}
 		return req.AstFile, nil
