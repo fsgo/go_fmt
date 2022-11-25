@@ -66,6 +66,12 @@ type User struct{
 
 - for b == true {
 + for b {
+
+- _ = 1 == index
++ _ = index == 1
+
+- _ = 1 < index
++ _ = index > 1
 ```
 
 3. 使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`

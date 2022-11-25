@@ -127,6 +127,9 @@ func (c *customApply) mapRead(node *ast.AssignStmt) {
 }
 
 func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
+	c.yadoCond0(cond)
+	c.yadoCond1(cond)
+
 	c.trueFalse(cond)
 
 	c.stringsCount0(cond)
@@ -139,6 +142,55 @@ func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
 	c.bytesCompare0(cond)
 
 	c.sortXY(cond)
+}
+
+// "a" == val -> val == "a"
+func (c *customApply) yadoCond0(cond *ast.BinaryExpr) {
+	_, ok := cond.X.(*ast.BasicLit)
+	if !ok {
+		return
+	}
+	if _, ok2 := cond.Y.(*ast.BasicLit); ok2 {
+		return
+	}
+	c.switchBinaryExprXY(cond)
+}
+
+func (c *customApply) switchBinaryExprXY(cond *ast.BinaryExpr) {
+	switch cond.Op {
+	case token.EQL: // "a" == val
+	// do nothing
+	case token.NEQ: // "a" != val
+	// do nothing
+	case token.GEQ: // 1 >= val  -> val <= 1
+		cond.Op = token.LEQ
+	case token.LEQ: // 1 <= val  -> val >= 1
+		cond.Op = token.GEQ
+	case token.GTR: // 1 > val   -> val < 1
+		cond.Op = token.LSS
+	case token.LSS: // 1 < val  -> val > 1
+		cond.Op = token.GTR
+	default:
+		return
+	}
+
+	x := cond.X
+
+	cond.X = cond.Y
+	cond.Y = x
+}
+
+// true == val -> val == true
+func (c *customApply) yadoCond1(cond *ast.BinaryExpr) {
+	x, ok := cond.X.(*ast.Ident)
+	if !ok || (x.Name != "true" && x.Name != "false") {
+		return
+	}
+
+	if _, ok2 := cond.Y.(*ast.BasicLit); ok2 {
+		return
+	}
+	c.switchBinaryExprXY(cond)
 }
 
 func (c *customApply) trueFalse(cond *ast.BinaryExpr) {

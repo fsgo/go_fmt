@@ -50,3 +50,44 @@ func ok1() bool {
 func ok2() bool {
 	return true
 }
+
+func yado() {
+	var a int
+	var b string
+	var c string
+	var d bool
+
+	const cs1 = 1
+
+	_ = a == 1
+	_ = a != 1
+	_ = a < 1
+	_ = a <= 1
+
+	_ = cs1 == a
+
+	_ = a > 1
+	_ = a >= 1
+
+	_ = b == "a"
+	_ = c == b
+
+	_ = a == 1 || c == "a"
+
+	_ = d
+	_ = !d
+
+	_ = !d
+	_ = d
+
+	_ = !d
+	_ = ok2()
+	_ = !ok2()
+
+	_ = !ok2()
+	_ = ok2()
+
+	if c == "hello" {
+		println("hello")
+	}
+}
