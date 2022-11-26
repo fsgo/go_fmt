@@ -1,0 +1,19 @@
+package demo
+
+import (
+	"sort"
+)
+
+func sortXX() {
+	var x []string
+	sort.Strings(x)
+	sort.Strings(x)
+
+	var y []int
+	sort.Ints(y)
+	sort.Ints(x)
+
+	var y []float64
+	sort.Float64s(y)
+	sort.Float64s(x)
+}

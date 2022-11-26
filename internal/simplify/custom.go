@@ -534,6 +534,8 @@ func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.fmtErrorf(node)
 
 	c.xPrintf(node)
+
+	c.sortSlice(node)
 }
 
 // 提高正则的可读性
@@ -845,6 +847,47 @@ func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string
 	}
 	fn := node.Fun.(*ast.SelectorExpr)
 	fn.Sel.Name = fnNew
+}
+
+// sort.Sort(sort.StringSlice(x)) => sort.Strings(x)
+func (c *customApply) sortSlice(node *ast.CallExpr) {
+	if !isFun(node.Fun, "sort", "Sort") {
+		return
+	}
+	if len(node.Args) != 1 {
+		return
+	}
+
+	xfun, ok0 := node.Fun.(*ast.SelectorExpr)
+	if !ok0 {
+		return
+	}
+
+	arg, ok1 := node.Args[0].(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+
+	if isFun(arg.Fun, "sort", "StringSlice") {
+		// sort.Sort(sort.StringSlice(x)) => sort.Strings(x)
+		xfun.Sel.Name = "Strings"
+		node.Args = arg.Args
+		return
+	}
+
+	if isFun(arg.Fun, "sort", "Float64Slice") {
+		// sort.Sort(sort.Float64Slice(x)) => sort.Float64s(x)
+		xfun.Sel.Name = "Float64s"
+		node.Args = arg.Args
+		return
+	}
+
+	if isFun(arg.Fun, "sort", "IntSlice") {
+		// sort.Sort(sort.IntSlice(x)) => sort.Ints(x)
+		xfun.Sel.Name = "Ints"
+		node.Args = arg.Args
+		return
+	}
 }
 
 func (c *customApply) fixFuncDecl(node *ast.FuncDecl) {

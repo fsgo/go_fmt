@@ -195,6 +195,11 @@ func ok() bool {
 + regexp.Compile(`\A(\w+) profile: total \d+\n\z`)
 ```
 
+11.sort :
+```diff
+- sort.Sort(sort.StringSlice(x))
++ sort.Strings(x)
+```
 </details>
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>
