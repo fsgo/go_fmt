@@ -148,6 +148,8 @@ func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
 	c.stringsCompare0(cond)
 	c.bytesCompare0(cond)
 
+	c.checkSliceNilLen(cond)
+
 	c.sortXY(cond)
 }
 
@@ -242,6 +244,59 @@ func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
 		} else { // if b!=false -> if b
 			setCond(cond.X)
 		}
+	}
+}
+
+// https://staticcheck.io/docs/checks#S1009
+// if x != nil && len(x) != 0 {}
+// =>
+// if len(x) != 0 {}
+//
+//nolint:gocyclo
+func (c *customApply) checkSliceNilLen(cond *ast.BinaryExpr) {
+	if cond.Op != token.LAND {
+		return
+	}
+	x, ok1 := cond.X.(*ast.BinaryExpr)
+	// 检查是否  x != nil
+	if !ok1 || x.Op != token.NEQ || !isIdentName(x.Y, "nil") {
+		return
+	}
+
+	y, ok2 := cond.Y.(*ast.BinaryExpr)
+	if !ok2 {
+		return
+	}
+	yx, ok3 := y.X.(*ast.CallExpr)
+	// 检查是否 len(x)
+	if !ok3 || !isIdentName(yx.Fun, "len") || len(yx.Args) != 1 {
+		return
+	}
+	// 检查是否同样的变量
+	if !nameExprEq(x.X, yx.Args[0]) {
+		return
+	}
+
+	// 检查其他的情况：
+	// len(x) >= z、len(x) > z
+	//  z >=0 即可
+	checkCond := func() bool {
+		if y.Op == token.GEQ || y.Op == token.GTR {
+			v1, ok4 := y.Y.(*ast.BasicLit)
+			if !ok4 || v1.Kind != token.INT {
+				return false
+			}
+			vi, _ := strconv.Atoi(v1.Value)
+			return vi >= 0
+		}
+		return false
+	}
+
+	if condYIs(y, token.NEQ, "0") || // !=0
+		condYIs(y, token.GEQ, "0") || // >= 0
+		condYIs(y, token.GTR, "0") ||
+		checkCond() { // > 0
+		c.Cursor.Replace(cond.Y)
 	}
 }
 

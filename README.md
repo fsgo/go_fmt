@@ -75,24 +75,25 @@ type User struct{
 
 - func ok() bool {
 - 	if a > b {
++ 	return a > b
 - 		return true
 - 	}else{
 - 		return false
-- 	}
 - } 
-+ func ok() bool {
-+ 	return a > b
+
 + } 
 
 - func ok() bool {
 - 	if a > b {
-- 		return true
-- 	}
-- 	return false
-- } 
-+ func ok() bool {
 + 	return a > b
+- 		return true
+- 	return false
 + } 
+
+- if val!=nil && len(val)!=0 {
++ if len(val)!=0 {
+-   // do something
++ }
 ```
 
 3.使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`

@@ -95,3 +95,53 @@ func doBytesIndex() {
 		log.Println("ok")
 	}
 }
+
+func checkSliceNilLen() {
+	var u user
+
+	if len(u.Names) != 0 {
+		println("ok2")
+	}
+
+	if len(u.Names) > 0 {
+		println("ok2")
+	}
+
+	if len(u.Names) > 1 {
+		println("ok2")
+	}
+
+	if len(u.Names) > 100 {
+		println("ok2")
+	}
+
+	if len(u.Names) >= 100 {
+		println("ok2")
+	}
+
+	if len(u.Names) != 0 {
+		println("ok2")
+	}
+
+	if len(u.p.Names) != 0 {
+		println("ok2")
+	}
+
+	// 这个不会剔除
+	if u.p.Names != nil && len(u.Names) != 0 {
+		println("ok2")
+	}
+	// 这个不会剔除
+	if u.p != nil && len(u.p.Names) != 0 {
+		println("ok2")
+	}
+}
+
+type user struct {
+	Names []string
+	p     cus
+}
+
+type cus struct {
+	Names []string
+}

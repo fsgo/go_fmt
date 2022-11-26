@@ -146,3 +146,56 @@ end:
 		X:  ne,
 	}
 }
+
+func isIdentName(n ast.Node, name string) bool {
+	v, ok := n.(*ast.Ident)
+	return ok && v.Name == name
+}
+
+func nameExprEq(a ast.Expr, b ast.Expr) bool {
+	var ta int
+	var tb int
+
+	switch a.(type) {
+	case *ast.SelectorExpr:
+		ta = 1
+	case *ast.Ident:
+		ta = 2
+	default:
+		return false
+	}
+
+	switch b.(type) {
+	case *ast.SelectorExpr:
+		tb = 1
+	case *ast.Ident:
+		tb = 2
+	default:
+		return false
+	}
+	if ta != tb {
+		return false
+	}
+
+	if ta == 2 {
+		va := a.(*ast.Ident)
+		vb := b.(*ast.Ident)
+		return va.Name == vb.Name
+	}
+	va := a.(*ast.SelectorExpr)
+	vb := b.(*ast.SelectorExpr)
+
+	return nameExprEq(va.Sel, vb.Sel) && nameExprEq(va.X, vb.X)
+}
+
+// 检查判断条件是否是满足
+func condYIs(cond *ast.BinaryExpr, op token.Token, y string) bool {
+	if cond.Op != op {
+		return false
+	}
+	yv, ok := cond.Y.(*ast.BasicLit)
+	if !ok {
+		return false
+	}
+	return yv.Value == y
+}
