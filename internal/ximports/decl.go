@@ -46,11 +46,7 @@ func (decl *importDecl) CommentHasImportPath() bool {
 		return false
 	}
 
-	if len(decl.realPathFromCmt()) != 0 {
-		return true
-	}
-
-	return false
+	return len(decl.realPathFromCmt()) != 0
 }
 
 func (decl *importDecl) realPathFromCmt() string {

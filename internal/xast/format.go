@@ -87,10 +87,7 @@ func (gf *genDeclFixer) notSameType() bool {
 		return true
 	}
 
-	if gd1.Tok != gf.decl.Tok {
-		return true
-	}
-	return false
+	return gd1.Tok != gf.decl.Tok
 }
 
 func (gf *genDeclFixer) fix() {

@@ -1,0 +1,274 @@
+package demo
+
+var vi = 3
+
+func ok() bool {
+	_ = "ok"
+
+	// return vi == 2
+	if vi == 2 {
+		return true
+	}
+	return false
+}
+
+func ok1() bool {
+	_ = "ok"
+	return vi == 2
+}
+
+func ok2() bool {
+	_ = "ok"
+
+	// 疑似 bug，不会处理
+	if vi == 2 {
+		return true
+	}
+	return true
+}
+
+func ok3() bool {
+	_ = "ok"
+
+	// 疑似 bug, 不会处理
+	if vi == 2 {
+		return false
+	}
+	return false
+}
+
+func ok4() bool {
+	_ = "ok"
+
+	// return vi != 2
+	if vi == 2 {
+		return false
+	}
+	return true
+}
+
+func ok4() bool {
+	_ = "ok"
+
+	// return !ok1()
+	if ok1() {
+		return false
+	}
+	return true
+}
+
+func ok5() bool {
+	_ = "ok"
+
+	// return ok1()
+	if !ok1() {
+		return false
+	}
+	return true
+}
+
+func ok6() bool {
+	_ = "ok"
+
+	// return !ok1()
+	if !ok1() {
+		return true
+	}
+	return false
+}
+
+var ok7 = func() bool {
+	// return !ok1()
+	if !ok1() {
+		return true
+	}
+	return false
+}
+
+func ok8() bool {
+	// return !ok1()
+	if !ok1() {
+		return true
+	}
+	return false
+}
+
+func ok9() bool {
+	// return ok1()
+	if ok1() {
+		return true
+	}
+	return false
+}
+
+func ok20() bool {
+	// return vi > 2
+	if vi > 2 {
+		return true
+	}
+	return false
+}
+
+func ok21() bool {
+	// return vi >= 2
+	if vi >= 2 {
+		return true
+	}
+	return false
+}
+
+func ok22() bool {
+	// return vi < 2
+	if vi > 2 {
+		return false
+	}
+	return true
+}
+
+func ok22() bool {
+	// return vi > 2
+	if vi <= 2 {
+		return false
+	}
+	return true
+}
+
+func ok23() bool {
+	// return vi >= 2
+	if vi < 2 {
+		return false
+	}
+	return true
+}
+
+func ok30() bool {
+	// 不会处理
+	if true {
+		return false
+	}
+	return true
+}
+
+func ok31() bool {
+	// 不会处理
+	if true {
+		return true
+	}
+	return false
+}
+
+func ok32() bool {
+	// 不会处理
+	if false {
+		return false
+	}
+	return true
+}
+
+func ok33() bool {
+	// 不会处理
+	if false {
+		return true
+	}
+	return false
+}
+
+func ok40() bool {
+	if vi > 5 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func ok41() bool {
+	if _, ok := hello(); ok {
+		return true
+	} else {
+		return false
+	}
+}
+
+func hello() (string, bool) {
+	return "", true
+}
+
+func ok42() bool {
+	if vi > 5 {
+		return true
+	} else {
+		_ = "ok"
+		return false
+	}
+}
+
+func doVoid10() {
+	if vi > 5 {
+	} else {
+	}
+}
+
+func doVoid11() {
+	if vi > 5 {
+		_ = "ok"
+	} else {
+		_ = "ok2"
+	}
+}
+
+func doVoid12() {
+	if vi > 5 {
+		_ = "ok"
+		return
+	} else {
+		_ = "s1"
+		_ = "s2"
+	}
+}
+
+func doVoid13() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 10 {
+			_ = "hello"
+		} else {
+		}
+		return
+	} else {
+		_ = "s1"
+		_ = "s2"
+	}
+}
+
+func doVoid14() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 10 {
+			_ = "hello"
+			return
+		} else {
+			_ = "21"
+		}
+		return
+	} else {
+		_ = "ok2"
+	}
+}
+
+func doVoid15() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 20 {
+			_ = "20"
+			return
+		} else if ui > 10 {
+			_ = "10"
+			return
+		} else {
+			_ = "3"
+		}
+		return
+	} else {
+		_ = "ok2"
+	}
+}

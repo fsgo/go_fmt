@@ -5,7 +5,6 @@
 package simplify
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"strconv"
@@ -22,6 +21,8 @@ func customSimplify(req *common.Request) {
 		switch vt := c.Node().(type) {
 		case *ast.BinaryExpr:
 			newCustomApply(req, c).fixBinaryExpr(vt)
+		case *ast.IfStmt:
+			newCustomApply(req, c).fixIfStmt(vt)
 		}
 		return true
 	}
@@ -34,6 +35,10 @@ func customSimplify(req *common.Request) {
 			newCustomApply(req, c).fixBinaryExpr(vt)
 		case *ast.CallExpr:
 			newCustomApply(req, c).fixCallExpr(vt)
+		case *ast.FuncDecl:
+			newCustomApply(req, c).fixFuncDecl(vt)
+		case *ast.FuncLit:
+			newCustomApply(req, c).fixFuncLit(vt)
 		}
 		return true
 	}
@@ -710,37 +715,6 @@ func (c *customApply) xPrintfByPkg(node *ast.CallExpr, pkg string, fnOld string,
 	}
 }
 
-func isIntExprValue(v ast.Expr) bool {
-	if isBasicLitKind(v, token.INT) {
-		return true
-	}
-	_, ok := v.(*ast.BasicLit) // fmt.Println(8)
-	if ok {
-		return true
-	}
-	cv, ok1 := v.(*ast.CallExpr) // fmt.Println(int16(8))
-	if !ok1 {
-		return false
-	}
-	fn, ok2 := cv.Fun.(*ast.Ident)
-	if ok2 {
-		switch fn.Name {
-		case "int8",
-			"int16",
-			"int32",
-			"int64",
-			"uint8",
-			"uint16",
-			"uint32",
-			"uint64":
-			return true
-		default:
-			return false
-		}
-	}
-	return false
-}
-
 // fmt.Fprintf(os.Stderr,"abc") -> fmt.Fprint(os.Stderr,"abc")
 func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string, fnNew string) {
 	if !isFun(node.Fun, pkg, fnOld) {
@@ -763,57 +737,142 @@ func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string
 	fn.Sel.Name = fnNew
 }
 
-func isBasicLitValue(n ast.Expr, kind token.Token, val string) bool {
-	nv, ok := n.(*ast.BasicLit)
-	if !ok {
-		return false
-	}
-	return nv.Value == val && nv.Kind == kind
+func (c *customApply) fixFuncDecl(node *ast.FuncDecl) {
+	c.shortReturnBool(node.Type, node.Body)
 }
 
-func isBasicLitKind(n ast.Expr, kind token.Token) bool {
-	nv, ok := n.(*ast.BasicLit)
-	if !ok {
-		return false
-	}
-	return nv.Kind == kind
+func (c *customApply) fixFuncLit(node *ast.FuncLit) {
+	c.shortReturnBool(node.Type, node.Body)
 }
 
-// isFunAny 判断是否任意的方法调用
-// fnNames: regexp.Compile
-func isFunAny(fn ast.Expr, fnNames ...string) bool {
-	for i := 0; i < len(fnNames); i++ {
-		info := strings.Split(fnNames[i], ".")
-		if len(info) != 2 {
-			panic(fmt.Sprintf("invalid fuc name %q, expect like x.y", fnNames[i]))
-		}
-		if isFun(fn, info[0], info[1]) {
-			return true
-		}
+// 对应case: custom13.go.input
+//
+//nolint:gocyclo
+func (c *customApply) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) {
+	ret := ft.Results
+	if ret == nil || len(ret.List) != 1 {
+		return
 	}
-	return false
+	// 函数的返回值只有一个并且是 bool 类型，如：
+	// func ok() bool
+	r1Type, ok := ret.List[0].Type.(*ast.Ident)
+	if !ok || r1Type.Name != "bool" {
+		return
+	}
+	if funBody == nil || len(funBody.List) < 2 {
+		// 函数已经很简单
+		return
+	}
+	st2If, ok2 := funBody.List[len(funBody.List)-2].(*ast.IfStmt)
+	if !ok2 || st2If.Body == nil || len(st2If.Body.List) != 1 {
+		return
+	}
+
+	if _, ok21 := toBoolIdentExpr(st2If.Cond); ok21 {
+		// 忽略：这种可能是临时调试代码
+		// if true {}
+		// if false {}
+		return
+	}
+
+	st2rt, ok21 := st2If.Body.List[0].(*ast.ReturnStmt)
+	if !ok21 || len(st2rt.Results) != 1 {
+		return
+	}
+
+	st2Bi, ok22 := toBoolIdentExpr(st2rt.Results[0])
+	if !ok22 {
+		return
+	}
+
+	st1, ok1 := funBody.List[len(funBody.List)-1].(*ast.ReturnStmt)
+	if !ok1 || len(st1.Results) != 1 {
+		// 语法错误，忽略
+		return
+	}
+	st1Bi, ok3 := toBoolIdentExpr(st1.Results[0])
+	if !ok3 {
+		return
+	}
+
+	if st2Bi.Name == st1Bi.Name {
+		// 可能存在 bug (返回一样的值):
+		//   if ok1(){
+		//      return true
+		//   }
+		//   return true
+		return
+	}
+
+	var cond ast.Expr
+
+	if st2Bi.Name == "true" {
+		// if cond(){
+		// 	return true
+		// }
+		// return false
+		cond = st2If.Cond
+	} else {
+		// if cond(){
+		// 	return false
+		// }
+		// return true
+		cond = conditionToNot(st2If.Cond)
+	}
+	stNew := &ast.ReturnStmt{
+		Return: st2If.Pos(),
+		Results: []ast.Expr{
+			cond,
+		},
+	}
+	funBody.List[len(funBody.List)-2] = stNew
+	funBody.List = funBody.List[0 : len(funBody.List)-1]
 }
 
-func isFun(fn ast.Expr, pkg string, name string) bool {
-	fun, ok2 := fn.(*ast.SelectorExpr)
+func (c *customApply) fixIfStmt(node *ast.IfStmt) {
+	c.ifReturnNoElse(node)
+}
+
+// 简化 if else:
+//
+//	if cond{
+//		  	// do something
+//		  return // 必须存在
+//	}else{
+//			// do something
+//	}
+//
+// 去掉 else 部分
+func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
+	if node.Else == nil {
+		return
+	}
+
+	if node.Init != nil {
+		//  if _,ok:=hello();ok {
+		return
+	}
+
+	if node.Body == nil || len(node.Body.List) == 0 {
+		return
+	}
+
+	_, ok1 := node.Body.List[len(node.Body.List)-1].(*ast.ReturnStmt)
+	if !ok1 {
+		// 必须是  if cond{  return}
+		return
+	}
+
+	stElse, ok2 := node.Else.(*ast.BlockStmt)
 	if !ok2 {
-		return false
+		return
 	}
-	if fun.Sel.Name != name {
-		return false
-	}
-	x, ok3 := fun.X.(*ast.Ident)
-	if !ok3 || x.Name != pkg {
-		return false
-	}
-	return true
-}
 
-func isExpVarBasic(e ast.Expr) bool {
-	_, ok1 := e.(*ast.BasicLit)
-	if ok1 {
-		return true
+	if c.Cursor.Name() != "List" {
+		return
 	}
-	_, ok2 := e.(*ast.Ident)
-	return ok2
+	for i := len(stElse.List) - 1; i >= 0; i-- {
+		c.Cursor.InsertAfter(stElse.List[i])
+	}
+	node.Else = nil
 }
