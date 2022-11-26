@@ -768,6 +768,10 @@ func (c *customApply) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) 
 		return
 	}
 
+	if st2If.Init != nil {
+		return
+	}
+
 	if _, ok21 := toBoolIdentExpr(st2If.Cond); ok21 {
 		// 忽略：这种可能是临时调试代码
 		// if true {}
@@ -853,6 +857,10 @@ func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
 		return
 	}
 
+	if c.Cursor.Name() != "List" {
+		return
+	}
+
 	if node.Body == nil || len(node.Body.List) == 0 {
 		return
 	}
@@ -868,9 +876,6 @@ func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
 		return
 	}
 
-	if c.Cursor.Name() != "List" {
-		return
-	}
 	for i := len(stElse.List) - 1; i >= 0; i-- {
 		c.Cursor.InsertAfter(stElse.List[i])
 	}

@@ -272,3 +272,23 @@ func doVoid15() {
 		_ = "ok2"
 	}
 }
+
+type myObj struct {
+}
+
+func (d *myObj) ok1() (string, bool) {
+	return "hello", true
+}
+
+func (d *myObj) ok2() (string, bool) {
+	return "world", true
+}
+
+func (d *myObj) isAnyEnableLockless(subject string) bool {
+	if enable, ok := d.ok1(); ok && enable == "k1" {
+		return true
+	} else if enable, ok := d.ok2(); ok && enable != "k2" {
+		return true
+	}
+	return false
+}
