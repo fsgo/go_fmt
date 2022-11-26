@@ -75,17 +75,17 @@ type User struct{
 
  func ok() bool {
 - 	if a > b {
-+ 	return a > b
 - 		return true
 - 	}else{
 - 		return false
++ 	return a > b
 } 
 
 func ok() bool {
 - 	if a > b {
-+ 	return a > b
 - 		return true
 - 	return false
++ 	return a > b
 } 
 
 - if val!=nil && len(val)!=0 {
