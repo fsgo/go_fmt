@@ -1,0 +1,12 @@
+package demo
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 这个文件里不再添加新的 case
+
+func errorsNewFmt() {
+	_ = errors.New(fmt.Sprintf("a"))
+}

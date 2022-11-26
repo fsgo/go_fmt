@@ -529,7 +529,10 @@ func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 	c.stringsReplace(node)
 	c.timeNowSub(node)
 	c.timeSubNow(node)
+
+	c.errorsNewFmt(node)
 	c.fmtErrorf(node)
+
 	c.xPrintf(node)
 }
 
@@ -710,8 +713,60 @@ func (c *customApply) fmtErrorf(node *ast.CallExpr) {
 			arg,
 		},
 	}
+	c.fmtErrorf(c1)
+
 	c.Cursor.Replace(c1)
 	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "errors")
+}
+
+// errors.New(fmt.Sprintf(...)) => fmt.Errorf(...)
+// 测试用例：
+// custom14.go.input
+// custom15.go.input
+func (c *customApply) errorsNewFmt(node *ast.CallExpr) {
+	if !isFun(node.Fun, "errors", "New") {
+		return
+	}
+	if len(node.Args) != 1 {
+		return
+	}
+
+	a1, ok1 := node.Args[0].(*ast.CallExpr)
+	if !ok1 {
+		return
+	}
+	if len(a1.Args) == 0 {
+		// 语法错误
+		return
+	}
+
+	if !isFun(a1.Fun, "fmt", "Sprintf") {
+		return
+	}
+
+	if len(a1.Args) == 1 {
+		arg, ok := a1.Args[0].(*ast.BasicLit)
+		if ok && arg.Kind == token.STRING && !strings.Contains(arg.Value, "%") {
+			node.Args = a1.Args
+			pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "errors")
+			return
+		}
+	}
+
+	nn := &ast.CallExpr{
+		Lparen: node.Lparen,
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "fmt",
+			},
+			Sel: &ast.Ident{
+				Name: "Errorf",
+			},
+		},
+		Args: a1.Args,
+	}
+	c.Cursor.Replace(nn)
+	pkgReplace(c.req.FSet, c.req.AstFile, "errors", "fmt")
 }
 
 func (c *customApply) xPrintf(node *ast.CallExpr) {

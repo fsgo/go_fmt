@@ -1,0 +1,22 @@
+package demo
+
+import (
+	"errors"
+	"fmt"
+)
+
+// 这个文件里不再添加新的 case
+
+func errorsNewFmt() {
+	_ = fmt.Errorf("a %s", "hello")
+
+	_ = errors.New("a")
+
+	msg := "hello"
+	// 未做类型分析，所以最终还是会使用 fmt.Errorf 以让行为和 fmt.Sprintf 保持一致
+	_ = fmt.Errorf(msg)
+}
+
+func check1() error {
+	return fmt.Errorf("a %s", "hello")
+}

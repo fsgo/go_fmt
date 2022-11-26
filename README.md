@@ -92,6 +92,7 @@ func ok() bool {
 + if len(val)!=0 {
    // do something
 }
+
 ```
 
 3.使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`
@@ -180,6 +181,12 @@ func ok() bool {
 
 - log.Printf("abc")
 + log.Print("abc")
+
+- _ = errors.New(fmt.Sprintf("hello"))
++ _ = errors.New("hello")
+
+- _ = errors.New(fmt.Sprintf("hello %s", "world"))
++ _ = fmt.Errorf("hello %s", "world")
 ```
 
 10.raw string :
