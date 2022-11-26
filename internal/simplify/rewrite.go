@@ -143,6 +143,8 @@ func isWildcard(s string) bool {
 // match reports whether pattern matches val,
 // recording wildcard submatches in m.
 // If m == nil, match checks whether pattern == val.
+//
+//nolint:gocyclo,cyclop
 func match(m map[string]reflect.Value, pattern, val reflect.Value) bool {
 	// Wildcard matches any expression. If it appears multiple
 	// times in the pattern, it must match the same expression
@@ -231,6 +233,8 @@ func match(m map[string]reflect.Value, pattern, val reflect.Value) bool {
 // of wildcards and pos used as the position of tokens from the pattern.
 // if m == nil, subst returns a copy of pattern and doesn't change the line
 // number information.
+//
+//nolint:gocyclo
 func subst(m map[string]reflect.Value, pattern reflect.Value, pos reflect.Value) reflect.Value {
 	if !pattern.IsValid() {
 		return reflect.Value{}

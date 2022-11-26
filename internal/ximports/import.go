@@ -28,6 +28,8 @@ import (
 // 默认按照3段：系统库、第三方库、当前项目库
 // 单独的注释行会保留
 // 不会自动去除没使用的 import
+//
+//nolint:funlen,gocyclo
 func FormatImports(req *common.Request) (out []byte, err error) {
 	_opts := req.Opt.Clone()
 	opts := *_opts

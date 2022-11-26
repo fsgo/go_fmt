@@ -33,6 +33,8 @@ var ruleMsg1 = "rewrite rule must be of the form 'pattern -> replacement'"
 var ruleMsg2 = ruleMsg1 + " or a valid filepath"
 
 // Rewrite 简化代码
+//
+//nolint:gocyclo
 func Rewrite(req *common.Request, rule string) (f *ast.File, e error) {
 	defer func() {
 		if re := recover(); re != nil {

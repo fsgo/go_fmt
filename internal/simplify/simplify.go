@@ -14,6 +14,7 @@ import (
 
 type simplifier struct{}
 
+//nolint:gocyclo
 func (s simplifier) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.CompositeLit:

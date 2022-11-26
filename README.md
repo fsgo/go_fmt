@@ -38,7 +38,7 @@ type User struct{
 
 <details><summary><i>Example 3：简化代码</i></summary>
 
-1. 简化循环逻辑：
+1.简化循环逻辑：
 ```diff
 - s[a:len(s)]
 + s[a:]
@@ -50,7 +50,7 @@ type User struct{
 + for range v {...}
 ```
 
-2. 简化判断逻辑：
+2.简化判断逻辑：
 ```diff
 - if b == true {
 + if b { 
@@ -74,7 +74,7 @@ type User struct{
 + _ = index > 1
 ```
 
-3. 使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`
+3.使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`
 ```diff
 - strings.Count(s, "a") == 0
 + !strings.Contains(s, "a")
@@ -96,7 +96,7 @@ type User struct{
 ```
 `bytes.Index` 具有和 `strings.Index` 一样的规则。
 
-4. 字符串的比较：
+4.字符串的比较：
 
 使用 `bytes.Equal` 替换 `bytes.Compare`：
 ```diff
@@ -116,7 +116,7 @@ type User struct{
 + "abc" != "a"
 ```
 
-5. 递增 1、递减 1:
+5.递增 1、递减 1:
 ```diff
 - i += 1
 + i++
@@ -125,7 +125,7 @@ type User struct{
 + i--
 ```
 
-6.  time.Since 和 time.Until
+6.time.Since 和 time.Until
 `time.Since`  替换 `time.Now().Sub`:
 ```diff
 - time.Now().Sub( t1 )
@@ -138,13 +138,13 @@ type User struct{
 + time.Until( t1 )
 ```
 
-7. channel:
+7.channel:
 ```diff
 - _ = <-chan
 + <-done
 ```
 
-8. map:
+8.map:
 ```diff
 - x, _ := someMap["key"]
 + x := someMap["key"]
@@ -160,6 +160,12 @@ type User struct{
 
 - log.Printf("abc")
 + log.Print("abc")
+```
+
+10.raw string :
+```diff
+- regexp.Compile("\\A(\\w+) profile: total \\d+\\n\\z")
++ regexp.Compile(`\A(\w+) profile: total \d+\n\z`)
 ```
 
 </details>

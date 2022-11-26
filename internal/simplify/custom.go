@@ -5,8 +5,10 @@
 package simplify
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
+	"strconv"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
@@ -251,6 +253,7 @@ func (c *customApply) bytesCount0(cond *ast.BinaryExpr) {
 	c.stringsBytesCount0(cond, "bytes")
 }
 
+//nolint:gocyclo
 func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
@@ -305,6 +308,7 @@ func (c *customApply) bytesIndex1(cond *ast.BinaryExpr) {
 	c.stringsBytesIndex1(cond, "bytes")
 }
 
+//nolint:gocyclo
 func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
@@ -460,11 +464,54 @@ func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
 }
 
 func (c *customApply) fixCallExpr(node *ast.CallExpr) {
+	c.regexpRawString(node)
+
 	c.stringsReplace(node)
 	c.timeNowSub(node)
 	c.timeSubNow(node)
 	c.fmtErrorf(node)
 	c.xPrintf(node)
+}
+
+// 提高正则的可读性
+// see https://staticcheck.io/docs/checks#S1007
+// regexp.Compile("\\A(\\w+) profile: total \\d+\\n\\z")
+// ->
+// regexp.Compile(`\A(\w+) profile: total \d+\n\z`)
+func (c *customApply) regexpRawString(node *ast.CallExpr) {
+	if !astutil.UsesImport(c.req.AstFile, "regexp") {
+		return
+	}
+
+	if isFunAny(node.Fun, "regexp.Compile", "regexp.MustCompile") && len(node.Args) == 1 {
+		c.nodeRawString(node.Args[0])
+		return
+	}
+}
+
+func (c *customApply) nodeRawString(node ast.Node) {
+	ab, ok := node.(*ast.BasicLit)
+	if !ok || ab.Kind != token.STRING {
+		return
+	}
+	if !strings.HasSuffix(ab.Value, `"`) {
+		// already a raw string
+		return
+	}
+	if !strings.Contains(ab.Value, `\\`) {
+		return
+	}
+	if strings.Contains(ab.Value, "`") {
+		return
+	}
+	raw, err := strconv.Unquote(ab.Value)
+	if err != nil {
+		return
+	}
+	if raw == ab.Value {
+		return
+	}
+	ab.Value = "`" + raw + "`"
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
@@ -730,6 +777,21 @@ func isBasicLitKind(n ast.Expr, kind token.Token) bool {
 		return false
 	}
 	return nv.Kind == kind
+}
+
+// isFunAny 判断是否任意的方法调用
+// fnNames: regexp.Compile
+func isFunAny(fn ast.Expr, fnNames ...string) bool {
+	for i := 0; i < len(fnNames); i++ {
+		info := strings.Split(fnNames[i], ".")
+		if len(info) != 2 {
+			panic(fmt.Sprintf("invalid fuc name %q, expect like x.y", fnNames[i]))
+		}
+		if isFun(fn, info[0], info[1]) {
+			return true
+		}
+	}
+	return false
 }
 
 func isFun(fn ast.Expr, pkg string, name string) bool {
