@@ -81,7 +81,7 @@ type User struct{
 - 	}
 - } 
 + func ok() bool {
-- 	return a > b
++ 	return a > b
 + } 
 
 - func ok() bool {
@@ -91,7 +91,7 @@ type User struct{
 - 	return false
 - } 
 + func ok() bool {
-- 	return a > b
++ 	return a > b
 + } 
 ```
 
