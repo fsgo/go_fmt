@@ -117,6 +117,7 @@ func conditionToNot(ne ast.Expr) ast.Expr {
 			return uc.X
 		}
 	}
+
 	bc, ok2 := ne.(*ast.BinaryExpr)
 	if ok2 {
 		switch bc.Op {
@@ -134,6 +135,16 @@ func conditionToNot(ne ast.Expr) ast.Expr {
 			bc.Op = token.GTR
 		case token.LSS: // a < b => a  >= b
 			bc.Op = token.GEQ
+
+		case token.LAND: // a && b => !( a && b ) => !a || !b
+			bc.Op = token.LOR
+			bc.X = conditionToNot(bc.X)
+			bc.Y = conditionToNot(bc.Y)
+			return bc
+		case token.LOR: // a || b => ! ( a || b ) => !a && !b
+			bc.Op = token.LAND
+			bc.X = conditionToNot(bc.X)
+			bc.Y = conditionToNot(bc.Y)
 		default:
 			goto end
 		}

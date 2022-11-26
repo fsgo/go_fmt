@@ -48,6 +48,14 @@ type User struct{
 
 - for _ = range v {...}
 + for range v {...}
+
+- for {
++ for ok{
+-   if !ok {
+-     break
+-   }
+   // do something
+ }
 ```
 
 2.简化判断逻辑：

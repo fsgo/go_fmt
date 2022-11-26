@@ -23,6 +23,8 @@ func customSimplify(req *common.Request) {
 			newCustomApply(req, c).fixBinaryExpr(vt)
 		case *ast.IfStmt:
 			newCustomApply(req, c).fixIfStmt(vt)
+		case *ast.ForStmt:
+			newCustomApply(req, c).fixForStmt(vt)
 		}
 		return true
 	}
@@ -1033,4 +1035,32 @@ func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
 		c.Cursor.InsertAfter(stElse.List[i])
 	}
 	node.Else = nil
+}
+
+func (c *customApply) fixForStmt(node *ast.ForStmt) {
+	c.loopBreak(node)
+}
+
+func (c *customApply) loopBreak(node *ast.ForStmt) {
+	// for 循环已经有条件
+	// 如：for ok
+	if node.Cond != nil {
+		return
+	}
+	if node.Body == nil || len(node.Body.List) == 0 {
+		return
+	}
+
+	first, ok1 := node.Body.List[0].(*ast.IfStmt)
+	if !ok1 || first.Init != nil || first.Body == nil || len(first.Body.List) != 1 {
+		return
+	}
+
+	ifb, ok2 := first.Body.List[0].(*ast.BranchStmt)
+	if !ok2 || ifb.Tok != token.BREAK {
+		return
+	}
+
+	node.Cond = conditionToNot(first.Cond)
+	node.Body.List = node.Body.List[1:]
 }
