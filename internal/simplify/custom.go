@@ -18,62 +18,91 @@ import (
 // customSimplify 自定义的简化规则
 func customSimplify(req *common.Request) {
 	pre := func(c *astutil.Cursor) bool {
+		base := customBase{
+			req:    req,
+			Cursor: c,
+		}
 		switch vt := c.Node().(type) {
 		case *ast.BinaryExpr:
-			newCustomApply(req, c).fixBinaryExpr(vt)
+			(&cBinaryExpr{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		case *ast.IfStmt:
-			newCustomApply(req, c).fixIfStmt(vt)
+			(&cIfStmt{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		case *ast.ForStmt:
-			newCustomApply(req, c).fixForStmt(vt)
+			(&cForStmt{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		}
 		return true
 	}
 	post := func(c *astutil.Cursor) bool {
+		base := customBase{
+			req:    req,
+			Cursor: c,
+		}
 		// log.Println("c.Name()", c.Name())
 		switch vt := c.Node().(type) {
 		case *ast.AssignStmt:
-			newCustomApply(req, c).fixAssignStmt(vt)
+			(&cAssignStmt{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		case *ast.BinaryExpr:
-			newCustomApply(req, c).fixBinaryExpr(vt)
+			(&cBinaryExpr{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		case *ast.CallExpr:
-			newCustomApply(req, c).fixCallExpr(vt)
+			(&cCallExpr{
+				customBase: base,
+				Node:       vt,
+			}).doFix()
 		case *ast.FuncDecl:
-			newCustomApply(req, c).fixFuncDecl(vt)
+			(&cFuncDecl{
+				customBase: base,
+			}).fixFuncDecl(vt)
 		case *ast.FuncLit:
-			newCustomApply(req, c).fixFuncLit(vt)
+			(&cFuncDecl{
+				customBase: base,
+			}).fixFuncLit(vt)
 		}
 		return true
 	}
 	astutil.Apply(req.AstFile, pre, post)
 }
 
-func newCustomApply(req *common.Request, c *astutil.Cursor) *customApply {
-	return &customApply{
-		Cursor: c,
-		req:    req,
-	}
-}
-
-type customApply struct {
+type customBase struct {
 	req    *common.Request
 	Cursor *astutil.Cursor
 }
 
-func (c *customApply) fixAssignStmt(vt *ast.AssignStmt) {
-	c.numIncDec(vt)
-	c.chanReceive(vt)
-	c.mapRead(vt)
+type cAssignStmt struct {
+	customBase
+	Node *ast.AssignStmt
+}
+
+func (c *cAssignStmt) doFix() {
+	c.numIncDec()
+	c.chanReceive()
+	c.mapRead()
 }
 
 // id+=1 -> id++
 // id-=1 -> id--
-func (c *customApply) numIncDec(vt *ast.AssignStmt) {
-	if len(vt.Rhs) != 1 {
+func (c *cAssignStmt) numIncDec() {
+	node := c.Node
+	if len(node.Rhs) != 1 {
 		return
 	}
 	var newTok token.Token
 
-	switch vt.Tok {
+	switch node.Tok {
 	case token.ADD_ASSIGN:
 		newTok = token.INC
 	case token.SUB_ASSIGN:
@@ -82,20 +111,21 @@ func (c *customApply) numIncDec(vt *ast.AssignStmt) {
 		return
 	}
 
-	rh, ok := vt.Rhs[0].(*ast.BasicLit)
+	rh, ok := node.Rhs[0].(*ast.BasicLit)
 	if !ok {
 		return
 	}
 	if rh.Value != "1" {
 		return
 	}
-	vt.TokPos--
-	vt.Rhs = nil
-	vt.Tok = newTok
+	node.TokPos--
+	node.Rhs = nil
+	node.Tok = newTok
 }
 
 // _ = <-ch  ->  <-ch
-func (c *customApply) chanReceive(node *ast.AssignStmt) {
+func (c *cAssignStmt) chanReceive() {
+	node := c.Node
 	if node.Tok != token.ASSIGN || (len(node.Rhs) != 1 || len(node.Lhs) != 1) || len(node.Lhs) != 1 {
 		return
 	}
@@ -120,7 +150,8 @@ func (c *customApply) chanReceive(node *ast.AssignStmt) {
 }
 
 // x, _ := someMap["key"] -> x:=someMap["key"]
-func (c *customApply) mapRead(node *ast.AssignStmt) {
+func (c *cAssignStmt) mapRead() {
+	node := c.Node
 	if node.Tok != token.DEFINE || (len(node.Lhs) != 2 || len(node.Rhs) != 1) || len(node.Rhs) != 1 {
 		return
 	}
@@ -135,28 +166,34 @@ func (c *customApply) mapRead(node *ast.AssignStmt) {
 	node.Lhs = node.Lhs[0:1]
 }
 
-func (c *customApply) fixBinaryExpr(cond *ast.BinaryExpr) {
-	c.yadoCond0(cond)
-	c.yadoCond1(cond)
+type cBinaryExpr struct {
+	customBase
+	Node *ast.BinaryExpr
+}
 
-	c.trueFalse(cond)
+func (c *cBinaryExpr) doFix() {
+	c.yadoCond0()
+	c.yadoCond1()
 
-	c.stringsCount0(cond)
-	c.bytesCount0(cond)
+	c.trueFalse()
 
-	c.stringsIndex1(cond)
-	c.bytesIndex1(cond)
+	c.stringsCount0()
+	c.bytesCount0()
 
-	c.stringsCompare0(cond)
-	c.bytesCompare0(cond)
+	c.stringsIndex1()
+	c.bytesIndex1()
 
-	c.checkSliceNilLen(cond)
+	c.stringsCompare0()
+	c.bytesCompare0()
 
-	c.sortXY(cond)
+	c.checkSliceNilLen()
+
+	c.sortXY()
 }
 
 // "a" == val -> val == "a"
-func (c *customApply) yadoCond0(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) yadoCond0() {
+	cond := c.Node
 	_, ok := cond.X.(*ast.BasicLit)
 	if !ok {
 		return
@@ -164,10 +201,11 @@ func (c *customApply) yadoCond0(cond *ast.BinaryExpr) {
 	if _, ok2 := cond.Y.(*ast.BasicLit); ok2 {
 		return
 	}
-	c.switchBinaryExprXY(cond)
+	c.switchBinaryExprXY()
 }
 
-func (c *customApply) switchBinaryExprXY(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) switchBinaryExprXY() {
+	cond := c.Node
 	switch cond.Op {
 	case token.EQL: // "a" == val
 	// do nothing
@@ -192,7 +230,8 @@ func (c *customApply) switchBinaryExprXY(cond *ast.BinaryExpr) {
 }
 
 // true == val -> val == true
-func (c *customApply) yadoCond1(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) yadoCond1() {
+	cond := c.Node
 	x, ok := cond.X.(*ast.Ident)
 	if !ok || (x.Name != "true" && x.Name != "false") {
 		return
@@ -201,10 +240,11 @@ func (c *customApply) yadoCond1(cond *ast.BinaryExpr) {
 	if _, ok2 := cond.Y.(*ast.BasicLit); ok2 {
 		return
 	}
-	c.switchBinaryExprXY(cond)
+	c.switchBinaryExprXY()
 }
 
-func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) trueFalse() {
+	cond := c.Node
 	y, ok2 := cond.Y.(*ast.Ident)
 	if !ok2 {
 		return
@@ -255,7 +295,8 @@ func (c *customApply) trueFalse(cond *ast.BinaryExpr) {
 // if len(x) != 0 {}
 //
 //nolint:gocyclo
-func (c *customApply) checkSliceNilLen(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) checkSliceNilLen() {
+	cond := c.Node
 	if cond.Op != token.LAND {
 		return
 	}
@@ -307,16 +348,17 @@ func (c *customApply) checkSliceNilLen(cond *ast.BinaryExpr) {
 // strings.Count(s,"a") < 1    -> !strings.Contains(s,"a")
 // strings.Count(s,"a") > 0    -> strings.Contains(s,"a")
 // strings.Count(s,"a") != 0   -> strings.Contains(s,"a")
-func (c *customApply) stringsCount0(cond *ast.BinaryExpr) {
-	c.stringsBytesCount0(cond, "strings")
+func (c *cBinaryExpr) stringsCount0() {
+	c.stringsBytesCount0("strings")
 }
 
-func (c *customApply) bytesCount0(cond *ast.BinaryExpr) {
-	c.stringsBytesCount0(cond, "bytes")
+func (c *cBinaryExpr) bytesCount0() {
+	c.stringsBytesCount0("bytes")
 }
 
 //nolint:gocyclo
-func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
+func (c *cBinaryExpr) stringsBytesCount0(pkg string) {
+	cond := c.Node
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
 		return
@@ -362,16 +404,17 @@ func (c *customApply) stringsBytesCount0(cond *ast.BinaryExpr, pkg string) {
 // strings.Index(s,"a") >  -1   ->  strings.Contains(s,"a")
 // strings.Index(s,"a") >=  0   ->  strings.Contains(s,"a")
 // strings.Index(s,"a") <   0   ->  !strings.Contains(s,"a")
-func (c *customApply) stringsIndex1(cond *ast.BinaryExpr) {
-	c.stringsBytesIndex1(cond, "strings")
+func (c *cBinaryExpr) stringsIndex1() {
+	c.stringsBytesIndex1("strings")
 }
 
-func (c *customApply) bytesIndex1(cond *ast.BinaryExpr) {
-	c.stringsBytesIndex1(cond, "bytes")
+func (c *cBinaryExpr) bytesIndex1() {
+	c.stringsBytesIndex1("bytes")
 }
 
 //nolint:gocyclo
-func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
+func (c *cBinaryExpr) stringsBytesIndex1(pkg string) {
+	cond := c.Node
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
 		return
@@ -427,7 +470,8 @@ func (c *customApply) stringsBytesIndex1(cond *ast.BinaryExpr, pkg string) {
 
 // bytes.Compare(s,a) == 0 -> bytes.Equal(s,a)
 // bytes.Compare(s,a) != 0 -> !bytes.Equal(s,a)
-func (c *customApply) bytesCompare0(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) bytesCompare0() {
+	cond := c.Node
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
 		return
@@ -466,7 +510,8 @@ const enableSortXY = false
 //
 //	ok1() && "a"=="b"       ->  "a"=="b" && ok1()
 //	ok1() && len("a") > 0   ->  len("a") > 0 && ok1()
-func (c *customApply) sortXY(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) sortXY() {
+	cond := c.Node
 	if !enableSortXY {
 		return
 	}
@@ -496,7 +541,8 @@ func (c *customApply) sortXY(cond *ast.BinaryExpr) {
 
 // strings.Compare(s,a) == 0 -> s==a
 // strings.Compare(s,a) != 0 -> s!=a
-func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
+func (c *cBinaryExpr) stringsCompare0() {
+	cond := c.Node
 	x, ok1 := cond.X.(*ast.CallExpr)
 	if !ok1 {
 		return
@@ -525,19 +571,24 @@ func (c *customApply) stringsCompare0(cond *ast.BinaryExpr) {
 	}
 }
 
-func (c *customApply) fixCallExpr(node *ast.CallExpr) {
-	c.regexpRawString(node)
+type cCallExpr struct {
+	customBase
+	Node *ast.CallExpr
+}
 
-	c.stringsReplace(node)
-	c.timeNowSub(node)
-	c.timeSubNow(node)
+func (c *cCallExpr) doFix() {
+	c.regexpRawString()
 
-	c.errorsNewFmt(node)
-	c.fmtErrorf(node)
+	c.stringsReplace()
+	c.timeNowSub()
+	c.timeSubNow()
 
-	c.xPrintf(node)
+	c.errorsNewFmt()
+	c.fmtErrorf()
 
-	c.sortSlice(node)
+	c.xPrintf()
+
+	c.sortSlice()
 }
 
 // 提高正则的可读性
@@ -545,18 +596,18 @@ func (c *customApply) fixCallExpr(node *ast.CallExpr) {
 // regexp.Compile("\\A(\\w+) profile: total \\d+\\n\\z")
 // ->
 // regexp.Compile(`\A(\w+) profile: total \d+\n\z`)
-func (c *customApply) regexpRawString(node *ast.CallExpr) {
+func (c *cCallExpr) regexpRawString() {
 	if !astutil.UsesImport(c.req.AstFile, "regexp") {
 		return
 	}
-
+	node := c.Node
 	if isFunAny(node.Fun, "regexp.Compile", "regexp.MustCompile") && len(node.Args) == 1 {
 		c.nodeRawString(node.Args[0])
 		return
 	}
 }
 
-func (c *customApply) nodeRawString(node ast.Node) {
+func (c *cCallExpr) nodeRawString(node ast.Node) {
 	ab, ok := node.(*ast.BasicLit)
 	if !ok || ab.Kind != token.STRING {
 		return
@@ -582,7 +633,8 @@ func (c *customApply) nodeRawString(node ast.Node) {
 }
 
 // strings.Replace(s,"a","b",-1) -> strings.ReplaceAll(s,"a","b")
-func (c *customApply) stringsReplace(node *ast.CallExpr) {
+func (c *cCallExpr) stringsReplace() {
+	node := c.Node
 	if len(node.Args) != 4 {
 		return
 	}
@@ -605,7 +657,8 @@ func (c *customApply) stringsReplace(node *ast.CallExpr) {
 }
 
 // time.Now().Sub(n) -> time.Since(n)
-func (c *customApply) timeNowSub(node *ast.CallExpr) {
+func (c *cCallExpr) timeNowSub() {
+	node := c.Node
 	if len(node.Args) != 1 {
 		return
 	}
@@ -642,7 +695,8 @@ func (c *customApply) timeNowSub(node *ast.CallExpr) {
 }
 
 // t.Sub(time.Now()) -> time.Until(t)
-func (c *customApply) timeSubNow(node *ast.CallExpr) {
+func (c *cCallExpr) timeSubNow() {
+	node := c.Node
 	if len(node.Args) != 1 {
 		return
 	}
@@ -680,7 +734,8 @@ func (c *customApply) timeSubNow(node *ast.CallExpr) {
 }
 
 // fmt.Errorf("abc") -> errors.New("def")
-func (c *customApply) fmtErrorf(node *ast.CallExpr) {
+func (c *cCallExpr) fmtErrorf() {
+	node := c.Node
 	if !isFun(node.Fun, "fmt", "Errorf") {
 		return
 	}
@@ -717,7 +772,6 @@ func (c *customApply) fmtErrorf(node *ast.CallExpr) {
 			arg,
 		},
 	}
-	c.fmtErrorf(c1)
 
 	c.Cursor.Replace(c1)
 	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "errors")
@@ -727,7 +781,8 @@ func (c *customApply) fmtErrorf(node *ast.CallExpr) {
 // 测试用例：
 // custom14.go.input
 // custom15.go.input
-func (c *customApply) errorsNewFmt(node *ast.CallExpr) {
+func (c *cCallExpr) errorsNewFmt() {
+	node := c.Node
 	if !isFun(node.Fun, "errors", "New") {
 		return
 	}
@@ -773,14 +828,14 @@ func (c *customApply) errorsNewFmt(node *ast.CallExpr) {
 	pkgReplace(c.req.FSet, c.req.AstFile, "errors", "fmt")
 }
 
-func (c *customApply) xPrintf(node *ast.CallExpr) {
-	c.xPrintfByPkg(node, "fmt", "Printf", "Print")
-	c.xPrintfByPkg(node, "log", "Printf", "Print")
+func (c *cCallExpr) xPrintf() {
+	c.xPrintfByPkg("fmt", "Printf", "Print")
+	c.xPrintfByPkg("log", "Printf", "Print")
 
-	c.xPrintfByPkg(node, "log", "Fatalf", "Fatal")
-	c.xPrintfByPkg(node, "log", "Panicf", "Panic")
+	c.xPrintfByPkg("log", "Fatalf", "Fatal")
+	c.xPrintfByPkg("log", "Panicf", "Panic")
 
-	c.xFprintfByPkg(node, "fmt", "Fprintf", "Fprint")
+	c.xFprintfByPkg("fmt", "Fprintf", "Fprint")
 }
 
 // fmt.Printf("abc") -> fmt.Print("abc")
@@ -788,7 +843,8 @@ func (c *customApply) xPrintf(node *ast.CallExpr) {
 // log.Printf("abc") -> log.Print("abc")
 // log.Fatalf("abc") -> log.Fatal("abc")
 // log.Panicf("abc") -> log.Panic("abc")
-func (c *customApply) xPrintfByPkg(node *ast.CallExpr, pkg string, fnOld string, fnNew string) {
+func (c *cCallExpr) xPrintfByPkg(pkg string, fnOld string, fnNew string) {
+	node := c.Node
 	if !isFun(node.Fun, pkg, fnOld) {
 		return
 	}
@@ -830,7 +886,8 @@ func (c *customApply) xPrintfByPkg(node *ast.CallExpr, pkg string, fnOld string,
 }
 
 // fmt.Fprintf(os.Stderr,"abc") -> fmt.Fprint(os.Stderr,"abc")
-func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string, fnNew string) {
+func (c *cCallExpr) xFprintfByPkg(pkg string, fnOld string, fnNew string) {
+	node := c.Node
 	if !isFun(node.Fun, pkg, fnOld) {
 		return
 	}
@@ -852,7 +909,8 @@ func (c *customApply) xFprintfByPkg(node *ast.CallExpr, pkg string, fnOld string
 }
 
 // sort.Sort(sort.StringSlice(x)) => sort.Strings(x)
-func (c *customApply) sortSlice(node *ast.CallExpr) {
+func (c *cCallExpr) sortSlice() {
+	node := c.Node
 	if !isFun(node.Fun, "sort", "Sort") {
 		return
 	}
@@ -892,18 +950,22 @@ func (c *customApply) sortSlice(node *ast.CallExpr) {
 	}
 }
 
-func (c *customApply) fixFuncDecl(node *ast.FuncDecl) {
+type cFuncDecl struct {
+	customBase
+}
+
+func (c *cFuncDecl) fixFuncDecl(node *ast.FuncDecl) {
 	c.shortReturnBool(node.Type, node.Body)
 }
 
-func (c *customApply) fixFuncLit(node *ast.FuncLit) {
+func (c *cFuncDecl) fixFuncLit(node *ast.FuncLit) {
 	c.shortReturnBool(node.Type, node.Body)
 }
 
 // 对应case: custom13.go.input
 //
 //nolint:gocyclo
-func (c *customApply) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) {
+func (c *cFuncDecl) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) {
 	ret := ft.Results
 	if ret == nil || len(ret.List) != 1 {
 		return
@@ -988,8 +1050,13 @@ func (c *customApply) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) 
 	funBody.List = funBody.List[0 : len(funBody.List)-1]
 }
 
-func (c *customApply) fixIfStmt(node *ast.IfStmt) {
-	c.ifReturnNoElse(node)
+type cIfStmt struct {
+	customBase
+	Node *ast.IfStmt
+}
+
+func (c *cIfStmt) doFix() {
+	c.ifReturnNoElse()
 }
 
 // 简化 if else:
@@ -1002,7 +1069,9 @@ func (c *customApply) fixIfStmt(node *ast.IfStmt) {
 //	}
 //
 // 去掉 else 部分
-func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
+func (c *cIfStmt) ifReturnNoElse() {
+	node := c.Node
+
 	if node.Else == nil {
 		return
 	}
@@ -1037,11 +1106,18 @@ func (c *customApply) ifReturnNoElse(node *ast.IfStmt) {
 	node.Else = nil
 }
 
-func (c *customApply) fixForStmt(node *ast.ForStmt) {
-	c.loopBreak(node)
+type cForStmt struct {
+	customBase
+	Node *ast.ForStmt
 }
 
-func (c *customApply) loopBreak(node *ast.ForStmt) {
+func (c *cForStmt) doFix() {
+	c.loopBreak()
+}
+
+func (c *cForStmt) loopBreak() {
+	node := c.Node
+
 	// for 循环已经有条件
 	// 如：for ok
 	if node.Cond != nil {

@@ -173,6 +173,15 @@ func ok42() bool {
 
 }
 
+func ok43() bool {
+	if vi > 5 {
+		return true
+	}
+	_ = "ok"
+
+	return false
+}
+
 func doVoid10() {
 	if vi > 5 {
 	} else {
@@ -222,7 +231,7 @@ func doVoid14() {
 
 		return
 	}
-	_ = "ok2"
+	_ = "doVoid14"
 
 }
 
@@ -240,7 +249,64 @@ func doVoid15() {
 		}
 		return
 	}
-	_ = "ok2"
+	_ = "doVoid15"
+
+}
+
+func doVoid16() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 20 {
+			_ = "20"
+			return
+		} else if ui > 10 {
+			_ = "10"
+		} else {
+			_ = "3"
+		}
+		return
+	}
+	// 只有这里的 else 会被去掉
+	_ = "doVoid16"
+
+}
+
+func doVoid17() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 20 {
+			_ = "20"
+		} else if ui > 10 {
+			_ = "10"
+			return
+		} else {
+			_ = "3"
+		}
+		return
+	}
+	// 只有这里的 else 会被去掉
+	_ = "doVoid17"
+
+}
+
+func doVoid18() {
+	if vi > 5 {
+		_ = "ok"
+		if vi > 20 {
+			_ = "20"
+			return
+		} else if ui > 10 {
+			_ = "10"
+		} else if ui > 8 {
+			_ = "8"
+			return
+		} else {
+			_ = "3"
+		}
+		return
+	}
+	// 只有这里的 else 会被去掉
+	_ = "doVoid18"
 
 }
 
