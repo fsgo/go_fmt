@@ -195,6 +195,9 @@ func ok() bool {
 
 - _ = errors.New(fmt.Sprintf("hello %s", "world"))
 + _ = fmt.Errorf("hello %s", "world")
+
+- bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
+- fmt.Fprintf(bf,"hello %d",1)
 ```
 
 10.raw string :

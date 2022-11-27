@@ -2,6 +2,7 @@ package demo
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"strings"
 )
@@ -144,4 +145,13 @@ type user struct {
 
 type cus struct {
 	Names []string
+}
+
+func writeFmtSprintf() {
+	bf := &bytes.Buffer{}
+	bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
+
+	_, _ = bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
+
+	fmt.Fprintf(bf, "hello %d", 1)
 }

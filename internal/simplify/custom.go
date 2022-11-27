@@ -589,6 +589,8 @@ func (c *cCallExpr) doFix() {
 	c.xPrintf()
 
 	c.sortSlice()
+
+	c.writeFmtSprintf()
 }
 
 // 提高正则的可读性
@@ -948,6 +950,60 @@ func (c *cCallExpr) sortSlice() {
 		node.Args = arg.Args
 		return
 	}
+}
+
+// bf.Write([]byte(fmt.Sprintf("hello %d",1)))
+// =>
+// fmt.Fprintf(bf,"hello %d",1)
+// 性能：1 => 1.37
+// ut: custom4.go.input
+func (c *cCallExpr) writeFmtSprintf() {
+	if !astutil.UsesImport(c.req.AstFile, "fmt") {
+		return
+	}
+	if len(c.Node.Args) != 1 {
+		return
+	}
+	fun, ok1 := c.Node.Fun.(*ast.SelectorExpr)
+	if !ok1 || fun.Sel == nil || fun.Sel.Name != "Write" {
+		return
+	}
+
+	arg, ok2 := c.Node.Args[0].(*ast.CallExpr)
+	if !ok2 || len(arg.Args) != 1 {
+		return
+	}
+
+	af, ok3 := arg.Fun.(*ast.ArrayType)
+	if !ok3 || !isIdentName(af.Elt, "byte") {
+		return
+	}
+
+	aa, ok4 := arg.Args[0].(*ast.CallExpr)
+	if !ok4 {
+		return
+	}
+	if !isFun(aa.Fun, "fmt", "Sprintf") {
+		return
+	}
+
+	var na []ast.Expr
+	na = append(na, fun.X)
+	na = append(na, aa.Args...)
+
+	n := &ast.CallExpr{
+		Lparen: c.Node.Lparen,
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "fmt",
+			},
+			Sel: &ast.Ident{
+				Name: "Fprintf",
+			},
+		},
+		Args: na,
+	}
+	c.Cursor.Replace(n)
 }
 
 type cFuncDecl struct {

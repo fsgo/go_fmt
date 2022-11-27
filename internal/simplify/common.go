@@ -91,11 +91,11 @@ func isFun(fn ast.Expr, pkg string, name string) bool {
 	if !ok2 {
 		return false
 	}
-	if fun.Sel.Name != name {
+	if fun.Sel == nil || fun.Sel.Name != name {
 		return false
 	}
 	x, ok3 := fun.X.(*ast.Ident)
-	return !(!ok3 || x.Name != pkg)
+	return ok3 && x.Name == pkg
 }
 
 func isExpVarBasic(e ast.Expr) bool {
