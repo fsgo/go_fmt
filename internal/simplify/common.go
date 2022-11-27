@@ -42,6 +42,7 @@ func isIntExprValue(v ast.Expr) bool {
 	return false
 }
 
+//lint:ignore U1000 临时忽略
 func toBoolIdentExpr(v ast.Expr) (*ast.Ident, bool) {
 	vi, ok := v.(*ast.Ident)
 	if !ok {
@@ -209,4 +210,12 @@ func condYIs(cond *ast.BinaryExpr, op token.Token, y string) bool {
 		return false
 	}
 	return yv.Value == y
+}
+
+func isBlockStmtReturn(b *ast.BlockStmt) bool {
+	if b == nil || len(b.List) == 0 {
+		return false
+	}
+	_, ok := b.List[len(b.List)-1].(*ast.ReturnStmt)
+	return ok
 }

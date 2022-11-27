@@ -15,6 +15,7 @@ func TestFormat(t *testing.T) {
 	testTestFormat(t, "testdata/case1.go.input")
 	testTestFormat(t, "testdata/case2.go.input")
 	testTestFormat(t, "testdata/case3.go.input")
+	testTestFormat(t, "testdata/case4.go.input")
 }
 
 func testTestFormat(t *testing.T, input string) {

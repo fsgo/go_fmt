@@ -1011,17 +1011,23 @@ type cFuncDecl struct {
 }
 
 func (c *cFuncDecl) fixFuncDecl(node *ast.FuncDecl) {
-	c.shortReturnBool(node.Type, node.Body)
+	// c.shortReturnBool(node.Type, node.Body)
 }
 
 func (c *cFuncDecl) fixFuncLit(node *ast.FuncLit) {
-	c.shortReturnBool(node.Type, node.Body)
+	// c.shortReturnBool(node.Type, node.Body)
 }
 
 // 对应case: custom13.go.input
 //
 //nolint:gocyclo
+//lint:ignore U1000 临时忽略
 func (c *cFuncDecl) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) {
+	if funBody == nil || len(funBody.List) < 2 {
+		// 函数已经很简单
+		return
+	}
+
 	ret := ft.Results
 	if ret == nil || len(ret.List) != 1 {
 		return
@@ -1030,10 +1036,6 @@ func (c *cFuncDecl) shortReturnBool(ft *ast.FuncType, funBody *ast.BlockStmt) {
 	// func ok() bool
 	r1Type, ok := ret.List[0].Type.(*ast.Ident)
 	if !ok || r1Type.Name != "bool" {
-		return
-	}
-	if funBody == nil || len(funBody.List) < 2 {
-		// 函数已经很简单
 		return
 	}
 	st2If, ok2 := funBody.List[len(funBody.List)-2].(*ast.IfStmt)
@@ -1128,7 +1130,7 @@ func (c *cIfStmt) doFix() {
 func (c *cIfStmt) ifReturnNoElse() {
 	node := c.Node
 
-	if node.Else == nil {
+	if node.Else == nil || node.Body == nil || len(node.Body.List) == 0 {
 		return
 	}
 
@@ -1137,18 +1139,20 @@ func (c *cIfStmt) ifReturnNoElse() {
 		return
 	}
 
+	if !isBlockStmtReturn(node.Body) {
+		return
+	}
+
 	if c.Cursor.Name() != "List" {
 		return
 	}
 
-	if node.Body == nil || len(node.Body.List) == 0 {
-		return
-	}
-
-	_, ok1 := node.Body.List[len(node.Body.List)-1].(*ast.ReturnStmt)
-	if !ok1 {
-		// 必须是  if cond{  return}
-		return
+	curNode, ok3 := node.Else.(*ast.IfStmt)
+	for ok3 && curNode.Cond != nil {
+		if !isBlockStmtReturn(curNode.Body) {
+			return
+		}
+		curNode, ok3 = curNode.Else.(*ast.IfStmt)
 	}
 
 	stElse, ok2 := node.Else.(*ast.BlockStmt)

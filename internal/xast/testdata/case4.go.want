@@ -1,0 +1,3 @@
+package app2
+
+func delete(m string)

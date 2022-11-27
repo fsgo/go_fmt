@@ -65,6 +65,12 @@ func fixFuncDecl(req *common.Request, fd *ast.FuncDecl) {
 
 // 空函数定义，将{} 放在同一行
 func fixEmptyFunc(req *common.Request, fd *ast.BlockStmt) {
+	if fd == nil {
+		// 只有函数定义，没有函数体：
+		// func delete(m string)
+		// see testdata/case4.go.input
+		return
+	}
 	cmts := cmtsBetween(req, fd.Lbrace, fd.Rbrace)
 	// 在函数定义区间无评论内容，同时没有表达式
 	if len(cmts) == 0 && len(fd.List) == 0 {

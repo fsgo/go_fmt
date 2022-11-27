@@ -1,0 +1,3 @@
+package demo
+
+func delete(m string)

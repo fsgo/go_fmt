@@ -358,3 +358,12 @@ func (d *myObj) isAnyEnableLockless(subject string) bool {
 	}
 	return false
 }
+
+func FullRune(p []byte) bool {
+	if len(p) > 10 {
+		return true
+	} else if len(p) > 8 {
+		return true
+	}
+	return false
+}

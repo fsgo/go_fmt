@@ -6,8 +6,10 @@ func ok() bool {
 	_ = "ok"
 
 	// return vi == 2
-	return vi == 2
-
+	if vi == 2 {
+		return true
+	}
+	return false
 }
 
 func ok1() bool {
@@ -39,80 +41,104 @@ func ok4() bool {
 	_ = "ok"
 
 	// return vi != 2
-	return vi != 2
-
+	if vi == 2 {
+		return false
+	}
+	return true
 }
 
 func ok4() bool {
 	_ = "ok"
 
 	// return !ok1()
-	return !ok1()
-
+	if ok1() {
+		return false
+	}
+	return true
 }
 
 func ok5() bool {
 	_ = "ok"
 
 	// return ok1()
-	return ok1()
-
+	if !ok1() {
+		return false
+	}
+	return true
 }
 
 func ok6() bool {
 	_ = "ok"
 
 	// return !ok1()
-	return !ok1()
-
+	if !ok1() {
+		return true
+	}
+	return false
 }
 
 var ok7 = func() bool {
 	// return !ok1()
-	return !ok1()
-
+	if !ok1() {
+		return true
+	}
+	return false
 }
 
 func ok8() bool {
 	// return !ok1()
-	return !ok1()
-
+	if !ok1() {
+		return true
+	}
+	return false
 }
 
 func ok9() bool {
 	// return ok1()
-	return ok1()
-
+	if ok1() {
+		return true
+	}
+	return false
 }
 
 func ok20() bool {
 	// return vi > 2
-	return vi > 2
-
+	if vi > 2 {
+		return true
+	}
+	return false
 }
 
 func ok21() bool {
 	// return vi >= 2
-	return vi >= 2
-
+	if vi >= 2 {
+		return true
+	}
+	return false
 }
 
 func ok22() bool {
 	// return vi < 2
-	return vi <= 2
-
+	if vi > 2 {
+		return false
+	}
+	return true
 }
 
 func ok22() bool {
 	// return vi > 2
-	return vi > 2
-
+	if vi <= 2 {
+		return false
+	}
+	return true
 }
 
 func ok23() bool {
 	// return vi >= 2
-	return vi >= 2
-
+	if vi < 2 {
+		return false
+	}
+	return true
 }
 
 func ok30() bool {
@@ -148,7 +174,10 @@ func ok33() bool {
 }
 
 func ok40() bool {
-	return vi > 5
+	if vi > 5 {
+		return true
+	}
+	return false
 
 }
 
@@ -325,6 +354,15 @@ func (d *myObj) isAnyEnableLockless(subject string) bool {
 	if enable, ok := d.ok1(); ok && enable == "k1" {
 		return true
 	} else if enable, ok := d.ok2(); ok && enable != "k2" {
+		return true
+	}
+	return false
+}
+
+func FullRune(p []byte) bool {
+	if len(p) > 10 {
+		return true
+	} else if len(p) > 8 {
 		return true
 	}
 	return false
