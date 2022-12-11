@@ -428,9 +428,30 @@ $ cat code.go|gorgeous stdin
 ```
 
 ## 4 git hooks
-git commit 前自动检查是否格式化/自动格式化
+在执行 git 命令时自动格式化或者检查是否已经完成格式化。
 
-### 4.1 配置项目 Hooks
+### 4.1 使用 bin-auto-switcher 添加全局 Hooks
+[bin-auto-switcher](https://github.com/fsgo/bin-auto-switcher) 可以很方便的对任意命令添加前置和后置 Hooks。
+
+1. 安装 git 替换命令（安装后，执行 git 命令时，实际会执行此命令，并执行配置的 Hooks）：  
+    `go install github.com/fsgo/bin-auto-switcher/git@latest`
+2. 编辑配置文件 `~/.config/bin-auto-switcher/git.toml`
+```toml
+[[Rules]]
+Cmd = "/usr/local/bin/git" # 替换为实际 git 命令的地址
+
+[[Rules.Pre]]
+Match = "^add\\s"  # 在执行 git add 命令前执行
+Trace = true       # 打印日志
+#Cond  = ["in_dir /home/work/goapps"]
+
+# 在 go.mod 文件所在目录下执行 gorgeous 命令
+Cmd   = "inner:find-exec"
+Args  = ["-name","go.mod","-dir_not","testdata","gorgeous"]
+```
+
+### 4.2 使用 git hooks
+
 编辑项目的 `.git/hooks/pre-commit`文件，将`gorgeous`命令加入。
 
 ```bash
@@ -443,7 +464,7 @@ chmod 777 $(git rev-parse --git-dir)/hooks/pre-commit
 echo -e '\n gorgeous \n git add . \n' >> $(git rev-parse --git-dir)/hooks/pre-commit
 ```
 
-### 4.2 配置到全局 Hooks
+还可以配置到全局 Hooks：
 > 该方式会导致项目自身的 hooks 失效。  
 > 若项目有自己的 hooks，请不要配置全局而要配置到单个项目。
 ```bash
