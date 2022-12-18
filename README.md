@@ -386,8 +386,6 @@ usage: gorgeous [flags] [path ...]
   -rr
     	rewrite with build in rules:
     	a[b:len(a)] -> a[b:]
-    	a == ""     -> len(a) == 0
-    	a != ""     -> len(a) != 0
     	interface{} -> any                    // go1.18
     	io/#ioutil.NopCloser -> io.NopCloser  // go1.16
     	io/#ioutil.ReadAll   -> io.ReadAll    // go1.16
@@ -444,10 +442,12 @@ Cmd = "/usr/local/bin/git" # 替换为实际 git 命令的地址
 Match = "^add\\s"  # 在执行 git add 命令前执行
 Trace = true       # 打印日志
 #Cond  = ["in_dir /home/work/goapps"]
+Cond  = ["go_module"]
+Cmd   = "gorgeous"
 
 # 在 go.mod 文件所在目录下执行 gorgeous 命令
-Cmd   = "inner:find-exec"
-Args  = ["-name","go.mod","-dir_not","testdata","gorgeous"]
+#Cmd   = "inner:find-exec"
+#Args  = ["-name","go.mod","-dir_not","testdata","gorgeous"]
 ```
 
 ### 4.2 使用 git hooks

@@ -6,8 +6,10 @@ package common
 
 var rewriteRules = []string{
 	`a[b:len(a)] -> a[b:]`,
-	`a == ""     -> len(a) == 0`,
-	`a != ""     -> len(a) != 0`,
+
+	// 可能有兼容性
+	// `a == ""     -> len(a) == 0`,
+	// `a != ""     -> len(a) != 0`,
 
 	`interface{} -> any                    // go1.18`,
 

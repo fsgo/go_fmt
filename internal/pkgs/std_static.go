@@ -1,11 +1,12 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.19.1
+// GO VersionFile: go1.20rc1
 
 package pkgs
 
 var stdPKGs = []string{
 	"archive",
+	"arena",
 	"bufio",
 	"builtin",
 	"bytes",
