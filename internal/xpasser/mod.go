@@ -22,17 +22,21 @@ func TryGoModTidy(opt common.Options, fs []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
+	start := time.Now()
 	cmd := exec.CommandContext(ctx, "go", "mod", "tidy")
 	stderr := &bytes.Buffer{}
 	cmd.Stderr = stderr
 	if len(fs) > 0 && len(fs[0]) > 0 {
 		cmd.Dir = filepath.Dir(fs[0])
 	}
+	if opt.Trace {
+		log.Println("exec_start:", cmd.String())
+	}
 	out, err := cmd.Output()
 	if err != nil {
 		log.Println("exec:", cmd.String(), ", failed:\n", stderr.String())
 	}
 	if opt.Trace {
-		log.Println("exec:", cmd.String(), "out:", string(out), ", err:", err)
+		log.Println("exec_done:", cmd.String(), "out:", string(out), ", err:", err, "cost:", time.Since(start).String())
 	}
 }

@@ -58,6 +58,7 @@ func LoadOverlay(fileName string) error {
 
 // Load 加载解析应用
 func Load(opt common.Options, patterns []string) error {
+	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	conf := packages.Config{
@@ -75,13 +76,18 @@ func Load(opt common.Options, patterns []string) error {
 	if len(patterns) == 0 {
 		patterns = []string{"./..."}
 	}
+
+	if opt.Trace {
+		log.Println("prog.Load_start")
+	}
+
 	pkgs, err := packages.Load(&conf, patterns...)
 	if err != nil {
 		return err
 	}
 	Default.pkgs = pkgs
 	if opt.Trace {
-		log.Println("pkgs", pkgs, "patterns=", patterns)
+		log.Println("prog.Load_done", "pkgs", pkgs, "patterns=", patterns, "cost=", time.Since(start).String())
 	}
 	return nil
 }
