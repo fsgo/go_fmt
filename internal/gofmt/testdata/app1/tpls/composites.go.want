@@ -203,7 +203,7 @@ var _ = map[string]*[]int{
 	"bal": &[]int{3, 4},
 }
 
-var pieces4 = []*Piece{
+var pieces40 = []*Piece{
 	&Piece{A: 0, B: 0, C: Point{X: 4, Y: 1}, D: []Point{Point{X: 0, Y: 0}, Point{X: 1, Y: 0}, Point{X: 1, Y: 0}, Point{X: 1, Y: 0}}, E: nil, F: nil},
 	&Piece{A: 1, B: 0, C: Point{X: 1, Y: 4}, D: []Point{Point{X: 0, Y: 0}, Point{X: 0, Y: 1}, Point{X: 0, Y: 1}, Point{X: 0, Y: 1}}, E: nil, F: nil},
 	&Piece{A: 2, B: 0, C: Point{X: 4, Y: 1}, D: []Point{Point{X: 0, Y: 0}, Point{X: 1, Y: 0}, Point{X: 1, Y: 0}, Point{X: 1, Y: 0}}, E: nil, F: nil},

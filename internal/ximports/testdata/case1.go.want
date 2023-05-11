@@ -12,8 +12,9 @@ import (
 	"net"        // after net
 	_ "net/http" // after http
 
-	"github.com/go_fmt/app2/internal"
 	"golang.org/x/mod/modfile"
+
+	"github.com/go_fmt/app2/internal"
 )
 
 type User1 struct {

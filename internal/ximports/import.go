@@ -5,11 +5,7 @@
 package ximports
 
 import (
-	/*
-	* 多行注释1
-	 */ /*
-	* 多行注释2
-	 */ /* 多行注释3 */ "bytes"
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -19,9 +15,11 @@ import (
 	// on strconv
 	"strconv" // strconv 后面
 	"strings"
+
+	"github.com/fsgo/fsgo/fstypes"
+
 	// internal common 上面
 	"github.com/fsgo/go_fmt/internal/common"
-	"github.com/fsgo/fsgo/fstypes"
 )
 
 // FormatImports 格式化 import 部分
