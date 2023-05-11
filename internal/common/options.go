@@ -95,13 +95,13 @@ type Options struct {
 type ImportGroupType byte
 
 const (
-	// ImportGroupGoStandard 标准库(简称 s)
+	// ImportGroupGoStandard 标准库(简称 s)，顺序编号 0
 	ImportGroupGoStandard ImportGroupType = 's'
 
-	// ImportGroupThirdParty 第三方库(简称 t)
+	// ImportGroupThirdParty 第三方库(简称 t)，顺序编号 1
 	ImportGroupThirdParty ImportGroupType = 't'
 
-	// ImportGroupCurrentModule 模块自身(简称 c)
+	// ImportGroupCurrentModule 模块自身(简称 c)，顺序编号 2
 	ImportGroupCurrentModule ImportGroupType = 'c'
 )
 

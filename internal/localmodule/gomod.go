@@ -19,5 +19,9 @@ func detectByGoMod(opt common.Options, fileName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return common.ModuleByFile(goModPath)
+	m, err := common.ModuleByFile(goModPath)
+	if opt.Trace {
+		log.Println("parser ", goModPath, "module=", m, ", err=", err)
+	}
+	return m, err
 }

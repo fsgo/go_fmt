@@ -16,9 +16,6 @@ func defaultImportGroup(importPath string, opt common.Options) int {
 	if len(importPath) == 0 {
 		return 0
 	}
-
-	module := opt.LocalModule
-
 	// 当前的路径是否属于配置的 第三方模块列表里的
 	if opt.ThirdModules.PkgIn(importPath) {
 		return opt.GetImportGroup(common.ImportGroupThirdParty)
@@ -26,7 +23,7 @@ func defaultImportGroup(importPath string, opt common.Options) int {
 
 	// 判断是否属于当前的项目库
 	// 因为当前项目的 模块名(LocalModule) 可能和 系统标准库 的出现同名，所以优先判断
-	if common.InModule(importPath, module) {
+	if common.InModule(importPath, opt.LocalModule) {
 		return opt.GetImportGroup(common.ImportGroupCurrentModule)
 	}
 

@@ -76,11 +76,14 @@ func (decl *importDecl) RealPath() string {
 		name = decl.realPathFromCmt()
 	}
 
-	if !strings.Contains(name, `"`) {
-		return name
+	for _, d := range []string{`"`, "`"} {
+		if strings.Contains(name, d) {
+			arr := strings.SplitN(name, d, 3)
+			return arr[1]
+		}
 	}
-	arr := strings.SplitN(name, `"`, 3)
-	return arr[1]
+
+	return name
 }
 
 var regSpace = regexp.MustCompile(`\s+`)
@@ -104,8 +107,19 @@ func (decl *importDecl) Bytes() []byte {
 	return buf.Bytes()
 }
 
+var _ json.Marshaler = (*importDecl)(nil)
+
+func (decl *importDecl) MarshalJSON() ([]byte, error) {
+	data := map[string]any{
+		"Path":     decl.Path,
+		"Docs":     decl.Docs,
+		"RealPath": decl.RealPath(),
+	}
+	return json.Marshal(data)
+}
+
 func (decl *importDecl) String() string {
-	bf, _ := json.Marshal(decl)
+	bf, _ := decl.MarshalJSON()
 	return string(bf)
 }
 

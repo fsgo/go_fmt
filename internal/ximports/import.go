@@ -19,8 +19,9 @@ import (
 	// on strconv
 	"strconv" // strconv 后面
 	"strings"
-	// common 上面
+	// internal common 上面
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/fsgo/fstypes"
 )
 
 // FormatImports 格式化 import 部分
@@ -306,8 +307,14 @@ func findSubModules(fileName string, opts *common.Options) error {
 	if err != nil {
 		return err
 	}
-	if len(ms) > 0 {
-		opts.ThirdModules = append(opts.ThirdModules, ms...)
+	for i := 0; i < len(ms); i++ {
+		module := ms[i]
+		if module == opts.LocalModule {
+			continue
+		}
+		if !fstypes.SliceHas(opts.ThirdModules, module) {
+			opts.ThirdModules = append(opts.ThirdModules, module)
+		}
 	}
 	return nil
 }
