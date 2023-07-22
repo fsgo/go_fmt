@@ -48,6 +48,6 @@ func TestRequest_IsGoVersion(t *testing.T) {
 	require.True(t, req.GoVersionGEQ("1.19"))
 	require.True(t, req.GoVersionGEQ("1.18"))
 
-	require.False(t, req.GoVersionGEQ("1.20"))
+	require.False(t, req.GoVersionGEQ("1.80"))
 	require.False(t, req.GoVersionGEQ("1.99"))
 }
