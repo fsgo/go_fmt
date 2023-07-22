@@ -17,6 +17,8 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strings"
+
+	"github.com/fsgo/go_fmt/internal/version"
 )
 
 // ImportGroupFunc import 排序逻辑
@@ -268,7 +270,7 @@ with env 'GORGEOUS_RR=false' to set default value as false
 			installPath = bi.Path
 		}
 		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install "+installPath+"@latest")
-		fmt.Fprintf(os.Stderr, titleFormat, "version", Version)
+		fmt.Fprintf(os.Stderr, titleFormat, "version", version.Version)
 		os.Exit(2)
 	}
 
