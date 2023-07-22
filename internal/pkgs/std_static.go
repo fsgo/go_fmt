@@ -1,6 +1,6 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.20
+// GO VersionFile: go1.21rc3
 
 package pkgs
 
@@ -11,6 +11,7 @@ var stdPKGs = []string{
 	"builtin",
 	"bytes",
 	"cmd",
+	"cmp",
 	"compress",
 	"container",
 	"context",
@@ -31,6 +32,7 @@ var stdPKGs = []string{
 	"internal",
 	"io",
 	"log",
+	"maps",
 	"math",
 	"mime",
 	"net",
@@ -40,6 +42,7 @@ var stdPKGs = []string{
 	"reflect",
 	"regexp",
 	"runtime",
+	"slices",
 	"sort",
 	"strconv",
 	"strings",
