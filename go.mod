@@ -3,7 +3,6 @@ module github.com/fsgo/go_fmt
 go 1.20
 
 require (
-	github.com/fsgo/fsgo v0.0.6
 	github.com/google/go-cmp v0.5.9
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/mod v0.12.0
