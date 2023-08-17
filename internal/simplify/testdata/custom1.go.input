@@ -2,6 +2,8 @@ package demo
 
 import (
 	"fmt"
+	"errors"
+	"io"
 )
 
 func do() {
@@ -62,6 +64,15 @@ func do() {
 	for i := 0; b == false && i < 10; i++ {
 		fmt.Println("5", i)
 	}
+
+	fmt.Println("6", isEmpty(b) == true)
+	fmt.Println("7", isEmpty(b) == false)
+	fmt.Println("8", false == isEmpty(b))
+	fmt.Println("9", isEmpty(s))
+
+	err1 := errors.New("fail")
+	_ = errors.Is(err1, io.EOF) == true
+	_ = errors.Is(err1, io.EOF) == false
 }
 
 func isEmpty(val any)bool{
