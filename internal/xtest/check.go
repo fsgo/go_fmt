@@ -5,8 +5,6 @@
 package xtest
 
 import (
-	"go/parser"
-	"go/token"
 	"os"
 	"strings"
 	"testing"
@@ -15,7 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
+
+func TestGoFileName(name string) string {
+	return strings.TrimSuffix(name, ".input")
+}
 
 // CheckAuto inputFile 必须以 .input 结尾；wantFile 则自动依据 inputFile 推断
 // 如 inputFile=demo.go.input 则 wantFile=demo.go.want
@@ -28,19 +31,29 @@ func CheckAuto(t *testing.T, inputFile string, do func(req *common.Request)) {
 
 // Check 运行测试 case
 func Check(t *testing.T, inputFile, wantFile string, do func(req *common.Request)) {
+	opt := common.NewDefaultOptions()
 	t.Run(inputFile, func(t *testing.T) {
 		t.Helper()
+		defer xpasser.Reset()
 		t.Logf("Check %q", inputFile)
 
-		fset := token.NewFileSet()
-		f, err := parser.ParseFile(fset, inputFile, nil, parser.ParseComments)
+		fileContent, err := os.ReadFile(inputFile)
 		require.NoError(t, err)
+
+		name1 := TestGoFileName(inputFile)
+
+		require.NoError(t, xpasser.LoadOverlay(name1, fileContent))
+		require.NoError(t, xpasser.Load(*opt, []string{"file=" + name1}))
+		asfFile, err := xpasser.ParserFile(name1, fileContent)
+		require.NoError(t, err)
+
 		req := &common.Request{
-			FileName: inputFile,
-			AstFile:  f,
-			FSet:     fset,
-			Opt:      *common.NewDefaultOptions(),
+			FileName: name1,
+			AstFile:  asfFile,
+			FSet:     xpasser.Default.FSet,
+			Opt:      *opt,
 		}
+
 		do(req)
 		req.MustReParse() // 重新格式化
 		code, err := req.FormatFile()

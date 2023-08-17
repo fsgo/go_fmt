@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"golang.org/x/tools/go/packages"
@@ -37,23 +38,44 @@ func Reset() {
 	Default = &Program{
 		FSet: token.NewFileSet(),
 	}
-	Overlay = nil
+	overlayMux.Lock()
+	overlay = nil
+	overlayMux.Unlock()
 }
 
+var overlayMux sync.Mutex
+
 // Overlay see packages.Config.Overlay
-var Overlay map[string][]byte
+var overlay map[string][]byte
 
 // LoadOverlay 加载文件，用于测试
-func LoadOverlay(fileName string) error {
-	if Overlay == nil {
-		Overlay = map[string][]byte{}
+func LoadOverlay(fileName string, code []byte) error {
+	overlayMux.Lock()
+	defer overlayMux.Unlock()
+
+	if overlay == nil {
+		overlay = map[string][]byte{}
 	}
-	bf, err := os.ReadFile(fileName)
+	ap, err := filepath.Abs(fileName)
 	if err != nil {
 		return err
 	}
-	Overlay[fileName] = bf
+
+	if len(code) == 0 {
+		bf, err := os.ReadFile(ap)
+		if err != nil {
+			return err
+		}
+		code = bf
+	}
+	overlay[ap] = code
 	return nil
+}
+
+func getOverlay() map[string][]byte {
+	overlayMux.Lock()
+	defer overlayMux.Unlock()
+	return overlay
 }
 
 // Load 加载解析应用
@@ -61,6 +83,7 @@ func Load(opt common.Options, patterns []string) error {
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
+
 	conf := packages.Config{
 		Context: ctx,
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
@@ -68,7 +91,7 @@ func Load(opt common.Options, patterns []string) error {
 			packages.NeedSyntax | packages.NeedTypesInfo,
 		Tests:   true,
 		Fset:    Default.FSet,
-		Overlay: Overlay,
+		Overlay: getOverlay(),
 		// Logf: func(format string, args ...interface{}) {
 		// 	log.Printf(format,args...)
 		// },
@@ -99,15 +122,20 @@ func (pr *Program) findPkg(filename string) (*packages.Package, *ast.File, error
 	if err != nil {
 		return nil, nil, err
 	}
+	goFiles := 0
 	for i := 0; i < len(pr.pkgs); i++ {
 		p := pr.pkgs[i]
 		for j, n := range p.CompiledGoFiles {
+			goFiles++
 			if n == ap {
+				if len(p.Syntax) <= j {
+					return nil, nil, fmt.Errorf("%w: %s, invalid Syntax, Errors: %v", errFileNotFound, filename, p.Errors)
+				}
 				return p, p.Syntax[j], nil
 			}
 		}
 	}
-	return nil, nil, fmt.Errorf("%w: %s", errFileNotFound, filename)
+	return nil, nil, fmt.Errorf("%w: %s, len(pkgs)=%d, goFiles=%d", errFileNotFound, filename, len(pr.pkgs), goFiles)
 }
 
 // FindPackage  查找所属 package

@@ -5,4 +5,4 @@
 package version
 
 // Version 版本信息
-var Version = "v0.5.0 20230722"
+var Version = "v0.5.2 20230817"

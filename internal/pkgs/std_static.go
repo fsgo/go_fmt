@@ -1,6 +1,6 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.21rc3
+// GO VersionFile: go1.21.0
 
 package pkgs
 

@@ -16,7 +16,7 @@ func do() {
 	num++
 	num += 2
 	num--
-	fmt.Println("ok", a, num)
+	fmt.Println("ok", "a", num)
 
 	var b bool
 	if b { // if b==true{
@@ -28,7 +28,7 @@ func do() {
 	b3 := b || num > 2
 
 	if !b { //  if b!=true{
-		fmt.Println("2")
+		fmt.Println("2", b1, b2, b3)
 	}
 
 	if !b { //  if b==false{
@@ -62,4 +62,13 @@ func do() {
 	for i := 0; !b && i < 10; i++ {
 		fmt.Println("5", i)
 	}
+}
+
+func isEmpty(val any) bool {
+	if val == nil {
+		return true
+	} else if val == false {
+		return true
+	}
+	return false
 }

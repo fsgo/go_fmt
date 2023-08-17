@@ -7,12 +7,14 @@ package simplify
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strconv"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // customSimplify 自定义的简化规则
@@ -243,10 +245,28 @@ func (c *cBinaryExpr) yadoCond1() {
 	c.switchBinaryExprXY()
 }
 
+// if val==true   --> if val
+// if val==false  --> if !val
+// if val!=true   --> if !val
+// if val!=false  --> if val
+//
+// testcase: custom1.go.input
 func (c *cBinaryExpr) trueFalse() {
 	cond := c.Node
 	y, ok2 := cond.Y.(*ast.Ident)
 	if !ok2 {
+		return
+	}
+
+	// 判断 val 是否是 bool 类型的，如不是则不应该处理
+	fileName := strings.TrimSuffix(c.req.FileName, ".input")
+	if p, err := xpasser.FindPackage(fileName); err == nil {
+		vtp := p.TypesInfo.TypeOf(cond.X)
+		vb, ok3 := vtp.(*types.Basic)
+		if !ok3 || vb.Info() != types.IsBoolean {
+			return
+		}
+	} else {
 		return
 	}
 
