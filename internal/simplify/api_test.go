@@ -15,7 +15,7 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	xtest.CheckAuto(t, "testdata/fmt1.go.input", func(req *common.Request) {
+	xtest.CheckFileAuto(t, "testdata/fmt1.go.input", func(req *common.Request) {
 		Format(req)
 	})
 }
@@ -26,15 +26,15 @@ func TestRewrite(t *testing.T) {
 		require.NoError(t, err)
 		req.AstFile = f
 	}
-	xtest.CheckAuto(t, "testdata/rewrite1.go.input", fn1)
-	xtest.CheckAuto(t, "testdata/rewrite2.go.input", fn1)
+	xtest.CheckFileAuto(t, "testdata/rewrite1.go.input", fn1)
+	xtest.CheckFileAuto(t, "testdata/rewrite2.go.input", fn1)
 
 	fn2 := func(req *common.Request) {
 		f, err := Rewrite(req, "testdata/rules/rule1.txt")
 		require.NoError(t, err)
 		req.AstFile = f
 	}
-	xtest.CheckAuto(t, "testdata/rewrite5.go.input", fn2)
+	xtest.CheckFileAuto(t, "testdata/rewrite5.go.input", fn2)
 
 	t.Run("invalid rule", func(t *testing.T) {
 		req := common.NewTestRequest("testdata/rewrite5.go.input")
@@ -67,14 +67,14 @@ func TestRewrites(t *testing.T) {
 		err := Rewrites(req, rules)
 		require.NoError(t, err)
 	}
-	xtest.CheckAuto(t, "testdata/rewrite3.go.input", fn1)
+	xtest.CheckFileAuto(t, "testdata/rewrite3.go.input", fn1)
 
 	t.Run("build in", func(t *testing.T) {
 		buildInCases, err := filepath.Glob("testdata/buildin*.go.input")
 		require.NoError(t, err)
 		require.GreaterOrEqual(t, len(buildInCases), 3)
 		for _, bc := range buildInCases {
-			xtest.CheckAuto(t, bc, func(req *common.Request) {
+			xtest.CheckFileAuto(t, bc, func(req *common.Request) {
 				err := Rewrites(req, BuildInRewriteRules())
 				require.NoError(t, err)
 			})

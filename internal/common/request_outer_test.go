@@ -15,7 +15,7 @@ import (
 )
 
 func TestTokenLine(t *testing.T) {
-	xtest.Check(t,
+	xtest.CheckFile(t,
 		"testdata/request/case1.go.input",
 		"testdata/request/case1.go.want",
 		func(req *common.Request) {

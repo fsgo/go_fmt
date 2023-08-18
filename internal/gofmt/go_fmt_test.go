@@ -2,7 +2,7 @@
 // Author: hidu <duv123@gmail.com>
 // Date: 2022/9/24
 
-package gofmt
+package gofmt_test
 
 import (
 	"io/fs"
@@ -12,7 +12,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 
+	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/gofmt"
 	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
@@ -32,21 +35,33 @@ func TestFormatter_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testExecute(t, tt.caseDir)
+			t.Logf("execute case: %s %s", tt.name, tt.caseDir)
+			CheckDir(t, tt.caseDir)
 		})
 	}
 }
 
-func testExecute(t *testing.T, caseDir string) {
+// CheckDir 检查一个目录
+//
+// 测试数据放在 dir 下的 case 子目录
+func CheckDir(t *testing.T, dir string) {
+	// 避免 case 受到当前项目的 go.work 的影响
+	t.Setenv("GOWORK", "off")
+
 	defer xpasser.Reset()
 	xpasser.Reset()
 
-	runDir := filepath.Join(caseDir, "tmp")
-	caseDir = filepath.Join(caseDir, "tpls")
+	caseDir := filepath.Join(dir, "case")
+	t.Logf("case data dir is: %s", caseDir)
+	info, err := os.Stat(caseDir)
+	require.NoError(t, err)
+	require.True(t, info.IsDir(), "expect "+caseDir+" is dir")
+
+	runDir := filepath.Join(dir, "tmp")
 	_ = os.RemoveAll(runDir)
 	require.NoError(t, os.MkdirAll(runDir, 0755))
 	wants := map[string]string{}
-	err := filepath.Walk(caseDir, func(path string, info fs.FileInfo, err error) error {
+	err = filepath.Walk(caseDir, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -69,8 +84,8 @@ func testExecute(t *testing.T, caseDir string) {
 		return nil
 	})
 	require.NoError(t, err)
-	ft := NewFormatter()
-	opt := &Options{
+	ft := gofmt.NewFormatter()
+	opt := &common.Options{
 		TabIndent:    true,
 		TabWidth:     8,
 		LocalModule:  "auto",
@@ -93,6 +108,15 @@ func testExecute(t *testing.T, caseDir string) {
 	}()
 	err = ft.Execute(opt)
 	require.NoError(t, err)
+
+	var n int
+	packages.Visit(xpasser.Default.Packages(), nil, func(pkg *packages.Package) {
+		for _, err := range pkg.Errors {
+			t.Logf("pkg Errors:%s %s", pkg.Name, err)
+			n++
+		}
+	})
+	require.Equal(t, 0, n)
 
 	for name, want := range wants {
 		t.Run(name, func(t *testing.T) {

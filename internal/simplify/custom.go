@@ -259,9 +259,7 @@ func (c *cBinaryExpr) trueFalse() {
 	}
 
 	// 判断 val 是否是 bool 类型的，如不是则不应该处理
-	fileName := strings.TrimSuffix(c.req.FileName, ".input")
-	if p, err := xpasser.FindPackage(fileName); err == nil {
-		vtp := p.TypesInfo.TypeOf(cond.X)
+	if vtp, err := xpasser.TypeOf(c.req, cond.X); err == nil {
 		vb, ok3 := vtp.(*types.Basic)
 		if !ok3 || vb.Info() != types.IsBoolean {
 			return

@@ -429,7 +429,7 @@ func TestFormatImports(t *testing.T) {
 }
 
 func TestFormatImports2(t *testing.T) {
-	xtest.Check(t, "import.go", "", func(req *common.Request) {
+	xtest.CheckFile(t, "import.go", "", func(req *common.Request) {
 		got, err := FormatImports(req)
 		require.NoError(t, err)
 		require.NotEmpty(t, got)

@@ -20,7 +20,7 @@ func TestFormat(t *testing.T) {
 
 func testTestFormat(t *testing.T, input string) {
 	t.Helper()
-	xtest.CheckAuto(t, input, func(req *common.Request) {
+	xtest.CheckFileAuto(t, input, func(req *common.Request) {
 		Format(req)
 	})
 }

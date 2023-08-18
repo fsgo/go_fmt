@@ -28,6 +28,10 @@ type Program struct {
 	pkgs []*packages.Package
 }
 
+func (p *Program) Packages() []*packages.Package {
+	return p.pkgs
+}
+
 // Default 默认的应用
 var Default = &Program{
 	FSet: token.NewFileSet(),
