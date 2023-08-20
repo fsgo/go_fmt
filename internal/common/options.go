@@ -270,7 +270,7 @@ with env 'GORGEOUS_RR=false' to set default value as false
 			installPath = bi.Path
 		}
 		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install "+installPath+"@latest")
-		fmt.Fprintf(os.Stderr, titleFormat, "version", version.Version)
+		fmt.Fprintf(os.Stderr, titleFormat, "version", version.Version())
 		os.Exit(2)
 	}
 

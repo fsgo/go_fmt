@@ -4,5 +4,11 @@
 
 package version
 
+const versionID = "v0.5.3"
+
+const versionDate = "2023-08-20"
+
 // Version 版本信息
-var Version = "v0.5.2 20230817"
+func Version() string {
+	return versionID + " " + versionDate
+}
