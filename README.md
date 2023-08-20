@@ -433,7 +433,7 @@ $ cat code.go|gorgeous stdin
 
 1. 安装 git 替换命令（安装后，执行 git 命令时，实际会执行此命令，并执行配置的 Hooks）：  
     `go install github.com/fsgo/bin-auto-switcher/git@latest`
-2. 编辑配置文件 `~/.config/bin-auto-switcher/git.toml`
+2. 编辑配置文件 `~/.config/bas/git.toml`
 ```toml
 [[Rules]]
 Cmd = "/usr/local/bin/git" # 替换为实际 git 命令的地址
@@ -478,9 +478,9 @@ chmod 777 ~/.git_config/hooks/pre-commit
 ## 5 GitHub Actions
 ```yml
 - name: Set up Go
-  uses: actions/setup-go@v2
+  uses: actions/setup-go@v4
   with:
-    go-version: 1.19
+    go-version: 1.20
 
 - name: gorgeous style check
   run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest && gorgeous -d ./...

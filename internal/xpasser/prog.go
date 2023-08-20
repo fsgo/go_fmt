@@ -28,8 +28,8 @@ type Program struct {
 	pkgs []*packages.Package
 }
 
-func (p *Program) Packages() []*packages.Package {
-	return p.pkgs
+func (pr *Program) Packages() []*packages.Package {
+	return pr.pkgs
 }
 
 // Default 默认的应用
