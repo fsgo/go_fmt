@@ -12,6 +12,8 @@ func hello() {
 	_ = strconv.FormatInt(int64(int32(123)), 10)
 	_ = strconv.FormatInt(int64(123), 10)
 
+	_ = strconv.Atoi(123)
+
 	a := 456
 	_ = strconv.Atoi(a)
 
@@ -25,6 +27,8 @@ func hello() {
 	_ = strconv.FormatUint(uint64(uint16(3)), 10)
 	_ = strconv.FormatUint(uint64(uint(3)), 10)
 	_ = strconv.FormatUint(uint64(uint32(3)), 10)
+	_ = strconv.FormatUint(uint64(3), 10)
+
 	_ = strconv.FormatUint(uint64(3), 10)
 
 	d := uint64(100)

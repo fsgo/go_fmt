@@ -9,6 +9,8 @@ func hello(){
     _=fmt.Sprintf("%d",int32(123))
     _=fmt.Sprintf("%d",int64(123))
 
+    _=fmt.Sprintf("%v",123)
+
     a:=456
     _=fmt.Sprintf("%d",a)
 
@@ -23,6 +25,8 @@ func hello(){
     _=fmt.Sprintf("%d",uint(3))
     _=fmt.Sprintf("%d",uint32(3))
     _=fmt.Sprintf("%d",uint64(3))
+
+    _=fmt.Sprintf("%v",uint64(3))
 
     d:=uint64(100)
     _=fmt.Sprintf("%d",d)

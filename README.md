@@ -202,6 +202,9 @@ func ok() bool {
 - fmt.Sprintf("%d",123)
 + strconv.Atoi(123)
 
+- fmt.Sprintf("%v",123)
++ strconv.Atoi(123)
+
 - fmt.Sprintf("%d",int32Num)
 + strconv.FormatInt(int64(int32Num), 10)
 

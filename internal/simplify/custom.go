@@ -1036,6 +1036,8 @@ func (c *cCallExpr) writeFmtSprintf() {
 //
 // fmt.Sprintf("%d",int8(1))  --> 	_ = strconv.FormatInt(int64(int8(1)), 10)
 // int64(int8(1) 是符合预期的
+//
+// custom19_fmtSprintf.go.input
 func (c *cCallExpr) fmtSprintfNumber() {
 	node := c.Node
 	if !isFun(node.Fun, "fmt", "Sprintf") {
@@ -1046,8 +1048,11 @@ func (c *cCallExpr) fmtSprintfNumber() {
 	if !ok {
 		return
 	}
-	if arg1.Value != `"%d"` {
+
+	switch arg1.Value {
+	default:
 		return
+	case `"%d"`, `"%v"`:
 	}
 
 	vtp, err := xpasser.TypeOf(c.req, node.Args[1])
