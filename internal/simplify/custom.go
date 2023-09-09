@@ -609,6 +609,8 @@ func (c *cCallExpr) doFix() {
 	c.sortSlice()
 
 	c.writeFmtSprintf()
+
+	c.fmtSprintfNumber()
 }
 
 // 提高正则的可读性
@@ -1022,6 +1024,145 @@ func (c *cCallExpr) writeFmtSprintf() {
 		Args: na,
 	}
 	c.Cursor.Replace(n)
+}
+
+// fmt.Sprintf("%d",123) -> strconv.Atoi(123)
+//
+// b:=int64(789)
+// strconv.FormatInt(b, 10)
+//
+// c:=uint32(456)
+// strconv.FormatUint(uint64(c), 10)
+//
+// fmt.Sprintf("%d",int8(1))  --> 	_ = strconv.FormatInt(int64(int8(1)), 10)
+// int64(int8(1) 是符合预期的
+func (c *cCallExpr) fmtSprintfNumber() {
+	node := c.Node
+	if !isFun(node.Fun, "fmt", "Sprintf") {
+		return
+	}
+
+	arg1, ok := node.Args[0].(*ast.BasicLit)
+	if !ok {
+		return
+	}
+	if arg1.Value != `"%d"` {
+		return
+	}
+
+	vtp, err := xpasser.TypeOf(c.req, node.Args[1])
+	if err != nil {
+		return
+	}
+	vb, ok3 := vtp.(*types.Basic)
+	if !ok3 {
+		return
+	}
+
+	doReplace := func(node ast.Node) {
+		c.Cursor.Replace(node)
+		pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "strconv")
+	}
+
+	if vb.Kind() == types.Int {
+		n := &ast.CallExpr{
+			Lparen: c.Node.Lparen,
+			Fun: &ast.SelectorExpr{
+				X: &ast.Ident{
+					Name: "strconv",
+				},
+				Sel: &ast.Ident{
+					Name: "Atoi",
+				},
+			},
+			Args: []ast.Expr{node.Args[1]},
+		}
+		doReplace(n)
+		return
+	}
+
+	formatInt := &ast.SelectorExpr{
+		X: &ast.Ident{
+			Name: "strconv",
+		},
+		Sel: &ast.Ident{
+			Name: "FormatInt",
+		},
+	}
+	blit10 := &ast.BasicLit{
+		Kind:  token.INT,
+		Value: "10",
+	}
+
+	formatUint := &ast.SelectorExpr{
+		X: &ast.Ident{
+			Name: "strconv",
+		},
+		Sel: &ast.Ident{
+			Name: "FormatUint",
+		},
+	}
+
+	switch vb.Kind() {
+	case types.Int8, types.Int16, types.Int32:
+		n := &ast.CallExpr{
+			Lparen: c.Node.Lparen,
+			Fun:    formatInt,
+			Args: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.Ident{
+						Name: "int64",
+					},
+					Args: []ast.Expr{
+						node.Args[1],
+					},
+				},
+				blit10,
+			},
+		}
+		doReplace(n)
+		return
+	case types.Int64:
+		n := &ast.CallExpr{
+			Lparen: c.Node.Lparen,
+			Fun:    formatInt,
+			Args: []ast.Expr{
+				node.Args[1],
+				blit10,
+			},
+		}
+		doReplace(n)
+		return
+	case types.Uint8, types.Uint16, types.Uint32, types.Uint:
+		n := &ast.CallExpr{
+			Lparen: c.Node.Lparen,
+			Fun:    formatUint,
+			Args: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.Ident{
+						Name: "uint64",
+					},
+					Args: []ast.Expr{
+						node.Args[1],
+					},
+				},
+				blit10,
+			},
+		}
+		doReplace(n)
+		return
+	case types.Uint64:
+		n := &ast.CallExpr{
+			Lparen: c.Node.Lparen,
+			Fun:    formatUint,
+			Args: []ast.Expr{
+				node.Args[1],
+				blit10,
+			},
+		}
+		doReplace(n)
+		return
+	}
 }
 
 type cFuncDecl struct {

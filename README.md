@@ -198,6 +198,15 @@ func ok() bool {
 
 - bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
 - fmt.Fprintf(bf,"hello %d",1)
+
+- fmt.Sprintf("%d",123)
++ strconv.Atoi(123)
+
+- fmt.Sprintf("%d",int32Num)
++ strconv.FormatInt(int64(int32Num), 10)
+
+- fmt.Sprintf("%d",uint32Num)
++ strconv.FormatUint(uint64(uint32Num), 10)
 ```
 
 10.raw string :
@@ -353,7 +362,7 @@ go env GOPROXY=https://goproxy.cn,direct
 go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 ```
 升级 Go 版本后，请用最新版本 go 重新安装/更新 `gorgeous` 。  
-最低 Go 版本：go1.19
+最低 Go 版本：go1.20
 
 
 ## 3 使用

@@ -1,0 +1,32 @@
+package demo
+
+import (
+	"strconv"
+)
+
+func hello() {
+	_ = strconv.Atoi(123)
+	_ = strconv.FormatInt(int64(int8(1)), 10)
+	_ = strconv.Atoi(int(1))
+	_ = strconv.FormatInt(int64(int16(123)), 10)
+	_ = strconv.FormatInt(int64(int32(123)), 10)
+	_ = strconv.FormatInt(int64(123), 10)
+
+	a := 456
+	_ = strconv.Atoi(a)
+
+	b := int64(789)
+	_ = strconv.FormatInt(b, 10)
+
+	c := int32(789)
+	_ = strconv.FormatInt(int64(c), 10)
+
+	_ = strconv.FormatUint(uint64(uint8(3)), 10)
+	_ = strconv.FormatUint(uint64(uint16(3)), 10)
+	_ = strconv.FormatUint(uint64(uint(3)), 10)
+	_ = strconv.FormatUint(uint64(uint32(3)), 10)
+	_ = strconv.FormatUint(uint64(3), 10)
+
+	d := uint64(100)
+	_ = strconv.FormatUint(d, 10)
+}

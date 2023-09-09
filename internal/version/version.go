@@ -4,9 +4,9 @@
 
 package version
 
-const versionID = "v0.5.3"
+const versionID = "v0.6.0"
 
-const versionDate = "2023-08-20"
+const versionDate = "2023-09-09"
 
 // Version 版本信息
 func Version() string {

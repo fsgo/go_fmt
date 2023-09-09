@@ -1,0 +1,29 @@
+package demo
+import "fmt"
+
+func hello(){
+    _=fmt.Sprintf("%d",123)
+    _=fmt.Sprintf("%d",int8(1))
+    _=fmt.Sprintf("%d",int(1))
+    _=fmt.Sprintf("%d",int16(123))
+    _=fmt.Sprintf("%d",int32(123))
+    _=fmt.Sprintf("%d",int64(123))
+
+    a:=456
+    _=fmt.Sprintf("%d",a)
+
+    b:=int64(789)
+    _=fmt.Sprintf("%d",b)
+
+    c:=int32(789)
+    _=fmt.Sprintf("%d",c)
+
+    _=fmt.Sprintf("%d",uint8(3))
+    _=fmt.Sprintf("%d",uint16(3))
+    _=fmt.Sprintf("%d",uint(3))
+    _=fmt.Sprintf("%d",uint32(3))
+    _=fmt.Sprintf("%d",uint64(3))
+
+    d:=uint64(100)
+    _=fmt.Sprintf("%d",d)
+}
