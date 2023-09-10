@@ -199,11 +199,11 @@ func ok() bool {
 - bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
 - fmt.Fprintf(bf,"hello %d",1)
 
-- fmt.Sprintf("%d",123)
-+ strconv.Atoi(123)
+- fmt.Sprintf("%d",123)  // 性能  1
++ strconv.Atoi(123)      // 性能  3
 
 - fmt.Sprintf("%v",123)
-+ strconv.Atoi(123)
++ strconv.Atoi(123)   
 
 - fmt.Sprintf("%d",int32Num)
 + strconv.FormatInt(int64(int32Num), 10)
