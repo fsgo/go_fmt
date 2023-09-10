@@ -197,7 +197,7 @@ func ok() bool {
 + _ = fmt.Errorf("hello %s", "world")
 
 - bf.Write([]byte(fmt.Sprintf("hello %d", 1)))
-- fmt.Fprintf(bf,"hello %d",1)
++ fmt.Fprintf(bf,"hello %d",1)
 
 - fmt.Sprintf("%d",123)  // 性能  1
 + strconv.Atoi(123)      // 性能  3
