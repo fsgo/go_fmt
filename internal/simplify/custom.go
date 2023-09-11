@@ -6,10 +6,12 @@ package simplify
 
 import (
 	"go/ast"
+	"go/types"
 
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/fsgo/go_fmt/internal/common"
+	"github.com/fsgo/go_fmt/internal/xpasser"
 )
 
 // customSimplify 自定义的简化规则
@@ -77,4 +79,16 @@ func customSimplify(req *common.Request) {
 type customBase struct {
 	req    *common.Request
 	Cursor *astutil.Cursor
+}
+
+func (cb customBase) isBasicKind(node ast.Expr, kind types.BasicKind) bool {
+	vtp, err := xpasser.TypeOf(cb.req, node)
+	if err != nil {
+		return false
+	}
+	vb, ok := vtp.(*types.Basic)
+	if !ok {
+		return false
+	}
+	return vb.Kind() == kind
 }

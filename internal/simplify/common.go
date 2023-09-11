@@ -219,3 +219,16 @@ func isBlockStmtReturn(b *ast.BlockStmt) bool {
 	_, ok := b.List[len(b.List)-1].(*ast.ReturnStmt)
 	return ok
 }
+
+// 字符串使用 + 连接
+func stringExprJoin(items []ast.Expr) ast.Expr {
+	if len(items) == 1 {
+		return items[0]
+	}
+	nn := &ast.BinaryExpr{
+		X:  stringExprJoin(items[:len(items)-1]),
+		Op: token.ADD,
+		Y:  items[len(items)-1],
+	}
+	return nn
+}

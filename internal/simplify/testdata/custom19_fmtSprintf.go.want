@@ -1,21 +1,22 @@
 package demo
 
 import (
+	"fmt"
 	"strconv"
 )
 
 func hello() {
-	_ = strconv.Atoi(123)
+	_ = strconv.Itoa(123)
 	_ = strconv.FormatInt(int64(int8(1)), 10)
-	_ = strconv.Atoi(int(1))
+	_ = strconv.Itoa(int(1))
 	_ = strconv.FormatInt(int64(int16(123)), 10)
 	_ = strconv.FormatInt(int64(int32(123)), 10)
 	_ = strconv.FormatInt(int64(123), 10)
 
-	_ = strconv.Atoi(123)
+	_ = strconv.Itoa(123)
 
 	a := 456
-	_ = strconv.Atoi(a)
+	_ = strconv.Itoa(a)
 
 	b := int64(789)
 	_ = strconv.FormatInt(b, 10)
@@ -33,4 +34,14 @@ func hello() {
 
 	d := uint64(100)
 	_ = strconv.FormatUint(d, 10)
+}
+
+func stringAdd() {
+	a := fmt.Sprintf("a %s", "hello")
+	b := fmt.Sprintf(`a %s`, "hello")
+	fmt.Println(a, b)
+
+	_ = fmt.Sprintf(`a %s %s abcd`, "hello", "world")
+
+	_ = fmt.Sprintf(`a %s %s abcd`+"c19", "hello", "world")
 }

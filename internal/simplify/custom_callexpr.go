@@ -38,6 +38,8 @@ func (c *cCallExpr) doFix() {
 	c.writeFmtSprintf()
 
 	c.fmtSprintfInt()
+
+	c.fmtSprintfStrings()
 }
 
 // 提高正则的可读性
@@ -504,7 +506,7 @@ func (c *cCallExpr) fmtSprintfInt() {
 					Name: "strconv",
 				},
 				Sel: &ast.Ident{
-					Name: "Atoi",
+					Name: "Itoa",
 				},
 			},
 			Args: []ast.Expr{node.Args[1]},
@@ -595,4 +597,61 @@ func (c *cCallExpr) fmtSprintfInt() {
 		doReplace(n)
 		return
 	}
+}
+
+// fmt.Sprintf("a %s b","hello") --> "a " + "hello" + " b"
+func (c *cCallExpr) fmtSprintfStrings() {
+	const enable = false
+	if !enable {
+		return
+	}
+	// todo
+	node := c.Node
+
+	if len(node.Args) < 2 || len(node.Args) > 5 {
+		return
+	}
+
+	if !isFun(node.Fun, "fmt", "Sprintf") {
+		return
+	}
+
+	fmtLayout, ok1 := node.Args[0].(*ast.BasicLit)
+	if !ok1 || !strings.Contains(fmtLayout.Value, "%s") || len(fmtLayout.Value) <= 4 {
+		return
+	}
+
+	list := strings.Split(fmtLayout.Value[1:len(fmtLayout.Value)-1], "%s")
+	for i := 0; i < len(list); i++ {
+		if strings.Contains(list[i], "%") {
+			return
+		}
+	}
+
+	for i := 1; i < len(node.Args); i++ {
+		if !c.isBasicKind(node.Args[i], types.String) {
+			return
+		}
+	}
+
+	qt := string(fmtLayout.Value[0])
+
+	items := make([]ast.Expr, 0, len(list)*2)
+	for i := 0; i < len(list); i++ {
+		if list[i] != "" {
+			val := &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: qt + list[i] + qt,
+			}
+			items = append(items, val)
+		}
+		if i == len(list)-1 {
+			break
+		}
+		items = append(items, node.Args[i+1])
+	}
+	nn := stringExprJoin(items)
+
+	c.Cursor.Replace(nn)
+	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "fmt")
 }

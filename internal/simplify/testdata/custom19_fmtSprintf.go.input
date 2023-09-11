@@ -31,3 +31,14 @@ func hello(){
     d:=uint64(100)
     _=fmt.Sprintf("%d",d)
 }
+
+
+func stringAdd(){
+    a:=fmt.Sprintf("a %s","hello")
+	b:=fmt.Sprintf(`a %s`,"hello")
+	fmt.Println(a,b)
+
+	_=fmt.Sprintf(`a %s %s abcd`,"hello","world")
+
+	_=fmt.Sprintf(`a %s %s abcd` + "c19","hello","world")
+}
