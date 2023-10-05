@@ -24,6 +24,8 @@ func TestTokenLine(t *testing.T) {
 			req.TokenLine().DeleteLine(0, 6)
 
 			decl := req.AstFile.Decls[0].(*ast.GenDecl)
+			require.False(t, req.NoFormat(decl))
+
 			ts := decl.Specs[0].(*ast.TypeSpec)
 			sts := ts.Type.(*ast.StructType)
 			field := sts.Fields.List[0]
@@ -31,5 +33,18 @@ func TestTokenLine(t *testing.T) {
 			req.TokenLine().AddLine(0, field.End())
 
 			req.TokenLine().Execute()
+		})
+}
+
+func TestNoFormat(t *testing.T) {
+	// 检查文件级别的指令
+	xtest.CheckFile(t,
+		"testdata/request/case2.go.input",
+		"testdata/request/case2.go.want",
+		func(req *common.Request) {
+			require.True(t, req.NoFormat(req.AstFile))
+
+			decl := req.AstFile.Decls[0].(*ast.GenDecl)
+			require.True(t, req.NoFormat(decl))
 		})
 }

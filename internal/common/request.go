@@ -51,6 +51,9 @@ type Request struct {
 	Opt Options
 
 	goVersionOnce sync.Once
+
+	directives    directives
+	directiveOnce sync.Once
 }
 
 // TokenLine 获取 TokenLine
@@ -128,6 +131,29 @@ func (req *Request) GoVersionGEQ(version string) bool {
 	return semver.Compare("v"+req.goVersion, "v"+version) >= 0
 }
 
+// NoFormat 判断一个节点是否不需要执行格式化
+func (req *Request) NoFormat(node ast.Node) bool {
+	return req.HasDirective(node, "no_fmt")
+}
+
+// HasDirective 判断一个节点是否有指定的指令
+func (req *Request) HasDirective(node ast.Node, name string) bool {
+	ds := req.getDirectives()
+	items0 := ds.ByNode(req.AstFile)
+	if items0.Has(name) {
+		return true
+	}
+	items := ds.ByNode(node)
+	return items.Has(name)
+}
+
+func (req *Request) getDirectives() directives {
+	req.directiveOnce.Do(func() {
+		req.directives = parserDirectives(req.AstFile, req.FSet)
+	})
+	return req.directives
+}
+
 // TokenLine 记录对文件的换行的处理
 type TokenLine struct {
 	file       *token.File
@@ -148,9 +174,9 @@ func (tf *TokenLine) DeleteLine(depth int, line int) {
 	if line < 1 {
 		panic(fmt.Sprintf("invalid line number %d (should be >= 1)", line))
 	}
-	max := tf.file.LineCount()
-	if line > max {
-		panic(fmt.Sprintf("invalid line number %d (should be < %d)", line, max))
+	maxLine := tf.file.LineCount()
+	if line > maxLine {
+		panic(fmt.Sprintf("invalid line number %d (should be < %d)", line, maxLine))
 	}
 	if Debug {
 		DebugPrintln(depth+1, "DeleteLine=", line, "lineStart=", tf.file.LineStart(line))

@@ -1,0 +1,17 @@
+// gorgeous:no_fmt
+
+package app2
+
+type User1 struct {
+
+	// hello
+
+	// abc
+
+	// on Name
+	Name string
+	// on Age
+	Age int
+
+	Grade int
+}
