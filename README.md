@@ -365,7 +365,7 @@ go env GOPROXY=https://goproxy.cn,direct
 go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 ```
 升级 Go 版本后，请用最新版本 go 重新安装/更新 `gorgeous` 。  
-最低 Go 版本：go1.20
+最低 Go 版本：go1.22
 
 
 ## 3 使用
