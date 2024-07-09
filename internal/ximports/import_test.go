@@ -12,8 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xtest"
@@ -388,8 +387,8 @@ import (
 
 func TestFormatImports(t *testing.T) {
 	ms, err := filepath.Glob("./testdata/*.input")
-	require.NoError(t, err)
-	require.NotEmpty(t, ms)
+	fst.NoError(t, err)
+	fst.NotEmpty(t, ms)
 	for i := 0; i < len(ms); i++ {
 		fp := ms[i]
 		t.Run(fp, func(t *testing.T) {
@@ -397,10 +396,10 @@ func TestFormatImports(t *testing.T) {
 			_ = os.Remove(tmpPath)
 
 			src, err := os.ReadFile(fp)
-			require.NoError(t, err)
+			fst.NoError(t, err)
 			fs, af, err := common.ParseOneFile(fp, src)
 
-			require.NoError(t, err)
+			fst.NoError(t, err)
 			req := &common.Request{
 				FileName: fp,
 				FSet:     fs,
@@ -412,18 +411,18 @@ func TestFormatImports(t *testing.T) {
 				},
 			}
 			got, err := FormatImports(req)
-			require.NoError(t, err)
+			fst.NoError(t, err)
 
 			wantFp := fp[:len(fp)-len(".input")] + ".want"
 			want, err := os.ReadFile(wantFp)
-			assert.NoError(t, err)
+			fst.NoError(t, err)
 
 			if !bytes.Equal(want, got) {
 				_ = os.WriteFile(tmpPath, got, 0644)
 				t.Logf("got file=%s", tmpPath)
 			}
 
-			require.Equal(t, string(want), string(got))
+			fst.Equal(t, string(want), string(got))
 		})
 	}
 }
@@ -431,7 +430,7 @@ func TestFormatImports(t *testing.T) {
 func TestFormatImports2(t *testing.T) {
 	xtest.CheckFile(t, "import.go", "", func(req *common.Request) {
 		got, err := FormatImports(req)
-		require.NoError(t, err)
-		require.NotEmpty(t, got)
+		fst.NoError(t, err)
+		fst.NotEmpty(t, got)
 	})
 }

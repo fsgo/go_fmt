@@ -7,12 +7,12 @@ package common
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 )
 
 func TestOptions_GetImportGroup(t *testing.T) {
 	o := &Options{}
-	require.Equal(t, 0, o.GetImportGroup(ImportGroupGoStandard))
-	require.Equal(t, 1, o.GetImportGroup(ImportGroupThirdParty))
-	require.Equal(t, 2, o.GetImportGroup(ImportGroupCurrentModule))
+	fst.Equal(t, 0, o.GetImportGroup(ImportGroupGoStandard))
+	fst.Equal(t, 1, o.GetImportGroup(ImportGroupThirdParty))
+	fst.Equal(t, 2, o.GetImportGroup(ImportGroupCurrentModule))
 }

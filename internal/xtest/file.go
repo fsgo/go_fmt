@@ -9,8 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xpasser"
@@ -24,7 +23,7 @@ func TestGoFileName(name string) string {
 // 如 inputFile=demo.go.input 则 wantFile=demo.go.want
 func CheckFileAuto(t *testing.T, inputFile string, do func(req *common.Request)) {
 	suf := ".input"
-	require.True(t, strings.HasSuffix(inputFile, suf))
+	fst.True(t, strings.HasSuffix(inputFile, suf))
 	wantFile := inputFile[:len(inputFile)-len(suf)] + ".want"
 	CheckFile(t, inputFile, wantFile, do)
 }
@@ -38,14 +37,14 @@ func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Req
 		t.Logf("Check %q", inputFile)
 
 		fileContent, err := os.ReadFile(inputFile)
-		require.NoError(t, err)
+		fst.NoError(t, err)
 
 		name1 := TestGoFileName(inputFile)
 
-		require.NoError(t, xpasser.LoadOverlay(name1, fileContent))
-		require.NoError(t, xpasser.Load(*opt, []string{"file=" + name1}))
+		fst.NoError(t, xpasser.LoadOverlay(name1, fileContent))
+		fst.NoError(t, xpasser.Load(*opt, []string{"file=" + name1}))
 		asfFile, err := xpasser.ParserFile(name1, fileContent)
-		require.NoError(t, err)
+		fst.NoError(t, err)
 
 		req := &common.Request{
 			FileName: name1,
@@ -57,19 +56,19 @@ func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Req
 		do(req)
 		req.MustReParse() // 重新格式化
 		code, err := req.FormatFile()
-		require.NoError(t, err)
+		fst.NoError(t, err)
 
 		if len(wantFile) > 0 {
 			bw, _ := os.ReadFile(wantFile)
 			gf := wantFile + ".got"
-			if assert.Equal(t, string(bw), string(code)) {
+			if string(bw) == string(code) {
 				_ = os.Remove(gf)
 			} else {
 				t.Logf("want: %s", gf)
 				e2 := os.WriteFile(gf, code, 0644)
-				require.NoError(t, e2)
+				fst.NoError(t, e2)
 			}
-			require.NotEmpty(t, bw)
+			fst.NotEmpty(t, bw)
 		} else {
 			t.Log("wantFile is empty, skipped check result file")
 		}

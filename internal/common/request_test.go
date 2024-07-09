@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 )
 
 func Test_intSliceDelete(t *testing.T) {
@@ -44,10 +44,10 @@ func TestRequest_IsGoVersion(t *testing.T) {
 	req := &Request{
 		FileName: "request.go",
 	}
-	require.True(t, req.GoVersionGEQ("1.13"))
-	require.True(t, req.GoVersionGEQ("1.19"))
-	require.True(t, req.GoVersionGEQ("1.18"))
+	fst.True(t, req.GoVersionGEQ("1.13"))
+	fst.True(t, req.GoVersionGEQ("1.19"))
+	fst.True(t, req.GoVersionGEQ("1.18"))
 
-	require.False(t, req.GoVersionGEQ("1.80"))
-	require.False(t, req.GoVersionGEQ("1.99"))
+	fst.False(t, req.GoVersionGEQ("1.80"))
+	fst.False(t, req.GoVersionGEQ("1.99"))
 }

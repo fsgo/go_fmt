@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xtest"
@@ -23,7 +23,7 @@ func TestFormat(t *testing.T) {
 func TestRewrite(t *testing.T) {
 	fn1 := func(req *common.Request) {
 		f, err := Rewrite(req, "io/#ioutil.WriteFile -> os.WriteFile")
-		require.NoError(t, err)
+		fst.NoError(t, err)
 		req.AstFile = f
 	}
 	xtest.CheckFileAuto(t, "testdata/rewrite1.go.input", fn1)
@@ -31,7 +31,7 @@ func TestRewrite(t *testing.T) {
 
 	fn2 := func(req *common.Request) {
 		f, err := Rewrite(req, "testdata/rules/rule1.txt")
-		require.NoError(t, err)
+		fst.NoError(t, err)
 		req.AstFile = f
 	}
 	xtest.CheckFileAuto(t, "testdata/rewrite5.go.input", fn2)
@@ -41,16 +41,16 @@ func TestRewrite(t *testing.T) {
 		rules := []string{"invalid", "invalid ->", " -> ", "", " "}
 		for i := 0; i < len(rules); i++ {
 			f, err := Rewrite(req, rules[i])
-			require.Error(t, err)
-			require.Nil(t, f)
+			fst.Error(t, err)
+			fst.Nil(t, f)
 		}
 	})
 
 	t.Run("invalid rule file", func(t *testing.T) {
 		req := common.NewTestRequest("testdata/rewrite5.go.input")
 		f, err := Rewrite(req, "testdata/rules/rule2.txt")
-		require.Error(t, err)
-		require.Nil(t, f)
+		fst.Error(t, err)
+		fst.Nil(t, f)
 	})
 }
 
@@ -65,18 +65,18 @@ func TestRewrites(t *testing.T) {
 	}
 	fn1 := func(req *common.Request) {
 		err := Rewrites(req, rules)
-		require.NoError(t, err)
+		fst.NoError(t, err)
 	}
 	xtest.CheckFileAuto(t, "testdata/rewrite3.go.input", fn1)
 
 	t.Run("build in", func(t *testing.T) {
 		buildInCases, err := filepath.Glob("testdata/buildin*.go.input")
-		require.NoError(t, err)
-		require.GreaterOrEqual(t, len(buildInCases), 3)
+		fst.NoError(t, err)
+		fst.GreaterOrEqual(t, len(buildInCases), 3)
 		for _, bc := range buildInCases {
 			xtest.CheckFileAuto(t, bc, func(req *common.Request) {
 				err := Rewrites(req, BuildInRewriteRules())
-				require.NoError(t, err)
+				fst.NoError(t, err)
 			})
 		}
 	})

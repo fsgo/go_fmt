@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xtest"
@@ -16,7 +16,7 @@ import (
 
 func Test_customSimplify(t *testing.T) {
 	fs, err := filepath.Glob("testdata/custom*.go.input")
-	require.NoError(t, err)
+	fst.NoError(t, err)
 	for _, input := range fs {
 		xtest.CheckFileAuto(t, input, func(req *common.Request) {
 			customSimplify(req)

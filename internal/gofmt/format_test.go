@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/xpasser"
 )
@@ -91,13 +91,13 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 			defer xpasser.Reset()
 
 			pts := []string{"file=" + path}
-			require.NoError(t, xpasser.Load(*opt, pts))
+			fst.NoError(t, xpasser.Load(*opt, pts))
 
 			got, _, err := Format(path, nil, opt)
-			require.NoError(t, err)
+			fst.NoError(t, err)
 			got = bytes.TrimSpace(got)
 			want, err := os.ReadFile(rule1Dir + "want/" + filepath.Base(path))
-			require.NoError(t, err)
+			fst.NoError(t, err)
 
 			want = bytes.TrimSpace(want)
 			fileGot := rule1Dir + "/tmp/" + filepath.Base(path) + ".got"
@@ -113,6 +113,6 @@ func runTest(t *testing.T, ruleDirName string, opt *Options) {
 		})
 		return nil
 	})
-	require.NoError(t, err)
-	require.GreaterOrEqual(t, checkFileTotal, 1)
+	fst.NoError(t, err)
+	fst.GreaterOrEqual(t, checkFileTotal, 1)
 }

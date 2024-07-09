@@ -8,7 +8,7 @@ import (
 	"go/ast"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 	"github.com/fsgo/go_fmt/internal/xtest"
@@ -24,12 +24,12 @@ func TestTokenLine(t *testing.T) {
 			req.TokenLine().DeleteLine(0, 6)
 
 			decl := req.AstFile.Decls[0].(*ast.GenDecl)
-			require.False(t, req.NoFormat(decl))
+			fst.False(t, req.NoFormat(decl))
 
 			ts := decl.Specs[0].(*ast.TypeSpec)
 			sts := ts.Type.(*ast.StructType)
 			field := sts.Fields.List[0]
-			require.Equal(t, "Name", field.Names[0].Obj.Name)
+			fst.Equal(t, "Name", field.Names[0].Obj.Name)
 			req.TokenLine().AddLine(0, field.End())
 
 			req.TokenLine().Execute()
@@ -42,9 +42,9 @@ func TestNoFormat(t *testing.T) {
 		"testdata/request/case2.go.input",
 		"testdata/request/case2.go.want",
 		func(req *common.Request) {
-			require.True(t, req.NoFormat(req.AstFile))
+			fst.True(t, req.NoFormat(req.AstFile))
 
 			decl := req.AstFile.Decls[0].(*ast.GenDecl)
-			require.True(t, req.NoFormat(decl))
+			fst.True(t, req.NoFormat(decl))
 		})
 }

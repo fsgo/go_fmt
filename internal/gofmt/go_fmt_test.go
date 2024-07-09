@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -54,22 +54,22 @@ func CheckDir(t *testing.T, dir string) {
 	caseDir := filepath.Join(dir, "case")
 	t.Logf("case data dir is: %s", caseDir)
 	info, err := os.Stat(caseDir)
-	require.NoError(t, err)
-	require.True(t, info.IsDir(), "expect "+caseDir+" is dir")
+	fst.NoError(t, err)
+	fst.True(t, info.IsDir())
 
 	runDir := filepath.Join(dir, "tmp")
 	_ = os.RemoveAll(runDir)
-	require.NoError(t, os.MkdirAll(runDir, 0755))
+	fst.NoError(t, os.MkdirAll(runDir, 0755))
 	wants := map[string]string{}
 	err = filepath.Walk(caseDir, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
 		rel, err1 := filepath.Rel(caseDir, path)
-		require.NoError(t, err1)
+		fst.NoError(t, err1)
 
 		code, err2 := os.ReadFile(path)
-		require.NoError(t, err2)
+		fst.NoError(t, err2)
 
 		to := filepath.Join(runDir, rel)
 		if strings.HasSuffix(path, ".want") {
@@ -79,11 +79,11 @@ func CheckDir(t *testing.T, dir string) {
 			to = strings.ReplaceAll(to, ".input", "")
 			_ = os.MkdirAll(filepath.Dir(to), 0755)
 			err3 := os.WriteFile(to, code, 0644)
-			require.NoError(t, err3)
+			fst.NoError(t, err3)
 		}
 		return nil
 	})
-	require.NoError(t, err)
+	fst.NoError(t, err)
 	ft := gofmt.NewFormatter()
 	opt := &common.Options{
 		TabIndent:    true,
@@ -96,10 +96,10 @@ func CheckDir(t *testing.T, dir string) {
 		Files:        []string{"./..."},
 	}
 	pwd, err := os.Getwd()
-	require.NoError(t, err)
-	require.NotEmpty(t, pwd)
+	fst.NoError(t, err)
+	fst.NotEmpty(t, pwd)
 
-	require.NoError(t, os.Chdir(runDir))
+	fst.NoError(t, os.Chdir(runDir))
 	defer func() {
 		_ = os.Chdir(pwd)
 		if !t.Failed() {
@@ -107,7 +107,7 @@ func CheckDir(t *testing.T, dir string) {
 		}
 	}()
 	err = ft.Execute(opt)
-	require.NoError(t, err)
+	fst.NoError(t, err)
 
 	var n int
 	packages.Visit(xpasser.Default.Packages(), nil, func(pkg *packages.Package) {
@@ -116,13 +116,13 @@ func CheckDir(t *testing.T, dir string) {
 			n++
 		}
 	})
-	require.Equal(t, 0, n)
+	fst.Equal(t, 0, n)
 
 	for name, want := range wants {
 		t.Run(name, func(t *testing.T) {
 			bf, err := os.ReadFile(name)
-			require.NoError(t, err)
-			require.Equal(t, want, string(bf))
+			fst.NoError(t, err)
+			fst.Equal(t, want, string(bf))
 		})
 	}
 }

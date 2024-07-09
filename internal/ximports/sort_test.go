@@ -7,7 +7,7 @@ package ximports
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/fsgo/fst"
 
 	"github.com/fsgo/go_fmt/internal/common"
 )
@@ -106,7 +106,7 @@ func Test_sortImportDecls(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := sortImportDecls(tt.args.decls, tt.args.options).String()
 			want := tt.want.String()
-			require.Equal(t, want, got)
+			fst.Equal(t, want, got)
 		})
 	}
 }
