@@ -1,6 +1,6 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.22.0
+// GO VersionFile: go1.23.0
 
 package pkgs
 
@@ -47,6 +47,7 @@ var stdPKGs = []string{
 	"sort",
 	"strconv",
 	"strings",
+	"structs",
 	"sync",
 	"syscall",
 	"testdata",
@@ -54,5 +55,6 @@ var stdPKGs = []string{
 	"text",
 	"time",
 	"unicode",
+	"unique",
 	"unsafe",
 }

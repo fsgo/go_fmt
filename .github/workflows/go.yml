@@ -12,11 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.21','1.22' ]
+        go-version: ['1.21','1.22' ,'1.23']
+        servers: [ "ubuntu-latest","windows-latest","macos-latest","macos-13"]
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup Go ${{ matrix.go-version }}
+    - name: Go ${{ matrix.go }} On ${{ matrix.servers }}
       uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
