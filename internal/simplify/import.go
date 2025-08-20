@@ -26,6 +26,14 @@ func fixImport(pattern, replace *expr, fset *token.FileSet, f *ast.File) {
 }
 
 func pkgReplace(fset *token.FileSet, f *ast.File, oldPkg string, newPkg string) {
+	// ----------------------
+	// 兼容 Go1.22+ ast.Scope 已标记废弃问题
+	// 待后续 astutil 升级兼容后可删除此逻辑
+	if f.Scope == nil {
+		f.Scope = &ast.Scope{}
+	}
+	// ----------------------
+
 	astutil.AddImport(fset, f, newPkg)
 	if !astutil.UsesImport(f, newPkg) {
 		astutil.DeleteImport(fset, f, newPkg)
