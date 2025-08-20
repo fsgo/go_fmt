@@ -88,14 +88,21 @@ func set(x, y reflect.Value) {
 
 // Values/types for special cases.
 var (
+	//lint:ignore SA1019 兼容，以后删除
 	objectPtrNil = reflect.ValueOf((*ast.Object)(nil))
-	scopePtrNil  = reflect.ValueOf((*ast.Scope)(nil))
 
-	identType     = reflect.TypeOf((*ast.Ident)(nil))
+	//lint:ignore SA1019 兼容，以后删除
+	scopePtrNil = reflect.ValueOf((*ast.Scope)(nil))
+
+	identType = reflect.TypeOf((*ast.Ident)(nil))
+
+	//lint:ignore SA1019 兼容，以后删除
 	objectPtrType = reflect.TypeOf((*ast.Object)(nil))
 	positionType  = reflect.TypeOf(token.NoPos)
 	callExprType  = reflect.TypeOf((*ast.CallExpr)(nil))
-	scopePtrType  = reflect.TypeOf((*ast.Scope)(nil))
+
+	//lint:ignore SA1019 兼容，以后删除
+	scopePtrType = reflect.TypeOf((*ast.Scope)(nil))
 )
 
 // apply replaces each AST field x in val with f(x), returning val.

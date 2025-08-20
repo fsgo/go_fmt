@@ -30,6 +30,7 @@ func pkgReplace(fset *token.FileSet, f *ast.File, oldPkg string, newPkg string) 
 	// 兼容 Go1.22+ ast.Scope 已标记废弃问题
 	// 待后续 astutil 升级兼容后可删除此逻辑
 	if f.Scope == nil {
+		//lint:ignore SA1019 兼容，以后删除
 		f.Scope = &ast.Scope{}
 	}
 	// ----------------------
