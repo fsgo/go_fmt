@@ -365,7 +365,7 @@ go env GOPROXY=https://goproxy.cn,direct
 go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 ```
 升级 Go 版本后，请用最新版本 go 重新安装/更新 `gorgeous` 。  
-最低 Go 版本：go1.22
+最低 Go 版本：go1.23
 
 
 ## 3 使用
@@ -492,9 +492,10 @@ chmod 777 ~/.git_config/hooks/pre-commit
 - name: Set up Go
   uses: actions/setup-go@v4
   with:
-    go-version: 1.20
+    go-version: 1.23
 
-- name: gorgeous style check
+- name: gorgeous style check 
+  # gorgeous 添加 “-d” 参数后，只检查代码风格，不重写文件，会在终端输出需要格式化的文件信息，退出码为非 0
   run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest && gorgeous -d ./...
 ```
 
@@ -523,7 +524,7 @@ go install github.com/fsgo/go_fmt/cmd/goformat@latest
     }
  ]
 ```
-3.配置的 `Go: Format Tool`，设置为 "default"：
+3. 配置的 `Go: Format Tool`，设置为 "default"：
 ```
   "go.formatTool": "default"
 ```
