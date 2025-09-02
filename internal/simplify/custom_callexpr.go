@@ -40,6 +40,8 @@ func (c *cCallExpr) doFix() {
 	c.fmtSprintfInt()
 
 	c.fmtSprintfStrings()
+
+	c.fixOsFnWithNew()
 }
 
 // 提高正则的可读性
@@ -654,4 +656,44 @@ func (c *cCallExpr) fmtSprintfStrings() {
 
 	c.Cursor.Replace(nn)
 	pkgReplace(c.req.FSet, c.req.AstFile, "fmt", "fmt")
+}
+
+// Go 1.23 （2024-08）:
+// os.IsExist(err) --> errors.Is(err,fs.ErrExist)
+// os.IsNotExist(err) --> errors.Is(err,fs.ErrNotExist)
+// os.IsPermission(err) --> errors.Is(err,fs.ErrPermission)
+func (c *cCallExpr) fixOsFnWithNew() {
+	c.doFixOsFnWithNew("IsExist", "ErrExist")
+	c.doFixOsFnWithNew("IsNotExist", "ErrNotExist")
+	c.doFixOsFnWithNew("IsPermission", "ErrPermission")
+}
+
+func (c *cCallExpr) doFixOsFnWithNew(old string, new string) {
+	if !isFun(c.Node.Fun, "os", old) {
+		return
+	}
+	nn := &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "errors",
+			},
+			Sel: &ast.Ident{
+				Name: "Is",
+			},
+		},
+		Args: []ast.Expr{
+			c.Node.Args[0],
+			&ast.SelectorExpr{
+				X: &ast.Ident{
+					Name: "fs",
+				},
+				Sel: &ast.Ident{
+					Name: new,
+				},
+			},
+		},
+	}
+	c.Cursor.Replace(nn)
+	pkgReplace(c.req.FSet, c.req.AstFile, "os", "errors")
+	pkgReplace(c.req.FSet, c.req.AstFile, "os", "fs")
 }

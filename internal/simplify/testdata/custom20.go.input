@@ -1,0 +1,20 @@
+package demo
+
+import (
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+)
+
+// 用于测试 custom_callexpr.go
+// func (c *cCallExpr) fixOsFnWithNew()
+
+func main() {
+	_, err := os.Open("demo.txt")
+	fmt.Println(os.IsExist(err))
+	fmt.Println(errors.Is(err, fs.ErrNotExist))
+	_ = os.IsNotExist(err)
+	fmt.Println(os.IsPermission(err))
+	fmt.Println(os.IsTimeout(err))
+}

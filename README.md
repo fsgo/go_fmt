@@ -5,7 +5,7 @@
 * 格式化单行注释：若为 `//注释内容`，调整为 `//{空格}注释内容`
 * 默认只对 git 项目库里有修改的进行格式化
 * 支持将多行的 copyright 注释修改为单行格式(默认不调整)
-* 简化代码
+* 简化代码、重写修正(将废弃的方法替换为推荐的新方法)
 * struct 赋值表达式，自动补齐 key
 * 补充空行、移除多余的空行
 
@@ -36,9 +36,9 @@ type User struct{
 ```
 </details>
 
-<details><summary><i>Example 3：简化代码</i></summary>
+<details><summary><i>Example 3：简化、重写代码</i></summary>
 
-1.简化循环逻辑：
+1. 简化循环逻辑：
 ```diff
 - s[a:len(s)]
 + s[a:]
@@ -58,7 +58,7 @@ type User struct{
  }
 ```
 
-2.简化判断逻辑：
+2. 简化判断逻辑：
 ```diff
 - if b == true {
 + if b { 
@@ -103,7 +103,7 @@ func ok() bool {
 
 ```
 
-3.使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`
+3. 使用 `strings.Contains` 替换 `strings.Count` 和 `strings.Index`
 ```diff
 - strings.Count(s, "a") == 0
 + !strings.Contains(s, "a")
@@ -125,7 +125,7 @@ func ok() bool {
 ```
 `bytes.Index` 具有和 `strings.Index` 一样的规则。
 
-4.字符串的比较：
+4. 字符串的比较：
 
 使用 `bytes.Equal` 替换 `bytes.Compare`：
 ```diff
@@ -145,7 +145,7 @@ func ok() bool {
 + "abc" != "a"
 ```
 
-5.递增 1、递减 1:
+5. 递增 1、递减 1:
 ```diff
 - i += 1
 + i++
@@ -154,7 +154,7 @@ func ok() bool {
 + i--
 ```
 
-6.time.Since 和 time.Until
+6. time.Since 和 time.Until
 `time.Since`  替换 `time.Now().Sub`:
 ```diff
 - time.Now().Sub( t1 )
@@ -167,19 +167,19 @@ func ok() bool {
 + time.Until( t1 )
 ```
 
-7.channel:
+7. channel:
 ```diff
 - _ = <-chan
 + <-done
 ```
 
-8.map:
+8. map:
 ```diff
 - x, _ := someMap["key"]
 + x := someMap["key"]
 ```
 
-9.fmt:
+9. fmt:
 ```diff
 - fmt.Errorf("hello")
 + errors.New("hello")
@@ -212,17 +212,31 @@ func ok() bool {
 + strconv.FormatUint(uint64(uint32Num), 10)
 ```
 
-10.raw string :
+10. raw string :
 ```diff
 - regexp.Compile("\\A(\\w+) profile: total \\d+\\n\\z")
 + regexp.Compile(`\A(\w+) profile: total \d+\n\z`)
 ```
 
-11.sort :
+11. sort :
 ```diff
 - sort.Sort(sort.StringSlice(x))
 + sort.Strings(x)
 ```
+
+12. os.IsExist 等替换为使用 errors.Is
+```
+- os.IsExist(err)
++ errors.Is(err, fs.ErrExist)
+
+- os.IsNotExist(err)
++ errors.Is(err, fs.ErrNotExist)
+
+- os.IsPermission(err)
++ errors.Is(err, fs.ErrPermission)
+```
+
+
 </details>
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>

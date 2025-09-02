@@ -7,10 +7,6 @@ package common
 var rewriteRules = []string{
 	`a[b:len(a)] -> a[b:]`,
 
-	// 可能有兼容性
-	// `a == ""     -> len(a) == 0`,
-	// `a != ""     -> len(a) != 0`,
-
 	`interface{} -> any                    // go1.18`,
 
 	"io/#ioutil.NopCloser -> io.NopCloser  // go1.16",
@@ -21,7 +17,13 @@ var rewriteRules = []string{
 	"io/#ioutil.WriteFile -> os.WriteFile  // go1.16",
 	"io/#ioutil.Discard   -> io.Discard    // go1.16",
 
-	// "io/#ioutil.ReadDir -> os.WriteFile", #  这两个方法不兼容，不能直接转换
+	// "io/#ioutil.ReadDir -> os.ReadDir", #  这两个方法不兼容，不能直接转换
+
+	// "os.ErrInvalid        -> fs.ErrInvalid        // go1.20",
+	// "os.ErrPermission     -> fs.ErrPermission     // go1.20",
+	// "os.ErrExist          -> fs.ErrExist          // go1.20",
+	// "os.ErrNotExist       -> fs.ErrNotExist       // go1.20",
+	// "os.ErrClosed         -> fs.ErrClosed         // go1.20",
 }
 
 // BuildInRewriteRules 获取内置的简化规则

@@ -4,7 +4,7 @@
 
 package version
 
-const versionID = "v0.6.4"
+const versionID = "v0.7.0"
 
 const versionDate = "2025-09-02"
 
