@@ -225,7 +225,7 @@ func ok() bool {
 ```
 
 12. os.IsExist 等替换为使用 errors.Is
-```
+```diff
 - os.IsExist(err)
 + errors.Is(err, fs.ErrExist)
 
@@ -235,6 +235,7 @@ func ok() bool {
 - os.IsPermission(err)
 + errors.Is(err, fs.ErrPermission)
 ```
+添加于： 2025-09-02 v0.7.0
 
 
 </details>

@@ -6,6 +6,8 @@ package localmodule
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -34,7 +36,7 @@ func loadConfig() error {
 	confPath := filepath.Join(home, ".go_fmt", "local_module.json")
 	_, err = os.Stat(confPath)
 	// 若配置文件不存在则 跳过
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
 

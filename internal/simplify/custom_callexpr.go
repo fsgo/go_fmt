@@ -695,5 +695,5 @@ func (c *cCallExpr) doFixOsFnWithNew(old string, new string) {
 	}
 	c.Cursor.Replace(nn)
 	pkgReplace(c.req.FSet, c.req.AstFile, "os", "errors")
-	pkgReplace(c.req.FSet, c.req.AstFile, "os", "fs")
+	pkgReplace(c.req.FSet, c.req.AstFile, "os", "io/fs")
 }

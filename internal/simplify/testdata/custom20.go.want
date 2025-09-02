@@ -2,7 +2,6 @@ package demo
 
 import (
 	"errors"
-	"fs"
 	"fmt"
 	"io/fs"
 	"os"
