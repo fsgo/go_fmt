@@ -6,7 +6,7 @@ package version
 
 const versionID = "v0.7.0"
 
-const versionDate = "2025-09-02"
+const versionDate = "2025-11-21"
 
 // Version 版本信息
 func Version() string {
