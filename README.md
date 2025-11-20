@@ -1,3 +1,14 @@
+<!-- Keep these links. Translations will automatically update with the README. -->
+[Deutsch](https://zdoc.app/de/fsgo/go_fmt) | 
+[English](https://zdoc.app/en/fsgo/go_fmt) | 
+[Español](https://zdoc.app/es/fsgo/go_fmt) | 
+[français](https://zdoc.app/fr/fsgo/go_fmt) | 
+[日本語](https://zdoc.app/ja/fsgo/go_fmt) | 
+[한국어](https://zdoc.app/ko/fsgo/go_fmt) | 
+[Português](https://zdoc.app/pt/fsgo/go_fmt) | 
+[Русский](https://zdoc.app/ru/fsgo/go_fmt) | 
+[中文](https://zdoc.app/zh/fsgo/go_fmt)
+
 # Go 代码格式化
 
 ## 1 功能说明
