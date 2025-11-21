@@ -15,7 +15,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"runtime/debug"
 	"strings"
 
 	"github.com/fsgo/go_fmt/internal/version"
@@ -266,9 +265,9 @@ with env 'GORGEOUS_RR=false' to set default value as false
 		fmt.Fprintf(os.Stderr, titleFormat, "site", "https://github.com/fsgo/go_fmt")
 
 		installPath := "github.com/fsgo/go_fmt/cmd/gorgeous"
-		if bi, ok := debug.ReadBuildInfo(); ok {
-			installPath = bi.Path
-		}
+		// if bi, ok := debug.ReadBuildInfo(); ok {
+		//	installPath = bi.Path
+		// }
 		fmt.Fprintf(os.Stderr, titleFormat, "check update", "go install "+installPath+"@latest")
 		fmt.Fprintf(os.Stderr, titleFormat, "version", version.Version())
 		os.Exit(2)
