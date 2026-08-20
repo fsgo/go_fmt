@@ -1,6 +1,6 @@
 module github.com/fsgo/go_fmt
 
-go 1.27.0
+go 1.26.0
 
 require (
 	github.com/fsgo/fst v0.0.6
