@@ -1,6 +1,6 @@
 // Code Generate by cmd/update_std_static.go, DO NOT EDIT.
 
-// GO VersionFile: go1.25.0
+// GO VersionFile: go1.27.0
 
 package pkgs
 
@@ -43,6 +43,7 @@ var stdPKGs = []string{
 	"reflect",
 	"regexp",
 	"runtime",
+	"simd",
 	"slices",
 	"sort",
 	"strconv",
@@ -57,5 +58,6 @@ var stdPKGs = []string{
 	"unicode",
 	"unique",
 	"unsafe",
+	"uuid",
 	"weak",
 }
