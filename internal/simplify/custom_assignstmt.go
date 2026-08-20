@@ -53,7 +53,7 @@ func (c *cAssignStmt) numIncDec() {
 // _ = <-ch  ->  <-ch
 func (c *cAssignStmt) chanReceive() {
 	node := c.Node
-	if node.Tok != token.ASSIGN || (len(node.Rhs) != 1 || len(node.Lhs) != 1) || len(node.Lhs) != 1 {
+	if node.Tok != token.ASSIGN || len(node.Rhs) != 1 || len(node.Lhs) != 1 {
 		return
 	}
 	x, ok1 := node.Lhs[0].(*ast.Ident)
@@ -79,7 +79,7 @@ func (c *cAssignStmt) chanReceive() {
 // x, _ := someMap["key"] -> x:=someMap["key"]
 func (c *cAssignStmt) mapRead() {
 	node := c.Node
-	if node.Tok != token.DEFINE || (len(node.Lhs) != 2 || len(node.Rhs) != 1) || len(node.Rhs) != 1 {
+	if node.Tok != token.DEFINE || len(node.Lhs) != 2 || len(node.Rhs) != 1 {
 		return
 	}
 	x1, ok1 := node.Lhs[1].(*ast.Ident)
