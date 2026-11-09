@@ -15,13 +15,17 @@ func hello() {
 
 	a1 := []string{"a", "b", "c"}
 
-	b2 := append([]string(nil), a1...)    // <---- 替换为  slices.Clone(a)
+	// 下面的会替换为  slices.Clone(a)
+	b2 := append([]string(nil), a1...)    
 	fmt.Println("b2=", b2)
 
 	c := slices.Clone(a)
 	fmt.Println("c=", c)
 
-	fmt.Println("d=", append([]string(nil), getStringSlice1()...))
+	fmt.Println("d=", append([]string(nil), getStringSlice1()...)) // 替换为  slices.Clone
+
+	_ = append([]int{},a...) // <---- 替换为  slices.Clone(a)
+	_ = append([]int{ 1 },a...) // 保持原样
 }
 
 func getStringSlice1() []string {

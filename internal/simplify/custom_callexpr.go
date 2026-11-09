@@ -43,6 +43,8 @@ func (c *cCallExpr) doFix() {
 
 	c.fixOsFnWithNew()
 	c.fixAppend()
+
+	c.fixSort()
 }
 
 // 提高正则的可读性
@@ -700,11 +702,72 @@ func (c *cCallExpr) doFixOsFnWithNew(old string, new string) {
 }
 
 func (c *cCallExpr) fixAppend() {
-	if !isIdentFun(c.Node.Fun, "append") {
+	if !isIdentName(c.Node.Fun, "append") {
 		return
 	}
 	(&cCallAppend{
 		customBase: c.customBase,
 		Node:       c.Node,
 	}).start()
+}
+
+func (c *cCallExpr) fixSort() {
+	c.fixSortSlice()
+}
+
+// sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
+// --->
+// slices.Sort(s)
+func (c *cCallExpr) fixSortSlice() {
+	if !isFun(c.Node.Fun, "sort", "Slice") || len(c.Node.Args) != 2 {
+		return
+	}
+	fg, ok0 := c.Node.Args[0].(*ast.Ident)
+	if !ok0 {
+		return
+	}
+	fl, ok1 := c.Node.Args[1].(*ast.FuncLit)
+	if !ok1 || len(fl.Body.List) != 1 || len(fl.Type.Params.List) != 1 {
+		return
+	}
+
+	paramNames := fl.Type.Params.List[0].Names
+	if len(paramNames) != 2 {
+		return
+	}
+
+	rs, ok2 := (fl.Body.List[0]).(*ast.ReturnStmt)
+	if !ok2 || len(rs.Results) != 1 {
+		return
+	}
+	be, ok3 := rs.Results[0].(*ast.BinaryExpr)
+	if !ok3 || be.Op != token.LSS {
+		return
+	}
+	x, ok4 := be.X.(*ast.IndexExpr)
+	if !ok4 || !isIdentName(x.X, fg.Name) || !isIdentName(x.Index, paramNames[0].Name) {
+		return
+	}
+
+	y, ok5 := be.Y.(*ast.IndexExpr)
+	if !ok5 || !isIdentName(y.X, fg.Name) || !isIdentName(y.Index, paramNames[1].Name) {
+		return
+	}
+
+	nn := &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "slices",
+			},
+			Sel: &ast.Ident{
+				Name: "Sort",
+			},
+		},
+		Args: []ast.Expr{
+			c.Node.Args[0],
+		},
+	}
+	c.Cursor.Replace(nn)
+
+	pkgReplace(c.req.FSet, c.req.AstFile, "sort", "slices")
 }

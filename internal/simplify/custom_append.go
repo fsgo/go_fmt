@@ -13,11 +13,12 @@ type cCallAppend struct {
 }
 
 func (c *cCallAppend) start() {
-	c.sliceClone()
+	c.nilSliceClone()
+	c.emptySliceClone()
 }
 
 // append([]int(nil), a...) --> slice.Clone(a)
-func (c *cCallAppend) sliceClone() {
+func (c *cCallAppend) nilSliceClone() {
 	if len(c.Node.Args) != 2 {
 		return
 	}
@@ -27,6 +28,37 @@ func (c *cCallAppend) sliceClone() {
 	}
 
 	_, ok2 := arg1.Fun.(*ast.ArrayType)
+	if !ok2 {
+		return
+	}
+	nn := &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name: "slices",
+			},
+			Sel: &ast.Ident{
+				Name: "Clone",
+			},
+		},
+		Args: []ast.Expr{
+			c.Node.Args[1],
+		},
+	}
+	c.Cursor.Replace(nn)
+
+	pkgReplace(c.req.FSet, c.req.AstFile, "", "slices")
+}
+
+// append([]int{}, a...) --> slice.Clone(a)
+func (c *cCallAppend) emptySliceClone() {
+	if len(c.Node.Args) != 2 {
+		return
+	}
+	arg1, ok1 := c.Node.Args[0].(*ast.CompositeLit)
+	if !ok1 || len(arg1.Elts) > 0 {
+		return
+	}
+	_, ok2 := arg1.Type.(*ast.ArrayType)
 	if !ok2 {
 		return
 	}

@@ -1,0 +1,14 @@
+package demo
+
+import (
+	"sort"
+	"slices"
+)
+
+func hello() {
+	s := []int{1, 2, 3}
+	slices.Sort(s) // <-- 会替换为 slices.Sort(s)
+
+	// 保持不变
+	sort.Slice(s, func(i, j int) bool { return s[i] > s[j] })
+}

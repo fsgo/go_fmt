@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/fsgo/go_fmt/internal/common"
@@ -112,6 +113,7 @@ func (ft *Formatter) execute(opt *Options) error {
 }
 
 func (ft *Formatter) printFmtResult(fileName string, change bool, event string, color common.ConsoleColor, err error) {
+	fileName = filepath.ToSlash(fileName)
 	if ft.PrintResult != nil {
 		ft.PrintResult(fileName, change, err)
 		return
