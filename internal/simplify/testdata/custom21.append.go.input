@@ -1,0 +1,29 @@
+package demo
+
+import (
+	"fmt"
+	"slices"
+)
+
+// 用于测试 custom_append.go
+
+func hello() {
+	a := []int{1, 2, 3}
+
+	b1 := append([]int(nil), a...)    // <---- 替换为  slices.Clone(a)
+	fmt.Println("b1=", b1)
+
+	a1 := []string{"a", "b", "c"}
+
+	b2 := append([]string(nil), a1...)    // <---- 替换为  slices.Clone(a)
+	fmt.Println("b2=", b2)
+
+	c := slices.Clone(a)
+	fmt.Println("c=", c)
+
+	fmt.Println("d=", append([]string(nil), getStringSlice1()...))
+}
+
+func getStringSlice1() []string {
+	return []string{"a"}
+}

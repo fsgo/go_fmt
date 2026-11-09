@@ -99,6 +99,11 @@ func isFun(fn ast.Expr, pkg string, name string) bool {
 	return ok3 && x.Name == pkg
 }
 
+func isIdentFun(fn ast.Expr, name string) bool {
+	fun, ok := fn.(*ast.Ident)
+	return ok && fun.Name == name
+}
+
 func isExpVarBasic(e ast.Expr) bool {
 	_, ok1 := e.(*ast.BasicLit)
 	if ok1 {

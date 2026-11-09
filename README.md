@@ -249,6 +249,21 @@ func ok() bool {
 添加于： 2025-09-02 v0.7.0
 
 
+13. append 方法替换为 slice 里的方法
+```diff
+- append([]T(nil), a...)
++ slices.Clone(a)
+
+- append([]byte(nil), b...)
++ bytes.Clone(b)
+
+- x[:len(x):len(x)]
++ slices.Clip(x)
+
+- append(slices.Clip(a), b...) 
++ slices.Concat(a, b)
+```
+
 </details>
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>

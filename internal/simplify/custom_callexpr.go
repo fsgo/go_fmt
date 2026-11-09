@@ -42,6 +42,7 @@ func (c *cCallExpr) doFix() {
 	c.fmtSprintfStrings()
 
 	c.fixOsFnWithNew()
+	c.fixAppend()
 }
 
 // 提高正则的可读性
@@ -696,4 +697,14 @@ func (c *cCallExpr) doFixOsFnWithNew(old string, new string) {
 	c.Cursor.Replace(nn)
 	pkgReplace(c.req.FSet, c.req.AstFile, "os", "errors")
 	pkgReplace(c.req.FSet, c.req.AstFile, "os", "io/fs")
+}
+
+func (c *cCallExpr) fixAppend() {
+	if !isIdentFun(c.Node.Fun, "append") {
+		return
+	}
+	(&cCallAppend{
+		customBase: c.customBase,
+		Node:       c.Node,
+	}).start()
 }

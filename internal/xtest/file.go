@@ -6,6 +6,7 @@ package xtest
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -31,7 +32,7 @@ func CheckFileAuto(t *testing.T, inputFile string, do func(req *common.Request))
 // CheckFile 运行测试,检查单个 case 文件
 func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Request)) {
 	opt := common.NewDefaultOptions()
-	t.Run(inputFile, func(t *testing.T) {
+	t.Run(filepath.ToSlash(inputFile), func(t *testing.T) {
 		t.Helper()
 		defer xpasser.Reset()
 		t.Logf("Check %q", inputFile)
@@ -64,7 +65,7 @@ func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Req
 			if string(bw) == string(code) {
 				_ = os.Remove(gf)
 			} else {
-				t.Logf("want: %s", gf)
+				t.Errorf("want: %s", gf)
 				e2 := os.WriteFile(gf, code, 0644)
 				fst.NoError(t, e2)
 			}
