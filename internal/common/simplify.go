@@ -24,6 +24,10 @@ var rewriteRules = []string{
 	// "os.ErrExist          -> fs.ErrExist          // go1.20",
 	// "os.ErrNotExist       -> fs.ErrNotExist       // go1.20",
 	// "os.ErrClosed         -> fs.ErrClosed         // go1.20",
+
+	`x[:len(x):len(x)]         -> slices.Clip(x)          // go1.21`,
+	`append(s[:i], s[j:]...)   -> slices.Delete(s, i, j)  // go1.21`,
+	`append([]byte(nil), b...) -> bytes.Clone(b)          // go1.21`,
 }
 
 // BuildInRewriteRules 获取内置的简化规则

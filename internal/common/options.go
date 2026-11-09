@@ -238,7 +238,7 @@ with env 'GORGEOUS_MI=false' to set default value as false`)
 	commandLine.BoolVar(&opt.SingleLineCopyright, "slcr", flagEnvBool("GORGEOUS_SLCR", opt.SingleLineCopyright),
 		`multiline copyright to single-line
 with env 'GORGEOUS_SLCR=true' to set default value as true`)
-	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `import groups sort rule,
+	commandLine.StringVar(&opt.ImportGroupRule, "ig", defaultImportGroupRule, `sort rule for import groups,
 stc: Go Standard package, Third Party package, Current package
 sct: Go Standard package, Current package, Third Party package
 `)
@@ -248,7 +248,7 @@ or a file path for rewrite rules (like -rr)
 `)
 
 	commandLine.BoolVar(&opt.RewriteWithBuildIn, "rr", flagEnvBool("GORGEOUS_RR", opt.RewriteWithBuildIn),
-		`rewrite with build in rules:
+		`build-in rewrite rules:
 `+strings.Join(BuildInRewriteRules(), "\n")+`
 
 with env 'GORGEOUS_RR=false' to set default value as false

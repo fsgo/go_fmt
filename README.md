@@ -432,6 +432,9 @@ usage: gorgeous [flags] [path ...]
     	io/#ioutil.TempDir   -> os.MkdirTemp  // go1.16
     	io/#ioutil.WriteFile -> os.WriteFile  // go1.16
     	io/#ioutil.Discard   -> io.Discard    // go1.16
+		x[:len(x):len(x)]         -> slices.Clip(x)          // go1.21
+        append(s[:i], s[j:]...)   -> slices.Delete(s, i, j)  // go1.21
+        append([]byte(nil), b...) -> bytes.Clone(b)          // go1.21
 
     	with env 'GORGEOUS_RR=false' to set default value as false
     	 (default true)

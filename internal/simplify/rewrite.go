@@ -23,7 +23,7 @@ import (
 func parseExpr(s, what string) ast.Expr {
 	x, err := parser.ParseExpr(s)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "parsing %s %s at %s\n", what, s, err)
+		fmt.Fprintf(os.Stderr, "parsing %s %q at %s\n", what, s, err)
 		os.Exit(2)
 	}
 	return x

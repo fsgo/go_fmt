@@ -19,7 +19,7 @@ import (
 func fixImport(pattern, replace *expr, fset *token.FileSet, f *ast.File) {
 	oldPkg := pattern.PkgName()
 	newPkg := replace.PkgName()
-	if len(oldPkg) == 0 || len(newPkg) == 0 || oldPkg == newPkg {
+	if (len(oldPkg) == 0 && len(newPkg) == 0) || oldPkg == newPkg {
 		return
 	}
 	pkgReplace(fset, f, oldPkg, newPkg)
@@ -35,11 +35,13 @@ func pkgReplace(fset *token.FileSet, f *ast.File, oldPkg string, newPkg string) 
 	}
 	// ----------------------
 
-	astutil.AddImport(fset, f, newPkg)
-	if !astutil.UsesImport(f, newPkg) {
-		astutil.DeleteImport(fset, f, newPkg)
+	if newPkg != "" {
+		astutil.AddImport(fset, f, newPkg)
+		if !astutil.UsesImport(f, newPkg) {
+			astutil.DeleteImport(fset, f, newPkg)
+		}
 	}
-	if !astutil.UsesImport(f, oldPkg) {
+	if oldPkg != "" && !astutil.UsesImport(f, oldPkg) {
 		astutil.DeleteImport(fset, f, oldPkg)
 	}
 }

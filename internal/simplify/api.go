@@ -136,6 +136,9 @@ func doRewrite(fs *token.FileSet, f *ast.File, patternExp string, replaceExp str
 	}
 	replace := customParseExpr(replaceExp, "replacement")
 	result, changed := rewriteFile(fs, pattern.expr, replace.expr, f)
+	if common.Debug {
+		common.DebugPrintln(0, "doRewrite", "changed=", changed, f.Name, patternExp, "--(to)->", replaceExp)
+	}
 	if changed {
 		fixImport(pattern, replace, fs, result)
 	}
@@ -174,7 +177,11 @@ type expr struct {
 }
 
 func (e *expr) PkgName() string {
-	v1, ok1 := e.expr.(*ast.SelectorExpr)
+	var exp ast.Expr = e.expr
+	if ce, ok := exp.(*ast.CallExpr); ok {
+		exp = ce.Fun
+	}
+	v1, ok1 := exp.(*ast.SelectorExpr)
 	if !ok1 {
 		return ""
 	}

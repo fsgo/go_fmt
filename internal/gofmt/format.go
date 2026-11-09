@@ -79,6 +79,7 @@ func fix(req *common.Request) ([]byte, error) {
 		simplify.Format(req)
 	}
 	FormatComments(req)
+	formatStructTags(req)
 
 	if len(req.Opt.RewriteRules) > 0 {
 		err := simplify.Rewrites(req, req.Opt.RewriteRules)
