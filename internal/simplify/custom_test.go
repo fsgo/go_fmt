@@ -22,4 +22,12 @@ func Test_customSimplify(t *testing.T) {
 			customSimplify(req)
 		})
 	}
+
+	fs, err = filepath.Glob("testdata/custom/**/*.go.input")
+	fst.NoError(t, err)
+	for _, input := range fs {
+		xtest.CheckFileAuto(t, input, func(req *common.Request) {
+			customSimplify(req)
+		})
+	}
 }

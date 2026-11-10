@@ -35,7 +35,7 @@ func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Req
 	t.Run(filepath.ToSlash(inputFile), func(t *testing.T) {
 		t.Helper()
 		defer xpasser.Reset()
-		t.Logf("Check %q", inputFile)
+		t.Logf("Check %q", filepath.ToSlash(inputFile))
 
 		fileContent, err := os.ReadFile(inputFile)
 		fst.NoError(t, err)
@@ -65,7 +65,7 @@ func CheckFile(t *testing.T, inputFile, wantFile string, do func(req *common.Req
 			if string(bw) == string(code) {
 				_ = os.Remove(gf)
 			} else {
-				t.Errorf("want: %s", gf)
+				t.Errorf("want: %s", filepath.ToSlash(gf))
 				e2 := os.WriteFile(gf, code, 0644)
 				fst.NoError(t, e2)
 			}

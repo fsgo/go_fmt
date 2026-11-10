@@ -232,3 +232,17 @@ func stringExprJoin(items []ast.Expr) ast.Expr {
 	}
 	return nn
 }
+
+// isSameIdent 检查节点是否相同的  *ast.Ident 或者 *ast.SelectorExpr
+func isSameIdent(a, b ast.Node) bool {
+	switch x := a.(type) {
+	case *ast.Ident:
+		y, ok := b.(*ast.Ident)
+		return ok && x.Name == y.Name
+	case *ast.SelectorExpr:
+		y, ok := b.(*ast.SelectorExpr)
+		return ok && isSameIdent(x.X, y.X) && x.Sel.Name == y.Sel.Name
+	default:
+		return false
+	}
+}

@@ -1,0 +1,41 @@
+package demo
+
+import "fmt"
+
+func main() {
+	fmt.Println(hello1())
+	fmt.Println(hello2())
+	fmt.Println(hello3())
+	fmt.Println(world())
+}
+
+func hello1() int {
+	a, b := 1, 2
+
+	// 下面的会被替换为 return min(a,b)
+
+	return min(a, b)
+
+}
+
+func world() int {
+	a, b := 1, 2
+	return min(a, b)
+}
+
+func hello2() int {
+	a, b := 1, 2
+
+	return min(a, b)
+
+	// 被替换为 return min(a,b)
+}
+
+func hello3() int {
+	a, b := 1, 2
+
+	// 下面的会被替换为 return max(a,b)
+
+	return max(a, b)
+
+}

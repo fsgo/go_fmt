@@ -1,0 +1,25 @@
+package demo
+
+import "fmt"
+
+func main() {
+	fmt.Println(hello())
+	fmt.Println(world())
+}
+
+func hello() int {
+	const min = 2 // 会导致无法直接 return min
+	_ = min
+
+	// 下面代码保持原样
+	a, b := 1, 2
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func world() int {
+	a, b := 1, 2
+	return min(a, b)
+}

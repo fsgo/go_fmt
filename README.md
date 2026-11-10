@@ -264,6 +264,22 @@ func ok() bool {
 + slices.Concat(a, b)
 ```
 
+14. if else 简化为 min/max
+```diff
+- if a < b { return a }else{ return b }
++ return min(a, b)
+
+- if a < b { return b }else{ return a }
++ return max(a, b)
+
+- if a > b { return a }else{ return b }
++ return max(a, b)
+
+- if a > b { return b }else{ return a }
++ return min(a, b)
+
+```
+
 </details>
 
 <details><summary><i>Example 4：基于表达式规则，重写代码</i></summary>

@@ -1,0 +1,18 @@
+package demo
+
+import "fmt"
+
+func main() {
+	fmt.Println(hello())
+}
+
+const min=12  // 存在 min 常量,所以 hello 方法不会使用 min 方法
+
+func hello() int {
+	a, b := 1, 2
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}

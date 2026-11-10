@@ -23,3 +23,11 @@ func TypeOf(req *common.Request, e ast.Expr) (types.Type, error) {
 	}
 	return nil, fmt.Errorf("type not found for %v", e)
 }
+
+func TypesInfo(req *common.Request, e ast.Node) (*types.Info, error) {
+	p, err := FindPackage(req.FileName)
+	if err != nil {
+		return nil, err
+	}
+	return p.TypesInfo, nil
+}

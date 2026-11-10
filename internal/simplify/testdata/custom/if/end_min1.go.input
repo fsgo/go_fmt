@@ -1,0 +1,151 @@
+package demo
+
+import "fmt"
+
+func main() {
+	fmt.Println(helloMin1())
+	fmt.Println(helloMin2())
+	fmt.Println(helloMin3())
+
+	fmt.Println(helloMax1())
+	fmt.Println(helloMax2())
+	
+	fmt.Println(gradeMin1())
+	fmt.Println(gradeMin2())
+	fmt.Println(gradeMax1())
+}
+
+func helloMin1() int {
+	a, b := 1, 2
+
+	// 下面的代码会被替换为 return min(a,b)
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func helloMin2() int {
+	a, b := 1, 2
+	
+	if a < b {
+		// 注释1
+		return a
+	} else {
+		// 注释2
+		return b  // 前面的代码会被替换为 return min(a,b)
+	}
+}
+
+func helloMin3() int {
+	a, b := 1, 2
+	
+	if b > a {
+		return a
+	} else {
+		return b  // 前面的代码会被替换为 return min(b,a)
+	}
+}
+
+func helloMax1() int {
+	a, b := 1, 2
+
+	// 下面的代码会被替换为 return max(a,b)
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func helloMax2() int {
+	a, b := 1, 2
+
+	// 下面的代码会被替换为 return max(b,a)
+	if b < a {
+		return a
+	} else {
+		return b
+	}
+}
+
+func helloMax3() int {
+	a, b := 1, 2
+
+	// 下面的代码会被替换为 return max(a,b)
+	if a < b {
+		return b
+	} else {
+		return a
+	}
+}
+
+
+type grade struct {
+	id int
+}
+
+func gradeMin1() *grade {
+	a := &grade{id: 1}
+	b := &grade{id: 2}
+
+	// 保持原样
+
+	if a.id < b.id {
+		return a
+	}
+	return b
+}
+
+
+func gradeMin2() int {
+	a := grade{id: 1}
+	b := grade{id: 2}
+
+	// 下面的会替换为 return min(a.id,b.id)
+
+	if a.id < b.id {
+		return a.id
+	}
+	return b.id
+}
+
+
+
+func gradeMin3() int {
+	a := grade{id: 1}
+	b := grade{id: 2}
+
+	// 下面的会替换为 return min(a.id,b.id)
+
+	if a.id > b.id {
+		return b.id
+	}
+	return a.id
+}
+
+
+func gradeMax1() int {
+	a := grade{id: 1}
+	b := grade{id: 2}
+
+	// 下面的会替换为 return max(a.id,b.id)
+
+	if a.id > b.id {
+		return a.id
+	}
+	return b.id
+}
+
+func gradeMax2() int {
+	a := grade{id: 1}
+	b := grade{id: 2}
+
+	// 下面的会替换为 return max(a.id,b.id)
+
+	if a.id < b.id {
+		return b.id
+	}
+	return a.id
+}
